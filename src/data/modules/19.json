@@ -1,0 +1,435 @@
+{
+ "id": "19",
+ "title": "Automated Machine Learning (AutoML)",
+ "weeks": [
+  36,
+  37
+ ],
+ "part": "II — Core ML in Practice",
+ "partIndex": 2,
+ "addon": true,
+ "pitchHtml": "<p>AutoML is the set of tools that automate the <em>mechanical</em> parts of building a model — trying preprocessors, picking algorithms, tuning their knobs, and stacking the survivors into an ensemble. For a tech lead, it is less an algorithm than a <strong>leverage and staffing decision</strong>: a well-aimed AutoML run produces a strong baseline in an afternoon that a data scientist would take a week to match by hand, which changes who you need to hire and what you can promise on a tight timeline. But it automates the <em>easy 20%</em> of a project and leaves the hard 80% — framing the problem, fixing the data, deploying and governing the result — exactly where it was. The value/complexity question for this module is sharp: <strong>AutoML lowers the cost of the modelling step, so it only pays off when the modelling step was your real bottleneck</strong> — and it never is, when the data or the framing is the problem.</p>",
+ "prev": "18",
+ "next": "20",
+ "sectionCount": 8,
+ "quizCount": 8,
+ "exerciseCount": 2,
+ "sections": [
+  {
+   "id": "learning-objectives",
+   "kind": "objectives",
+   "title": "Learning Objectives",
+   "blocks": [
+    {
+     "type": "checklist",
+     "checklistId": "19/learning-objectives/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Draw the line between what AutoML automates (preprocessing, model selection, <strong>hyperparameter tuning</strong>, ensembling) and what it can't (framing, data quality, deployment, governance)"
+      },
+      {
+       "id": "1",
+       "html": "Explain — at a whiteboard level — grid vs <strong>random search</strong>, Bayesian optimisation, and <strong>Hyperband</strong>, and pick one for a given budget"
+      },
+      {
+       "id": "2",
+       "html": "Estimate the <strong>compute cost</strong> of a tuning run before launching it, and recognise when it will balloon"
+      },
+      {
+       "id": "3",
+       "html": "Decide when AutoML gives a fast strong baseline versus when it is the wrong tool entirely"
+      },
+      {
+       "id": "4",
+       "html": "Scope an AutoML-accelerated PoC, a platform rollout, or an analyst-enablement mission with realistic guardrails"
+      },
+      {
+       "id": "5",
+       "html": "Name the governance risk of \"citizen data science\" and the controls that contain it"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "key-concepts",
+   "kind": "concepts",
+   "title": "Key Concepts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "what-automl-automates--and-what-it-doesnt",
+     "number": 1,
+     "title": "What AutoML Automates — and What It Doesn't",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>AutoML is not \"AI that builds AI.\" It is <strong>search over a pipeline</strong>: given a labelled table and a metric, it tries combinations of preprocessing, models, and hyperparameters, validates each, and returns the best (often an ensemble). The honest mental model is a split between the part it can search and the part it can't.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">AutoML automates well</th><th align=\"left\">AutoML does <strong>not</strong> touch</th></tr></thead><tbody><tr><td align=\"left\">Imputation, scaling, encoding of features</td><td align=\"left\"><strong>Problem framing</strong> — is this even a prediction problem? what's the target?</td></tr><tr><td align=\"left\">Generating &#x26; selecting candidate features</td><td align=\"left\"><strong>Data quality &#x26; acquisition</strong> — it optimises the matrix it's handed</td></tr><tr><td align=\"left\"><strong>Model selection</strong> across families</td><td align=\"left\"><strong>Deployment</strong> — serving, latency, integration, rollback</td></tr><tr><td align=\"left\"><strong>Hyperparameter tuning</strong></td><td align=\"left\"><strong>Governance / ethics</strong> — accountability, fairness, the EU AI Act</td></tr><tr><td align=\"left\"><strong>Ensembling</strong> the strong candidates</td><td align=\"left\"><strong>Monitoring</strong> — drift, decay, the offline→online gap</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The decisive point for a leader: <strong>the columns it can't touch are where AI missions actually fail.</strong> A pristine AutoML leaderboard on a dataset full of leakage, or aimed at a target the business never agreed on, is a confident answer to the wrong question. Frame the problem and fix the data <em>first</em> (see <a class=\"wikilink\" data-module=\"03\" href=\"#/module/03\">Working with Data: Sources, Quality &#x26; Feature Engineering</a>); only then does automating the search pay off. And the model that comes out still has to be deployed and run like any other (see <a class=\"wikilink\" data-module=\"13\" href=\"#/module/13\">MLOps &#x26; Productionization</a>) and governed like any other (see <a class=\"wikilink\" data-module=\"15\" href=\"#/module/15\">Responsible AI: Interpretability, Fairness, Safety &#x26; the EU AI Act</a>).</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>AutoML compresses the <em>modelling</em> step of a project from weeks to hours. But on a typical tabular mission the modelling step was maybe 15-20% of the effort — the rest is data and delivery. Automating the small slice is genuinely useful (it frees your scarcest people), but it cannot move the project's critical path, which runs through the slices AutoML leaves untouched.</p>"
+      }
+     ]
+    },
+    {
+     "id": "hyperparameter-optimisation--the-engine-inside-automl",
+     "number": 2,
+     "title": "Hyperparameter Optimisation — the Engine Inside AutoML",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Hyperparameters are the knobs you set <em>before</em> training: learning rate, tree depth, regularisation strength, number of estimators. They aren't learned from the data — they're searched. Every AutoML system is, at its core, a smarter search over this space, so it pays to understand the four strategies and when each wins.</p>\n<p><strong>Grid search — try every combination.</strong> You list candidate values per knob and evaluate the full cross-product. The cost is a <strong>product</strong>, which is why it explodes:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "N_{\\text{grid}} = \\prod_{i=1}^{d} m_i",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><msub><mi>N</mi><mtext>grid</mtext></msub><mo>=</mo><munderover><mo>∏</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>d</mi></munderover><msub><mi>m</mi><mi>i</mi></msub></mrow><annotation encoding=\"application/x-tex\">N_{\\text{grid}} = \\prod_{i=1}^{d} m_i</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.9694em;vertical-align:-0.2861em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.109em;\">N</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3361em;\"><span style=\"top:-2.55em;margin-left:-0.109em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">grid</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2861em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:3.1138em;vertical-align:-1.2777em;\"></span><span class=\"mop op-limits\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.8361em;\"><span style=\"top:-1.8723em;margin-left:0em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">i</span><span class=\"mrel mtight\">=</span><span class=\"mord mtight\">1</span></span></span></span><span style=\"top:-3.05em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span><span class=\"mop op-symbol large-op\">∏</span></span></span><span style=\"top:-4.3em;margin-left:0em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">d</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.2777em;\"><span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">m</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>where <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>d</mi></mrow><annotation encoding=\"application/x-tex\">d</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord mathnormal\">d</span></span></span></span> is the number of hyperparameters and <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>m</mi><mi>i</mi></msub></mrow><annotation encoding=\"application/x-tex\">m_i</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.5806em;vertical-align:-0.15em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">m</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> the number of values you try for knob <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>i</mi></mrow><annotation encoding=\"application/x-tex\">i</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6595em;\"></span><span class=\"mord mathnormal\">i</span></span></span></span>. Plain terms: total trials = the values for knob 1, times the values for knob 2, and so on. <em>Use:</em> tiny spaces (2-3 knobs, a handful of values each) where you want exhaustive coverage and each trial is cheap.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "why grid search drowns",
+       "html": "<p>Multiplication, not addition. Five knobs at five values each is <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msup><mn>5</mn><mn>5</mn></msup><mo>=</mo><mn>3,125</mn></mrow><annotation encoding=\"application/x-tex\">5^5 = 3{,}125</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8141em;\"></span><span class=\"mord\"><span class=\"mord\">5</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.8141em;\"><span style=\"top:-3.063em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\">5</span></span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.8389em;vertical-align:-0.1944em;\"></span><span class=\"mord\">3</span><span class=\"mord\"><span class=\"mpunct\">,</span></span><span class=\"mord\">125</span></span></span></span> trials; add one more knob and it's 15,625. Worse, grid search spends equal effort on knobs that don't matter — if only learning rate truly moves the score, the grid still wastes most of its budget varying the irrelevant four. This \"<strong>combinatorial explosion</strong>\" makes grid search infeasible past ~3 knobs.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Random search — sample instead of enumerate.</strong> Draw <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>T</mi></mrow><annotation encoding=\"application/x-tex\">T</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span></span></span></span> random configurations from the same ranges and evaluate them. For the <em>same budget</em> <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>T</mi></mrow><annotation encoding=\"application/x-tex\">T</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span></span></span></span>, random search beats grid search whenever only a few knobs actually matter — which is almost always. The reason is a coverage argument:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\text{unique values explored per knob: grid} \\approx T^{1/d} \\quad\\text{vs}\\quad \\text{random} \\approx T",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mtext>unique values explored per knob: grid</mtext><mo>≈</mo><msup><mi>T</mi><mrow><mn>1</mn><mi mathvariant=\"normal\">/</mi><mi>d</mi></mrow></msup><mspace width=\"1em\"/><mtext>vs</mtext><mspace width=\"1em\"/><mtext>random</mtext><mo>≈</mo><mi>T</mi></mrow><annotation encoding=\"application/x-tex\">\\text{unique values explored per knob: grid} \\approx T^{1/d} \\quad\\text{vs}\\quad \\text{random} \\approx T</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\">unique values explored per knob: grid</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">≈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.938em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.938em;\"><span style=\"top:-3.113em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">1/</span><span class=\"mord mathnormal mtight\">d</span></span></span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:1em;\"></span><span class=\"mord text\"><span class=\"mord\">vs</span></span><span class=\"mspace\" style=\"margin-right:1em;\"></span><span class=\"mord text\"><span class=\"mord\">random</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">≈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>Plain terms: a grid of <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>T</mi></mrow><annotation encoding=\"application/x-tex\">T</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span></span></span></span> total trials only tries about <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msup><mi>T</mi><mrow><mn>1</mn><mi mathvariant=\"normal\">/</mi><mi>d</mi></mrow></msup></mrow><annotation encoding=\"application/x-tex\">T^{1/d}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.888em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.888em;\"><span style=\"top:-3.063em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">1/</span><span class=\"mord mathnormal mtight\">d</span></span></span></span></span></span></span></span></span></span></span></span> distinct settings of <em>each</em> knob (the budget is split across all <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>d</mi></mrow><annotation encoding=\"application/x-tex\">d</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord mathnormal\">d</span></span></span></span> dimensions), whereas random search tries a fresh value of every knob on every trial — so it explores the dimension that matters far more densely.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "random's quiet win",
+       "html": "<p>Picture the one knob that controls performance. Grid search pins the others to a coarse lattice and so samples that important knob at only a handful of points. Random search, by jittering everything at once, gives you <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>T</mi></mrow><annotation encoding=\"application/x-tex\">T</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span></span></span></span> different values of the important knob for the same cost. You pay nothing extra and get orders-of-magnitude better coverage of whatever turns out to matter. <strong>Random search is the right default for cheap-to-moderate trials and more than ~3 knobs.</strong></p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Bayesian optimisation — learn from past trials.</strong> When each trial is <em>expensive</em> (training takes minutes to hours), you can't afford 100 random shots. Bayesian optimisation (BO) builds a cheap <strong>surrogate model</strong> — a fast approximation of \"configuration → score\" — from the trials seen so far, then uses an <strong>acquisition function</strong> to decide where to look next, balancing two pulls: try configurations the surrogate predicts will score well (<strong>exploitation</strong>) and try configurations it's most <em>uncertain</em> about (<strong>exploration</strong>). The most common acquisition function is <strong>Expected Improvement (EI)</strong> — the expected amount by which a new point would beat the best score <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msup><mi>f</mi><mo>+</mo></msup></mrow><annotation encoding=\"application/x-tex\">f^+</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.9658em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.1076em;\">f</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.7713em;\"><span style=\"top:-3.063em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mbin mtight\">+</span></span></span></span></span></span></span></span></span></span></span> seen so far:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\text{EI}(\\lambda) = \\mathbb{E}\\big[\\max\\big(f(\\lambda) - f^{+},\\ 0\\big)\\big]",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mtext>EI</mtext><mo stretchy=\"false\">(</mo><mi>λ</mi><mo stretchy=\"false\">)</mo><mo>=</mo><mi mathvariant=\"double-struck\">E</mi><mo fence=\"false\" stretchy=\"true\" minsize=\"1.2em\" maxsize=\"1.2em\">[</mo><mi>max</mi><mo>⁡</mo><mo fence=\"false\" stretchy=\"true\" minsize=\"1.2em\" maxsize=\"1.2em\">(</mo><mi>f</mi><mo stretchy=\"false\">(</mo><mi>λ</mi><mo stretchy=\"false\">)</mo><mo>−</mo><msup><mi>f</mi><mo lspace=\"0em\" rspace=\"0em\">+</mo></msup><mo separator=\"true\">,</mo><mtext> </mtext><mn>0</mn><mo fence=\"false\" stretchy=\"true\" minsize=\"1.2em\" maxsize=\"1.2em\">)</mo><mo fence=\"false\" stretchy=\"true\" minsize=\"1.2em\" maxsize=\"1.2em\">]</mo></mrow><annotation encoding=\"application/x-tex\">\\text{EI}(\\lambda) = \\mathbb{E}\\big[\\max\\big(f(\\lambda) - f^{+},\\ 0\\big)\\big]</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\"><span class=\"mord\">EI</span></span><span class=\"mopen\">(</span><span class=\"mord mathnormal\">λ</span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.2em;vertical-align:-0.35em;\"></span><span class=\"mord mathbb\">E</span><span class=\"mord\"><span class=\"delimsizing size1\">[</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mop\">max</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\"><span class=\"delimsizing size1\">(</span></span><span class=\"mord mathnormal\" style=\"margin-right:0.1076em;\">f</span><span class=\"mopen\">(</span><span class=\"mord mathnormal\">λ</span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.2em;vertical-align:-0.35em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.1076em;\">f</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.8213em;\"><span style=\"top:-3.113em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">+</span></span></span></span></span></span></span></span></span><span class=\"mpunct\">,</span><span class=\"mspace\"> </span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\">0</span><span class=\"mord\"><span class=\"delimsizing size1\">)</span></span><span class=\"mord\"><span class=\"delimsizing size1\">]</span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>Plain terms: for a candidate configuration <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>λ</mi></mrow><annotation encoding=\"application/x-tex\">\\lambda</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord mathnormal\">λ</span></span></span></span>, EI asks \"how much, on average, do we expect this to improve on our current best?\" — and the next trial goes to whichever <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>λ</mi></mrow><annotation encoding=\"application/x-tex\">\\lambda</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord mathnormal\">λ</span></span></span></span> scores highest on that question. (The closed-form EI and the Gaussian-process surrogate are derived in the AI Scientist module — not needed here.)</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "why a surrogate beats random when trials are dear",
+       "html": "<p>Random search forgets every result the instant it has it. BO remembers: each evaluation updates a map of the search space, so the next pick is <em>informed</em>, not blind. EI's two terms encode the explore/exploit trade — it favours points predicted to be good <em>and</em> points it knows little about, automatically backing off from regions it has already mapped. The payoff is reaching a strong configuration in tens of trials instead of hundreds — which matters precisely when each trial costs a GPU-hour. <strong>Reach for BO when trials are expensive and the budget is small.</strong></p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Hyperband / successive halving — kill the losers early.</strong> Most configurations are bad, and you usually know they're bad long before training finishes. Successive halving exploits this: start many configurations on a <em>small</em> budget (a few epochs, a data subsample), keep the top fraction, multiply the survivors' budget, and repeat. A clean way to see the spend is that each round of halving uses roughly the same total budget:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\text{round budget} \\approx n \\times \\frac{B}{n} = B \\quad\\text{then}\\quad \\frac{n}{2}\\times\\frac{2B}{n} = B \\quad\\text{then}\\quad \\frac{n}{4}\\times\\frac{4B}{n}=B",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mtext>round budget</mtext><mo>≈</mo><mi>n</mi><mo>×</mo><mfrac><mi>B</mi><mi>n</mi></mfrac><mo>=</mo><mi>B</mi><mspace width=\"1em\"/><mtext>then</mtext><mspace width=\"1em\"/><mfrac><mi>n</mi><mn>2</mn></mfrac><mo>×</mo><mfrac><mrow><mn>2</mn><mi>B</mi></mrow><mi>n</mi></mfrac><mo>=</mo><mi>B</mi><mspace width=\"1em\"/><mtext>then</mtext><mspace width=\"1em\"/><mfrac><mi>n</mi><mn>4</mn></mfrac><mo>×</mo><mfrac><mrow><mn>4</mn><mi>B</mi></mrow><mi>n</mi></mfrac><mo>=</mo><mi>B</mi></mrow><annotation encoding=\"application/x-tex\">\\text{round budget} \\approx n \\times \\frac{B}{n} = B \\quad\\text{then}\\quad \\frac{n}{2}\\times\\frac{2B}{n} = B \\quad\\text{then}\\quad \\frac{n}{4}\\times\\frac{4B}{n}=B</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\">round budget</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">≈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6667em;vertical-align:-0.0833em;\"></span><span class=\"mord mathnormal\">n</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">×</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.0463em;vertical-align:-0.686em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3603em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">n</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0502em;\">B</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.7936em;vertical-align:-0.686em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0502em;\">B</span><span class=\"mspace\" style=\"margin-right:1em;\"></span><span class=\"mord text\"><span class=\"mord\">then</span></span><span class=\"mspace\" style=\"margin-right:1em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.1076em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\">2</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">n</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">×</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.0463em;vertical-align:-0.686em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3603em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">n</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\">2</span><span class=\"mord mathnormal\" style=\"margin-right:0.0502em;\">B</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.7936em;vertical-align:-0.686em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0502em;\">B</span><span class=\"mspace\" style=\"margin-right:1em;\"></span><span class=\"mord text\"><span class=\"mord\">then</span></span><span class=\"mspace\" style=\"margin-right:1em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.1076em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\">4</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">n</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">×</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.0463em;vertical-align:-0.686em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3603em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">n</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\">4</span><span class=\"mord mathnormal\" style=\"margin-right:0.0502em;\">B</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0502em;\">B</span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>Plain terms: with <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>n</mi></mrow><annotation encoding=\"application/x-tex\">n</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mord mathnormal\">n</span></span></span></span> configurations sharing a per-round budget <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>B</mi></mrow><annotation encoding=\"application/x-tex\">B</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0502em;\">B</span></span></span></span>, each gets <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>B</mi><mi mathvariant=\"normal\">/</mi><mi>n</mi></mrow><annotation encoding=\"application/x-tex\">B/n</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0502em;\">B</span><span class=\"mord\">/</span><span class=\"mord mathnormal\">n</span></span></span></span>; halve the field and double the survivors' budget and the round still costs ~<span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>B</mi></mrow><annotation encoding=\"application/x-tex\">B</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0502em;\">B</span></span></span></span> — so you screen a wide field cheaply and only spend big on the few that earned it. <strong>Hyperband</strong> simply runs successive halving at several starting widths to hedge how aggressively to cut.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Method</th><th align=\"left\">Search strategy</th><th align=\"left\">Reach for it when</th></tr></thead><tbody><tr><td align=\"left\"><strong>Grid search</strong></td><td align=\"left\">Exhaustive cross-product</td><td align=\"left\">≤3 cheap knobs; you want full coverage</td></tr><tr><td align=\"left\"><strong>Random search</strong></td><td align=\"left\">Random sampling</td><td align=\"left\">The everyday default; >3 knobs, trials cheap-to-moderate</td></tr><tr><td align=\"left\"><strong>Bayesian optimisation</strong></td><td align=\"left\">Surrogate + acquisition function</td><td align=\"left\">Each trial is expensive; small total budget</td></tr><tr><td align=\"left\"><strong>Hyperband / SHA</strong></td><td align=\"left\">Early-stop the weak, on a budget ladder</td><td align=\"left\">Trials have a \"partial\" signal (epochs, data fraction) you can cut on</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "worked-example",
+       "title": "sizing a tuning run before you launch it",
+       "html": "<p>A team wants to tune a gradient-boosting model on 5 knobs, 6 values each, with 5-fold cross-validation; one fit takes ~30 s. Grid search is <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msup><mn>6</mn><mn>5</mn></msup><mo>=</mo><mn>7,776</mn></mrow><annotation encoding=\"application/x-tex\">6^5 = 7{,}776</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8141em;\"></span><span class=\"mord\"><span class=\"mord\">6</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.8141em;\"><span style=\"top:-3.063em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\">5</span></span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.8389em;vertical-align:-0.1944em;\"></span><span class=\"mord\">7</span><span class=\"mord\"><span class=\"mpunct\">,</span></span><span class=\"mord\">776</span></span></span></span> configurations <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mo>×</mo><mtext> </mtext><mn>5</mn></mrow><annotation encoding=\"application/x-tex\">\\times\\,5</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.7278em;vertical-align:-0.0833em;\"></span><span class=\"mord\">×</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\">5</span></span></span></span> folds <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mo>=</mo><mn>38,880</mn></mrow><annotation encoding=\"application/x-tex\">= 38{,}880</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.3669em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.8389em;vertical-align:-0.1944em;\"></span><span class=\"mord\">38</span><span class=\"mord\"><span class=\"mpunct\">,</span></span><span class=\"mord\">880</span></span></span></span> fits <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mo>≈</mo></mrow><annotation encoding=\"application/x-tex\">\\approx</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4831em;\"></span><span class=\"mrel\">≈</span></span></span></span> <strong>324 hours</strong> of compute. You stop them. Random search at <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>T</mi><mo>=</mo><mn>60</mn></mrow><annotation encoding=\"application/x-tex\">T = 60</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">60</span></span></span></span> configurations covers each knob with 60 distinct values (vs grid's <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msup><mn>7776</mn><mrow><mn>1</mn><mi mathvariant=\"normal\">/</mi><mn>5</mn></mrow></msup><mo>≈</mo><mn>6</mn></mrow><annotation encoding=\"application/x-tex\">7776^{1/5}\\approx 6</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.888em;\"></span><span class=\"mord\">777</span><span class=\"mord\"><span class=\"mord\">6</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.888em;\"><span style=\"top:-3.063em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">1/5</span></span></span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">≈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">6</span></span></span></span>), costs <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mn>60</mn><mo>×</mo><mn>5</mn><mo>=</mo><mn>300</mn></mrow><annotation encoding=\"application/x-tex\">60\\times5=300</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.7278em;vertical-align:-0.0833em;\"></span><span class=\"mord\">60</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">×</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">5</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">300</span></span></span></span> fits <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mo>≈</mo></mrow><annotation encoding=\"application/x-tex\">\\approx</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4831em;\"></span><span class=\"mrel\">≈</span></span></span></span> <strong>2.5 hours</strong>, and on this kind of problem lands within a hair of the grid optimum. The lesson is the whole module in miniature: <strong>estimate <code>trials × folds × time-per-fit</code> before launching, and the right search method is usually the cheap one.</strong></p>"
+      }
+     ]
+    },
+    {
+     "id": "automated-feature-engineering-briefly",
+     "number": 3,
+     "title": "Automated Feature Engineering (Briefly)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>A sub-branch of AutoML automates <em>feature creation</em> rather than model choice. The canonical tool, <strong>featuretools</strong>, performs <strong>deep feature synthesis</strong>: given related tables (customers → orders → line-items), it mechanically generates candidate features by stacking aggregations and transforms — <code>MEAN(orders.amount)</code>, <code>COUNT(orders)</code>, <code>DAYS_SINCE(last_order)</code> — across the relationships. It is genuinely useful for wide relational data where hand-crafting hundreds of aggregates is tedious. Its limits mirror AutoML's: it generates <em>generic</em> features, not the domain-meaningful ratio an expert would know matters, and it can manufacture thousands of mostly-useless columns (and leakage, if a feature uses post-outcome data). Treat it as a candidate-generator that still needs a human filter — see the feature-engineering discipline in <a class=\"wikilink\" data-module=\"03\" href=\"#/module/03\">Working with Data: Sources, Quality &#x26; Feature Engineering</a>.</p>"
+      }
+     ]
+    },
+    {
+     "id": "neural-architecture-search-nas--know-it-exists-rarely-buy-it",
+     "number": 4,
+     "title": "Neural Architecture Search (NAS) — Know It Exists, Rarely Buy It",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>NAS automates the design of the neural network <em>architecture itself</em> — how many layers, which operations, how they connect — by searching over candidate architectures, training each (or a shared \"supernet\"), and keeping the best. It is the deep-learning analogue of hyperparameter search, one level up.</p>\n<p>For a tech lead, the operative facts are about <strong>cost and ownership</strong>:</p>\n<ul>\n<li>The original NAS results cost on the order of <strong>hundreds of GPUs running for weeks</strong> for a single architecture. Efficient variants (weight-sharing, differentiable search) cut this dramatically, but it remains compute-heavy and finicky.</li>\n<li>The payoff — a slightly better architecture — matters most at <strong>massive scale</strong> (a model served billions of times, on-device latency budgets). That is <strong>big-lab and hyperscaler territory</strong>, and the <em>outputs</em> of their NAS (e.g. efficient mobile-optimised model families) reach you as off-the-shelf architectures you simply use.</li>\n<li>For essentially every client mission, the right move is to <strong>adopt a proven architecture</strong>, not search for a new one. If someone proposes NAS for a normal business problem, that is a value/complexity red flag.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "when-automl-shines-vs-when-it-fails",
+     "number": 5,
+     "title": "When AutoML Shines vs When It Fails",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The decision is not \"is AutoML good?\" but \"is the <em>modelling step</em> my bottleneck, and is my data sound?\" Tie it back to the value/complexity budget: AutoML buys down the cost of one slice of the work, so it only pays where that slice was expensive <em>and</em> the surrounding slices are healthy.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">AutoML <strong>shines</strong> when…</th><th align=\"left\">AutoML <strong>fails</strong> when…</th></tr></thead><tbody><tr><td align=\"left\">You need a <strong>fast, strong baseline</strong> to beat or sanity-check</td><td align=\"left\">The real problem is <strong>data quality or framing</strong> — it optimises garbage faithfully</td></tr><tr><td align=\"left\">The data is <strong>tabular</strong> and reasonably clean</td><td align=\"left\">Compute cost <strong>balloons</strong> (huge grids, big data, expensive trials)</td></tr><tr><td align=\"left\">The team is <strong>small</strong> and DS time is scarce</td><td align=\"left\">You need <strong>full interpretability/control</strong> of the final model</td></tr><tr><td align=\"left\">You want to <strong>level up analysts</strong> beyond spreadsheets</td><td align=\"left\">The output is an opaque 20-model ensemble nobody can explain</td></tr><tr><td align=\"left\">The model family is genuinely uncertain</td><td align=\"left\"><strong>Nobody owns</strong> the resulting model — no one to validate, deploy, or maintain it</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "AutoML as a baseline machine",
+       "html": "<p>The single most defensible use is <em>establishing the floor</em>. Run AutoML first; if your hand-built model can't beat it, either AutoML found the right approach or you've made a mistake worth finding. It turns \"is our model any good?\" from an opinion into a benchmark — cheaply. The failure modes are the mirror image: it cannot invent the feature your domain expert knows matters, it cannot tell you the target is wrong, and it will happily hand you a brilliant leaderboard on a leaky dataset. <strong>Automation amplifies whatever you point it at — including bad framing.</strong></p>"
+      }
+     ]
+    },
+    {
+     "id": "the-leaders-angle--staffing-build-vs-buy-and-citizen-data-science",
+     "number": 6,
+     "title": "The Leader's Angle — Staffing, Build-vs-Buy, and Citizen Data Science",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>AutoML's real impact is organisational. It changes the <strong>shape of the team</strong> and the <strong>build-vs-buy line</strong>, and it opens a governance question you must answer before it bites you.</p>\n<ul>\n<li><strong>A smaller team ships more.</strong> AutoML lets one strong generalist do work that previously needed a dedicated modelling specialist, because the search is automated. This shifts hiring from \"another data scientist to tune models\" toward \"an engineer who can frame problems, judge the output, and ship it.\" Plan staffing around the work AutoML <em>doesn't</em> do.</li>\n<li><strong>It moves the build-vs-buy line.</strong> Tuning and model selection become a <em>commodity</em> you rent from a platform. Your build budget should move up the stack — to data, to the domain-specific features, to integration and monitoring — exactly the slices AutoML can't automate. (Same principle as the index's \"buy the commodity, build the differentiator.\")</li>\n<li><strong>\"Citizen data science\" is the double-edged promise.</strong> AutoML platforms market the ability for analysts and domain experts — not just data scientists — to build models. The upside is real: more people delivering value, scarce DS time freed for hard problems. The risk is <strong>unaccountable models</strong>: someone with no training in validation ships a model with leakage, an inappropriate metric, or a hidden fairness problem, into a real decision — and no one owns the consequences.</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "automation removes the mechanics, not the judgement",
+       "html": "<p>AutoML makes it trivial to produce <em>a</em> model and dangerously easy to produce a <em>bad</em> one that looks good. The skills it doesn't automate — challenging a baseline, smelling leakage, mapping a metric to a business KPI, deciding the model is fit to ship — are exactly the skills a \"citizen\" builder lacks. The governance answer is not to ban it but to <strong>gate it</strong>: AutoML for exploration and baselines by anyone, but a qualified review and a clear owner before any model touches a real decision. Validation and monitoring are still mandatory, by someone who can do them (see <a class=\"wikilink\" data-module=\"05\" href=\"#/module/05\">Model Evaluation, Validation &#x26; Experimentation</a>).</p>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "client-mission-patterns--commercial-angle",
+   "kind": "missions",
+   "title": "Client Mission Patterns / Commercial Angle",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>AutoML sells as <strong>speed and leverage</strong>, not as a product in itself. The missions package the <em>judgement around the automation</em> — which is the part clients can't buy off the shelf.</p>\n<ul>\n<li><strong>AutoML-Accelerated Baseline / Rapid PoC</strong> — <em>Problem:</em> a client wants to know fast whether a prediction problem is even tractable, before committing to a full build. <em>Deliverable:</em> a proof-of-concept on their data — a strong AutoML baseline, an honest read of achievable performance against a sensible baseline, the limiting factor (data? signal? framing?), and a go / no-go with the reasoning. <em>Scope:</em> 1-3 weeks, fixed price. <em>Who buys:</em> a product owner or innovation lead de-risking a bet; a CTO wanting a reality check before funding a project. <em>This is the highest-leverage entry mission — AutoML lets you deliver in days what used to take a discovery month.</em></li>\n<li><strong>AutoML Platform Evaluation &#x26; Rollout</strong> — <em>Problem:</em> a data team is drowning in repetitive modelling and the client is weighing an AutoML platform. <em>Deliverable:</em> a scored evaluation of 2-3 platforms on <em>their</em> use cases (cost at expected volume, lock-in, integration with the existing stack, governance/audit features), a recommendation, and a rollout plan with usage guardrails. <em>Scope:</em> 3-6 weeks. <em>Who buys:</em> a head of data / data platform owner; procurement wanting an independent technical view. <em>(Lands on the platform — see <a class=\"wikilink\" data-module=\"13\" href=\"#/module/13\">MLOps &#x26; Productionization</a>.)</em></li>\n<li><strong>Analyst Enablement (Citizen-DS) with Guardrails</strong> — <em>Problem:</em> the client has capable analysts and more modelling demand than data scientists, and wants to scale safely. <em>Deliverable:</em> an enablement programme — a chosen tool, templates, training, and crucially a <strong>governance gate</strong> (who can ship, the mandatory validation checklist, the review/sign-off step, the model owner) so citizen-built models don't become unaccountable liabilities. <em>Scope:</em> 4-8 weeks, often retained for ongoing review. <em>Who buys:</em> a head of analytics scaling the team's output; a CDO worried about shadow models.</li>\n</ul>\n<p><strong>Buy-vs-build for the client:</strong> the AutoML <em>engine</em> is always bought (open-source or platform) — never build a tuner. Sell the <strong>framing, the evaluation rigour, and the governance design</strong> around it; that is bespoke and defensible. <strong>What to charge for:</strong> the PoC and the platform evaluation as fixed-price, repeatable packages; enablement as a programme with an optional review retainer. <strong>What NOT to promise:</strong> that AutoML is a <strong>data strategy</strong> (it consumes one, it doesn't create one); that it will <strong>fix bad data</strong> (it will faithfully model the mess); a specific accuracy before you've seen the data; or that a citizen-built model is safe to ship without a qualified review.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "tools--vendor-landscape",
+   "kind": "tools",
+   "title": "Tools & Vendor Landscape",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p><em>As of 2026 — treat names/prices as perishable; re-check before quoting.</em></p>"
+    },
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Tool / Category</th><th align=\"left\">Use here</th><th align=\"left\">OSS / Paid</th><th align=\"left\">Note</th></tr></thead><tbody><tr><td align=\"left\">Auto-sklearn, TPOT, AutoGluon, FLAML</td><td align=\"left\">Open-source tabular AutoML</td><td align=\"left\">OSS</td><td align=\"left\">Strong baselines for free; AutoGluon/FLAML are the pragmatic current picks</td></tr><tr><td align=\"left\">H2O AutoML / Driverless AI</td><td align=\"left\">Tabular AutoML + stacked ensembles</td><td align=\"left\">OSS / Paid</td><td align=\"left\">OSS core; the paid tier adds UI, explainability, governance</td></tr><tr><td align=\"left\">Optuna, Hyperopt, Ray Tune</td><td align=\"left\">Hyperparameter optimisation (BO, Hyperband)</td><td align=\"left\">OSS</td><td align=\"left\">The tuning engine when you want control; integrates with your own code</td></tr><tr><td align=\"left\">Cloud AutoML (Vertex AI, Azure AutoML, SageMaker Autopilot)</td><td align=\"left\">Managed AutoML in the cloud stack</td><td align=\"left\">Paid (consumption)</td><td align=\"left\">Convenient if you're already on that cloud; watch cost-at-volume &#x26; lock-in</td></tr><tr><td align=\"left\">DataRobot</td><td align=\"left\">Enterprise AutoML + governance</td><td align=\"left\">Paid</td><td align=\"left\">Heavy on citizen-DS workflow &#x26; audit; priced for large orgs</td></tr><tr><td align=\"left\">featuretools</td><td align=\"left\">Automated feature engineering</td><td align=\"left\">OSS</td><td align=\"left\">Deep feature synthesis over relational tables; needs a human filter</td></tr><tr><td align=\"left\">Google Vizier / Ax</td><td align=\"left\">Black-box &#x26; experiment optimisation</td><td align=\"left\">OSS / Service</td><td align=\"left\">BO at scale; more than most missions need</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The open-source tabular tools (AutoGluon, FLAML) clear the bar for most missions; reach for a paid platform mainly when <strong>governance, UI for non-coders, and audit trails</strong> are the actual requirement.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "when-is-this-overkill",
+   "kind": "overkill",
+   "title": "When Is This Overkill?",
+   "blocks": [
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Situation</th><th align=\"left\">AutoML is overkill — do this instead</th></tr></thead><tbody><tr><td align=\"left\">A linear/logistic regression already meets the bar</td><td align=\"left\">Ship the simple, interpretable model; skip the search</td></tr><tr><td align=\"left\">The dataset is tiny (hundreds of rows)</td><td align=\"left\">AutoML will overfit the search; use one well-chosen model + careful CV</td></tr><tr><td align=\"left\">You need a fully interpretable, auditable model</td><td align=\"left\">Pick a transparent model deliberately — don't accept an opaque ensemble</td></tr><tr><td align=\"left\">The real blocker is missing or dirty data</td><td align=\"left\">Run a data mission first (<a class=\"wikilink\" data-module=\"03\" href=\"#/module/03\">Working with Data: Sources, Quality &#x26; Feature Engineering</a>); AutoML can't help yet</td></tr><tr><td align=\"left\">A heavily structured problem (time series, spatial, grouped)</td><td align=\"left\">Encode the structure by hand; generic AutoML ignores it (see <a class=\"wikilink\" data-module=\"04\" href=\"#/module/04\">Classical ML &#x26; Forecasting in Practice</a>)</td></tr><tr><td align=\"left\">One expert can hand-tune in an hour</td><td align=\"left\">Let them; the AutoML setup + compute isn't worth it for a one-off</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The senior move mirrors the rest of the path: AutoML is for when the <em>modelling search</em> is genuinely your cost, not a reflex to reach for on every tabular problem.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "resources",
+   "kind": "resources",
+   "title": "Resources",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "books",
+     "number": null,
+     "title": "Books",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Hutter, Kotthoff &#x26; Vanschoren (eds.) — <em>Automated Machine Learning: Methods, Systems, Challenges</em> — the standard reference; free PDF from the editors. <em>(Free)</em></li>\n<li>Chip Huyen — <em>Designing Machine Learning Systems</em> — where AutoML sits in a real pipeline, and why deployment/monitoring dominate. <em>(Paid)</em></li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "courses--articles-free",
+     "number": null,
+     "title": "Courses & Articles (Free)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Bergstra &#x26; Bengio — <em>Random Search for Hyper-Parameter Optimization</em> (2012) — the paper behind \"random beats grid\"; short and readable. <em>Free.</em></li>\n<li>Documentation of AutoGluon / FLAML / Optuna — example-led, the fastest way to build intuition for the trade-offs. <em>Free.</em></li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "go-deeper",
+     "number": null,
+     "title": "Go Deeper",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li><strong>Deeper math</strong> (the surrogate model, the closed-form acquisition functions, NAS search strategies, multi-fidelity theory) → <span class=\"vault-ref\" title=\"In the Obsidian vault: 07 - Model Selection, Evaluation &#x26; AutoML\">Model Selection, Evaluation &#x26; AutoML</span> (AI Scientist Path).</li>\n<li><strong>Deeper code</strong> (running tuning loops, building and shipping the resulting pipelines) → <span class=\"vault-ref\" title=\"In the Obsidian vault: 04 - Classical ML Mastery\">Classical ML Mastery</span> (ML Engineer Path).</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "practical-artifacts",
+   "kind": "artifacts",
+   "title": "Practical Artifacts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "decision-checklist--should-we-reach-for-automl-here",
+     "number": null,
+     "title": "Decision Checklist — \"Should we reach for AutoML here?\"",
+     "blocks": [
+      {
+       "type": "checklist",
+       "checklistId": "19/practical-artifacts/1",
+       "items": [
+        {
+         "id": "0",
+         "html": "Is the <strong>modelling step</strong> actually our bottleneck (vs data, framing, or delivery)?"
+        },
+        {
+         "id": "1",
+         "html": "Is the data <strong>tabular and reasonably clean</strong>, with an agreed target?"
+        },
+        {
+         "id": "2",
+         "html": "Have we estimated the run cost (<code>trials × folds × time-per-fit</code>) and is it acceptable?"
+        },
+        {
+         "id": "3",
+         "html": "Can we tolerate the output being an <strong>opaque ensemble</strong> — or do we need interpretability?"
+        },
+        {
+         "id": "4",
+         "html": "Is there a <strong>named owner</strong> to validate, ship, and maintain the resulting model?"
+        },
+        {
+         "id": "5",
+         "html": "Will the result pass the same <strong>validation and monitoring</strong> bar as any hand-built model?"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "red-flags",
+     "number": null,
+     "title": "Red Flags",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"AutoML will sort out our data problem.\" (It won't — it optimises the mess.)</li>\n<li>A spotless leaderboard with no baseline and no leakage check.</li>\n<li>A grid search that hasn't been cost-estimated. (It may be days of compute.)</li>\n<li>NAS proposed for an ordinary business problem.</li>\n<li>A citizen-built model heading into a real decision with no review and no owner.</li>\n<li>\"We'll just ship whatever AutoML returns.\" (The output still needs auditing.)</li>\n<li>AutoML pitched as the <em>strategy</em> rather than a step inside one.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "scoping-prompts-ask-the-client--the-team",
+     "number": null,
+     "title": "Scoping Prompts (ask the client / the team)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"Is the hard part building the model, or getting and trusting the data?\"</li>\n<li>\"What's the baseline this would have to beat, and how do you measure it today?\"</li>\n<li>\"Who will own, validate, and maintain the model AutoML produces?\"</li>\n<li>\"Do you need to explain this model to a regulator or a customer?\"</li>\n<li>\"If analysts build models with this, what's your gate before one goes live?\"</li>\n<li>\"What's your compute budget, and have we sized the search against it?\"</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "self-assessment",
+   "kind": "self-assessment",
+   "title": "Self-Assessment",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Before moving on, you should be able to:</p>"
+    },
+    {
+     "type": "checklist",
+     "checklistId": "19/self-assessment/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "State precisely what AutoML automates and what it leaves to humans"
+      },
+      {
+       "id": "1",
+       "html": "Explain grid vs random vs Bayesian vs Hyperband at a whiteboard and choose one for a budget"
+      },
+      {
+       "id": "2",
+       "html": "Estimate a tuning run's compute cost and spot a combinatorial explosion before it happens"
+      },
+      {
+       "id": "3",
+       "html": "Judge whether AutoML will shine or fail on a given problem, and say why in one sentence"
+      },
+      {
+       "id": "4",
+       "html": "Scope an AutoML PoC, a platform evaluation, or an analyst-enablement mission with guardrails"
+      },
+      {
+       "id": "5",
+       "html": "Articulate the governance risk of citizen data science and the gate that contains it"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  }
+ ]
+}

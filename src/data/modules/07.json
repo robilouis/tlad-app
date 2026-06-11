@@ -1,0 +1,415 @@
+{
+ "id": "07",
+ "title": "Computer Vision & Multimodal in Practice",
+ "weeks": [
+  14,
+  15
+ ],
+ "part": "III — Deep Learning & Modern AI",
+ "partIndex": 3,
+ "addon": false,
+ "pitchHtml": "<p>This module covers everything AI does with non-text perception and generation: reading images and documents, finding defects on a production line, transcribing a call, and generating a marketing visual from a sentence. It deliberately merges two worlds that the deeper paths keep apart — <strong>classic computer vision</strong> (classify, detect, segment, read) and <strong>generative media</strong> (text-to-image, speech, audio, video) — because for a tech lead they answer the same business question: <em>what can we do with pixels and sound, and what does it cost to ship?</em> The good news in 2026 is that most of this is now a <strong>rented API call or a fine-tuned pretrained model</strong>, not a research project. Your job is to know which task a client problem maps to, when an off-the-shelf model is enough, where the annotation and privacy costs hide, and how to scope a mission that delivers. We keep only the few formulas a tech lead should recognise on a whiteboard — the overlap metric, the convolution sketch — and leave the heavy derivations to the deeper paths.</p>",
+ "prev": "06",
+ "next": "08",
+ "sectionCount": 8,
+ "quizCount": 8,
+ "exerciseCount": 2,
+ "sections": [
+  {
+   "id": "learning-objectives",
+   "kind": "objectives",
+   "title": "Learning Objectives",
+   "blocks": [
+    {
+     "type": "checklist",
+     "checklistId": "07/learning-objectives/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Map a client's vision problem to the right <strong>task</strong> (classification, detection, segmentation, OCR, similarity, anomaly) and name a realistic deliverable"
+      },
+      {
+       "id": "1",
+       "html": "Decide <strong>off-the-shelf API vs pretrained + fine-tune vs train-from-scratch</strong> for a perception task, reusing the transfer-learning logic from <a class=\"wikilink\" data-module=\"06\" href=\"#/module/06\">Deep Learning Essentials</a>"
+      },
+      {
+       "id": "2",
+       "html": "Explain when a <strong>multimodal vision-language model</strong> beats a classic CV pipeline — and when it's the wrong, expensive tool"
+      },
+      {
+       "id": "3",
+       "html": "Give a stakeholder an honest 2026 maturity read on <strong>text-to-image, speech, audio, and video</strong> generation, with the rights/IP/deepfake caveats"
+      },
+      {
+       "id": "4",
+       "html": "Estimate the hidden costs of a vision mission: <strong>annotation, edge/on-device deployment, latency, and image/video privacy</strong>"
+      },
+      {
+       "id": "5",
+       "html": "Scope and price a document-processing, defect-detection, creative-asset, or transcription mission with a named buyer"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "key-concepts",
+   "kind": "concepts",
+   "title": "Key Concepts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "the-computer-vision-task-menu",
+     "number": 1,
+     "title": "The Computer Vision Task Menu",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Almost every \"can AI look at this?\" request collapses into one of a handful of well-defined tasks. Naming the task correctly is half the scoping job — it fixes the data you need, the model class, the metric, and the price. Get this wrong and you'll quote a classification budget for a segmentation problem.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Task</th><th align=\"left\">What it outputs</th><th align=\"left\">Example business problem</th></tr></thead><tbody><tr><td align=\"left\"><strong>Image classification</strong></td><td align=\"left\">One label for the whole image</td><td align=\"left\">\"Is this product photo compliant / not?\"; route incoming photos by category</td></tr><tr><td align=\"left\"><strong>Object detection</strong></td><td align=\"left\">Boxes + labels for <em>each</em> object</td><td align=\"left\">Count items on a shelf; flag PPE missing on site; detect vehicles in a frame</td></tr><tr><td align=\"left\"><strong>Segmentation</strong></td><td align=\"left\">A per-pixel mask outlining shapes</td><td align=\"left\">Measure the exact area of a skin lesion, a field, a scratch; medical/agronomy</td></tr><tr><td align=\"left\"><strong>OCR / document understanding</strong></td><td align=\"left\">Text + layout extracted from a document</td><td align=\"left\">Read invoices, IDs, forms, contracts into structured fields</td></tr><tr><td align=\"left\"><strong>Face / landmark detection</strong></td><td align=\"left\">Face locations &#x26; key points (not identity)</td><td align=\"left\">Blur faces for privacy; count visitors; align/crop for a photo product</td></tr><tr><td align=\"left\"><strong>Visual anomaly / defect detection</strong></td><td align=\"left\">\"Normal vs abnormal\" + where</td><td align=\"left\">Spot manufacturing defects, cracks, contamination on a line</td></tr><tr><td align=\"left\"><strong>Image similarity / search</strong></td><td align=\"left\">\"Find images like this one\"</td><td align=\"left\">Visual product search; deduplicate a media library; reverse-image lookup</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>The one metric to recognise: Intersection over Union (IoU).</strong> For detection and segmentation, \"did the model find it?\" isn't yes/no — it's <em>how well does the predicted box/mask overlap the true one?</em> IoU is the standard answer: the area where prediction <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>A</mi></mrow><annotation encoding=\"application/x-tex\">A</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\">A</span></span></span></span> and ground truth <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>B</mi></mrow><annotation encoding=\"application/x-tex\">B</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0502em;\">B</span></span></span></span> overlap, divided by the total area they jointly cover.</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\text{IoU} = \\frac{\\text{area}(A \\cap B)}{\\text{area}(A \\cup B)}",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mtext>IoU</mtext><mo>=</mo><mfrac><mrow><mtext>area</mtext><mo stretchy=\"false\">(</mo><mi>A</mi><mo>∩</mo><mi>B</mi><mo stretchy=\"false\">)</mo></mrow><mrow><mtext>area</mtext><mo stretchy=\"false\">(</mo><mi>A</mi><mo>∪</mo><mi>B</mi><mo stretchy=\"false\">)</mo></mrow></mfrac></mrow><annotation encoding=\"application/x-tex\">\\text{IoU} = \\frac{\\text{area}(A \\cap B)}{\\text{area}(A \\cup B)}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord text\"><span class=\"mord\">IoU</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.363em;vertical-align:-0.936em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.427em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">area</span></span><span class=\"mopen\">(</span><span class=\"mord mathnormal\">A</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">∪</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0502em;\">B</span><span class=\"mclose\">)</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">area</span></span><span class=\"mopen\">(</span><span class=\"mord mathnormal\">A</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">∩</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0502em;\">B</span><span class=\"mclose\">)</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.936em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>It runs from 0 (no overlap) to 1 (perfect). A prediction is usually counted as \"correct\" at <strong>IoU ≥ 0.5</strong>; stricter applications demand 0.7 or higher. The aggregate detection score you'll see on vendor benchmarks and in scoping docs is <strong>mAP (mean average precision)</strong> — precision/recall (from <a class=\"wikilink\" data-module=\"05\" href=\"#/module/05\">Model Evaluation, Validation &#x26; Experimentation</a>) averaged across classes and across IoU thresholds; treat it as the single headline number for \"how good is this detector,\" but always ask <em>at what IoU</em>.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>IoU rewards a box that is both in the right place <em>and</em> the right size. Predict a box that's too big and the union balloons, so the score drops; predict one that's too small and the intersection shrinks, so it drops too. That two-sided penalty is why it measures <em>localisation quality</em>, not just \"roughly near the object\" — and why the 0.5 cut-off is a sensible default for \"good enough to act on.\"</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>Two rules that save mis-scoping:</p>\n<ul>\n<li><strong>The more spatial precision a task needs, the more it costs to label and to build.</strong> Classification needs one tag per image; detection needs boxes; segmentation needs hand-painted masks at maybe 10× the annotation effort. Push back hard on \"we need pixel-perfect masks\" until the business decision actually requires the pixels.</li>\n<li><strong>Anomaly detection is its own beast</strong> — you usually have thousands of \"good\" examples and almost no labelled \"bad\" ones, so it's framed as \"learn normal, flag deviations,\" not as classification. (This echoes the anomaly framing in <a class=\"wikilink\" data-module=\"04\" href=\"#/module/04\">Classical ML &#x26; Forecasting in Practice</a>.)</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "pretrained-models--when-to-fine-tune",
+     "number": 2,
+     "title": "Pretrained Models & When to Fine-Tune",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The single most important fact in applied vision: <strong>you almost never train from scratch.</strong> A model pretrained on millions of generic images has already learned edges, textures, shapes, and object parts; you adapt that to your task with a fraction of the data. This is the transfer-learning idea from <a class=\"wikilink\" data-module=\"06\" href=\"#/module/06\">Deep Learning Essentials</a>, and it's why a vision capability that cost a research lab months in 2015 is now a weekend of fine-tuning — or a single API call.</p>\n<p>How does a model \"see\" those edges and textures in the first place? The workhorse operation is <strong>convolution</strong>: a small grid of weights (a <em>kernel</em>) slides across the image, and at each position computes a weighted sum of the pixels under it, producing a <em>feature map</em> that lights up wherever the kernel's pattern appears — compactly, <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mo stretchy=\"false\">(</mo><mi>I</mi><mo>∗</mo><mi>K</mi><mo stretchy=\"false\">)</mo><mo stretchy=\"false\">(</mo><mi>x</mi><mo separator=\"true\">,</mo><mi>y</mi><mo stretchy=\"false\">)</mo><mo>=</mo><msub><mo>∑</mo><mrow><mi>i</mi><mo separator=\"true\">,</mo><mi>j</mi></mrow></msub><mi>I</mi><mo stretchy=\"false\">(</mo><mi>x</mi><mo>+</mo><mi>i</mi><mo separator=\"true\">,</mo><mtext> </mtext><mi>y</mi><mo>+</mo><mi>j</mi><mo stretchy=\"false\">)</mo><mtext> </mtext><mi>K</mi><mo stretchy=\"false\">(</mo><mi>i</mi><mo separator=\"true\">,</mo><mi>j</mi><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">(I * K)(x,y) = \\sum_{i,j} I(x+i,\\,y+j)\\,K(i,j)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mopen\">(</span><span class=\"mord mathnormal\" style=\"margin-right:0.0785em;\">I</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">∗</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0715em;\">K</span><span class=\"mclose\">)</span><span class=\"mopen\">(</span><span class=\"mord mathnormal\">x</span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.1858em;vertical-align:-0.4358em;\"></span><span class=\"mop\"><span class=\"mop op-symbol small-op\" style=\"position:relative;top:0em;\">∑</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.162em;\"><span style=\"top:-2.4003em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">i</span><span class=\"mpunct mtight\">,</span><span class=\"mord mathnormal mtight\" style=\"margin-right:0.0572em;\">j</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.4358em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0785em;\">I</span><span class=\"mopen\">(</span><span class=\"mord mathnormal\">x</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.854em;vertical-align:-0.1944em;\"></span><span class=\"mord mathnormal\">i</span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0572em;\">j</span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0715em;\">K</span><span class=\"mopen\">(</span><span class=\"mord mathnormal\">i</span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0572em;\">j</span><span class=\"mclose\">)</span></span></span></span>.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>One kernel is a tiny pattern-detector — an \"edge here?\" or \"this texture?\" stamp — and because the <em>same</em> weights are reused at every position, the model learns each pattern once and finds it anywhere in the image. Stacking these layers builds up from edges to textures to object parts. The full maths (strides, padding, pooling, backprop through convolutions) lives in <span class=\"vault-ref\" title=\"In the Obsidian vault: 10 - CNNs &#x26; Computer Vision\">CNNs &#x26; Computer Vision</span> in the AI Scientist Path. A classification head then turns the final features into class probabilities with <strong>softmax</strong> — the same normalisation defined in <a class=\"wikilink\" data-module=\"06\" href=\"#/module/06\">Deep Learning Essentials</a>.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The escalation ladder, cheapest first — climb only when the rung below provably fails:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Option</th><th align=\"left\">Reach for it when</th><th align=\"left\">Data you need</th><th align=\"left\">Cost &#x26; risk</th></tr></thead><tbody><tr><td align=\"left\"><strong>Off-the-shelf API</strong> (cloud vision / OCR / a multimodal model)</td><td align=\"left\">The task is generic: read text, detect common objects, moderate content, describe an image</td><td align=\"left\">None to start</td><td align=\"left\">Lowest build; recurring per-call cost; data leaves your walls</td></tr><tr><td align=\"left\"><strong>Pretrained + fine-tune</strong></td><td align=\"left\">The task is specific to <em>your</em> images (your defect, your form, your product)</td><td align=\"left\">Hundreds to a few thousand labelled examples</td><td align=\"left\">Medium; needs annotation + a modest GPU run</td></tr><tr><td align=\"left\"><strong>Train from scratch</strong></td><td align=\"left\">Almost never — only truly novel domains (some medical/satellite/scientific imaging) with no usable pretrained base</td><td align=\"left\">Tens of thousands of labels + serious compute</td><td align=\"left\">High; treat as a research bet, not a delivery</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>A pretrained vision model is a generalist that already \"sees\" the visual world; fine-tuning is a short apprenticeship that teaches it <em>your</em> job. You're not paying to teach it what an edge or a surface is — that's free — you're paying only for the last mile of domain specifics. So the real cost driver of a custom vision mission is rarely compute; it's <strong>getting enough labelled examples of your specific thing</strong>. Budget for annotation, not GPUs.</p>"
+      }
+     ]
+    },
+    {
+     "id": "multimodal-vision-language-models--the-practical-default",
+     "number": 3,
+     "title": "Multimodal (Vision-Language) Models — the Practical Default",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>A <strong>multimodal model</strong> takes images <em>and</em> text together and reasons across both. You show it a picture and ask a question in plain language: \"What's wrong with this product?\", \"Extract the line items from this invoice as a table,\" \"Describe this image for an alt-text caption.\" Under the hood it ties vision into the same LLM machinery covered in <a class=\"wikilink\" data-module=\"09\" href=\"#/module/09\">Large Language Models in Practice</a> — which is why these models inherit both the strengths (flexible, no training, instruction-following) and the weaknesses (hallucination, per-token cost, latency) of LLMs.</p>\n<p>Why this is increasingly the <strong>default first thing to try</strong> in 2026:</p>\n<ul>\n<li><strong>No training, no labels, day one.</strong> You prompt it. For many tasks that previously needed a fine-tuned pipeline (read this receipt, classify this photo, caption this image), a multimodal API now clears the bar with zero training data.</li>\n<li><strong>Document AI that reads layout <em>and</em> text.</strong> The standout use case. Classic OCR returns characters; a multimodal model reads an invoice the way a human does — understanding that <em>this</em> number is the total because of <em>where</em> it sits and <em>what</em> it's next to. It handles messy, varied layouts that would break a rules-based extractor.</li>\n<li><strong>Flexible output.</strong> Same model, different prompt: today a caption, tomorrow a structured JSON of fields, next week a yes/no compliance check. No retraining.</li>\n</ul>\n<p>When a multimodal model is the <strong>wrong</strong> tool:</p>\n<ul>\n<li><strong>High volume, fixed task, tight unit cost.</strong> If you're processing 10 million identical images a day, a small fine-tuned classifier is far cheaper per call and faster than a general multimodal API.</li>\n<li><strong>Pixel-precise outputs.</strong> It can <em>describe</em> a defect but won't give you a clean segmentation mask or precise object coordinates the way a purpose-built detector will.</li>\n<li><strong>Hard reliability / auditability needs.</strong> It can confidently misread a digit on a contract. For anything that touches money or compliance, you need confidence scoring, validation rules, and a human-in-the-loop — see the worked example below.</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Think of a multimodal model as a smart, fast generalist intern who can look at almost anything and give you a sensible answer in words — brilliant for variety and ambiguity, but you wouldn't let them sign off invoices unsupervised, and you wouldn't hire one per second when a cheap specialist machine does the repetitive job. <strong>Use multimodal for variety and reasoning; use a fine-tuned specialist for volume and precision.</strong></p>"
+      }
+     ]
+    },
+    {
+     "id": "a-worked-example-invoice-processing-the-2026-way",
+     "number": 4,
+     "title": "A Worked Example: Invoice Processing, the 2026 Way",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>A finance team receives ~3,000 supplier invoices a month, in dozens of layouts, and keys them in by hand. Walk the decision:</p>\n<ol>\n<li><strong>Name the task.</strong> This is <strong>OCR + document understanding + extraction</strong> — read each invoice into structured fields (supplier, invoice number, date, line items, VAT, total).</li>\n<li><strong>Try the cheapest thing.</strong> A multimodal model with a clear prompt (\"return these fields as JSON\") handles the layout variety that would have needed a custom-trained extractor per template a few years ago. No labels, working prototype in days.</li>\n<li><strong>Confront reliability, not just accuracy.</strong> \"94% field accuracy\" sounds great until you realise a wrong <em>total</em> is a financial error. So the deliverable isn't raw extraction — it's extraction <strong>plus confidence scoring plus validation rules</strong> (does VAT + net = gross? is the supplier in our vendor list?) <strong>plus a human review queue</strong> for anything low-confidence or failing a check.</li>\n<li><strong>Decide and deliver.</strong> The deliverable is <strong>a pipeline</strong>: invoice in → fields out → auto-post the confident ones, route the rest to a human. Success is measured as <em>share auto-processed without error</em> and <em>hours of manual keying removed</em> — not as a model accuracy number in isolation. (Measurement discipline: <a class=\"wikilink\" data-module=\"05\" href=\"#/module/05\">Model Evaluation, Validation &#x26; Experimentation</a>.)</li>\n</ol>\n<p>Notice what carried the value: framing it as a <em>pipeline with a human fallback</em>, not a model. The model was the easy part.</p>"
+      }
+     ]
+    },
+    {
+     "id": "generative-media--beyond-text",
+     "number": 5,
+     "title": "Generative Media — Beyond Text",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The same deep-learning wave that learned to <em>recognise</em> pixels and sound learned to <em>generate</em> them. For a tech lead this is a menu of new deliverables — and a minefield of rights and consent issues. Take the maturity reads below as \"as of 2026\" and re-check before promising anything.</p>\n<p><strong>Text-to-image (and image editing).</strong> Type a prompt, get an image. The dominant technique is <strong>diffusion</strong> — but you need only the intuition:</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "how text-to-image works (no maths)",
+       "html": "<p>The model was trained by taking real images, progressively adding random noise until they were pure static, and learning to <em>reverse</em> that process step by step. To generate, it starts from a field of pure noise and <strong>denoises it toward your prompt</strong>, nudging each step so the emerging picture matches the words. \"Start from static, sculpt away everything that isn't the prompt.\" Image <em>editing</em> (inpainting, \"change the background\", \"remove this object\") is the same trick applied to part of an existing image. The deeper mechanics live in <span class=\"vault-ref\" title=\"In the Obsidian vault: 14 - Generative Models II: Adversarial &#x26; Diffusion\">Generative Models II: Adversarial &#x26; Diffusion</span> in the AI Scientist Path.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Speech.</strong> Two directions, both mature and genuinely useful:</p>\n<ul>\n<li><strong>Speech-to-text (transcription).</strong> Robust in 2026 across many languages and accents, with speaker separation (\"who said what\") and timestamps. A reliable, sellable commodity.</li>\n<li><strong>Text-to-speech (voice synthesis).</strong> Near-human in quality; <strong>voice cloning</strong> from a short sample is the high-risk feature — powerful for accessibility and localisation, dangerous for impersonation.</li>\n</ul>\n<p><strong>Music &#x26; audio.</strong> Generate background tracks, sound effects, jingles. Good for non-headline assets (stock-quality backing music, prototyping); rights provenance of the training data is the open question.</p>\n<p><strong>Video.</strong> The fastest-moving and least mature. In 2026, short, controllable clips and product/marketing b-roll are realistic; long, perfectly consistent narrative video with stable characters is still fragile and labour-intensive to direct. Promise short-form, treat long-form as R&#x26;D.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Modality</th><th align=\"left\">2026 maturity</th><th align=\"left\">Solid use cases</th><th align=\"left\">Watch out for</th></tr></thead><tbody><tr><td align=\"left\"><strong>Text-to-image</strong></td><td align=\"left\">Mature</td><td align=\"left\">Marketing visuals, concept art, product mockups, variations</td><td align=\"left\">Brand consistency; IP of style/output; \"almost right\" hands/text</td></tr><tr><td align=\"left\"><strong>Image editing</strong></td><td align=\"left\">Mature</td><td align=\"left\">Background removal, retouching, object add/remove, upscaling</td><td align=\"left\">Authenticity/provenance; over-editing real photos</td></tr><tr><td align=\"left\"><strong>Speech-to-text</strong></td><td align=\"left\">Mature</td><td align=\"left\">Call/meeting transcription, subtitles, voice search, analytics</td><td align=\"left\">Accent/jargon errors; privacy of recordings</td></tr><tr><td align=\"left\"><strong>Text-to-speech</strong></td><td align=\"left\">Mature</td><td align=\"left\">Narration, IVR, accessibility, localisation</td><td align=\"left\"><strong>Voice cloning consent</strong>; impersonation</td></tr><tr><td align=\"left\"><strong>Music / audio</strong></td><td align=\"left\">Good</td><td align=\"left\">Background tracks, SFX, jingles, prototyping</td><td align=\"left\">Training-data rights; not yet \"hit single\" quality</td></tr><tr><td align=\"left\"><strong>Video</strong></td><td align=\"left\">Emerging</td><td align=\"left\">Short clips, b-roll, social/marketing shorts</td><td align=\"left\">Consistency over time; cost; deepfake risk</td></tr></tbody></table>"
+      }
+     ]
+    },
+    {
+     "id": "rights-consent--deepfakes--the-caveat-you-must-voice",
+     "number": 6,
+     "title": "Rights, Consent & Deepfakes — the Caveat You Must Voice",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Generative media is the part of this module most likely to get a client into legal or reputational trouble, so a tech lead names the risks <em>before</em> the demo dazzles everyone. These aren't footnotes — they're scoping gates. (Full treatment: <a class=\"wikilink\" data-module=\"15\" href=\"#/module/15\">Responsible AI: Interpretability, Fairness, Safety &#x26; the EU AI Act</a>.)</p>\n<ul>\n<li><strong>Training-data &#x26; output IP.</strong> Who owns an AI-generated image, and was the model trained on copyrighted work? The legal ground is still shifting in 2026 — don't promise a client clean, exclusive ownership of generated assets without checking the vendor's indemnity terms.</li>\n<li><strong>Likeness &#x26; voice consent.</strong> Generating a real person's face or cloning their voice without explicit, documented consent is a hard no — legally and ethically. This is the deepfake risk, and it applies to your client's own staff and customers too.</li>\n<li><strong>Provenance &#x26; disclosure.</strong> Edited or synthetic media increasingly needs to be labelled as such (watermarking, content credentials). Bake disclosure into the deliverable, not as an afterthought.</li>\n<li><strong>EU AI Act.</strong> Deepfakes and synthetic media carry transparency obligations; biometric/face use raises the risk tier sharply. Treat any face-identity or large-scale biometric use as high-risk until proven otherwise — see <a class=\"wikilink\" data-module=\"15\" href=\"#/module/15\">Responsible AI: Interpretability, Fairness, Safety &#x26; the EU AI Act</a>.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "practical-concerns-annotation-edge-latency-privacy",
+     "number": 7,
+     "title": "Practical Concerns: Annotation, Edge, Latency, Privacy",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The model is rarely the hard part. Four operational realities decide whether a vision mission ships and what it costs:</p>\n<ul>\n<li><strong>Annotation cost.</strong> Custom vision lives or dies on labelled data, and labels for vision are <em>expensive</em> because a human must draw them. Rough effort ladder: a classification tag is seconds; a bounding box is ~10–30 seconds; a segmentation mask is minutes. Multiply by thousands of images and a quality-review pass, and annotation is often the <strong>largest line item</strong> in the budget. Price it explicitly; consider active learning (label only the images the model is unsure about) and pre-labelling with an off-the-shelf model that humans then correct.</li>\n<li><strong>Edge / on-device deployment.</strong> Many vision jobs run <em>where the camera is</em> — a factory line, a phone, a vehicle — not in the cloud, because of latency, bandwidth, connectivity, or privacy. That constrains model size and means a different toolchain (model compression, quantisation, specialised runtimes). Decide cloud-vs-edge early; it reshapes the whole architecture.</li>\n<li><strong>Latency &#x26; throughput.</strong> \"Real-time\" means very different things: flagging a defect at 30 frames per second on a fast line is a hard engineering target; reading a batch of invoices overnight is not. Pin down the required frame rate / response time before choosing a model — a big accurate model that can't keep up with the line is a failed mission.</li>\n<li><strong>Image &#x26; video data privacy.</strong> Images and video are often <strong>personal data</strong> (faces, plates, locations, screens with PII). Capturing, storing, and processing them triggers GDPR obligations — lawful basis, retention limits, and often <strong>face/plate blurring</strong> as a built-in step. CCTV and customer-facing cameras are especially sensitive. Treat privacy as a design input, not a final-week checkbox — see <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>.</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "client-mission-patterns--commercial-angle",
+   "kind": "missions",
+   "title": "Client Mission Patterns / Commercial Angle",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Four concrete, sellable archetypes. Each names a deliverable, a realistic scope, and who signs the cheque.</p>\n<ul>\n<li>\n<p><strong>Document / Invoice Processing Pipeline (OCR + extraction)</strong> — <em>Problem:</em> a team manually keys invoices, forms, IDs, or contracts. <em>Deliverable:</em> a pipeline that ingests documents, extracts structured fields with <strong>confidence scores + validation rules + a human review queue</strong>, and posts to the target system. <em>Scope:</em> 6–10 weeks for a first document type, then incremental. <em>Who buys:</em> finance/AP, operations, shared-services or back-office leads. <em>The value is in the workflow and the fallback, not the OCR.</em></p>\n</li>\n<li>\n<p><strong>Visual Quality Inspection / Defect Detection</strong> — <em>Problem:</em> manual or inconsistent inspection of products/components on a line. <em>Deliverable:</em> a camera-fed model that flags defective items in real time, with a dashboard and a human-confirm step; framed as <strong>anomaly detection</strong> (\"learn good, flag deviations\") to cope with few defect samples. <em>Scope:</em> 8–14 weeks including a data-collection phase on the actual line. <em>Who buys:</em> manufacturing/operations/quality directors. <em>Edge deployment and line-speed latency are the real engineering, and the budget, lives there.</em></p>\n</li>\n<li>\n<p><strong>Creative-Asset / Image-Generation Pipeline for Marketing</strong> — <em>Problem:</em> slow, costly production of marketing visuals and variations. <em>Deliverable:</em> a brand-aware generation workflow — prompt templates, brand-style presets, an editing/retouching step, and <strong>rights/disclosure governance baked in</strong> — that produces on-brand images and variants at scale. <em>Scope:</em> 4–8 weeks. <em>Who buys:</em> marketing/brand/creative-ops leads. <em>Charge for the workflow, governance, and brand consistency — not for \"access to an image model\" the client could rent themselves.</em></p>\n</li>\n<li>\n<p><strong>Speech Transcription &#x26; Analysis</strong> — <em>Problem:</em> hours of calls/meetings with insight locked in audio. <em>Deliverable:</em> a transcription pipeline (speaker-separated, timestamped) feeding analysis — search, summaries, sentiment, compliance keyword flags — over the text. <em>Scope:</em> 4–8 weeks. <em>Who buys:</em> contact-centre, sales-ops, compliance, or customer-insight leads. <em>Transcription itself is a commodity; the value is the analysis layer and the recordings-privacy handling.</em></p>\n</li>\n</ul>\n<p><strong>Buy-vs-build for the client:</strong> buy the commodity capability (cloud OCR, transcription, hosted image/multimodal models) and build only the <strong>workflow, domain-specific fine-tuning, integration, governance, and human-in-the-loop</strong> around it — that's where defensible value sits. <strong>What to charge for:</strong> the pipeline, the validation/fallback design, the annotation effort, and integration — repeatable IP. <strong>What not to promise:</strong> 100% accuracy on documents; pixel-perfect defect catch with no false alarms; clean IP ownership of generated assets; or flawless long-form video. Commit to a <em>target and a measurement method</em>, with a human path for the long tail.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "tools--vendor-landscape",
+   "kind": "tools",
+   "title": "Tools & Vendor Landscape",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p><em>As of 2026 — treat names/capabilities as perishable; re-check before quoting.</em></p>"
+    },
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Tool / Category</th><th align=\"left\">Use here</th><th align=\"left\">OSS / Paid</th><th align=\"left\">Note</th></tr></thead><tbody><tr><td align=\"left\">Cloud vision &#x26; document AI (AWS Rekognition/Textract, Azure AI Vision/Document Intelligence, Google Vision/Document AI)</td><td align=\"left\">Off-the-shelf detection, OCR, doc extraction</td><td align=\"left\">Paid (per-call)</td><td align=\"left\">Fast start; data leaves your walls; per-call cost at scale</td></tr><tr><td align=\"left\">Multimodal LLM APIs (Anthropic Claude, OpenAI, Google)</td><td align=\"left\">Describe / Q&#x26;A / extract over images &#x26; documents</td><td align=\"left\">Paid (per-token)</td><td align=\"left\">The flexible default; compare cost, latency, data terms; see <a class=\"wikilink\" data-module=\"09\" href=\"#/module/09\">Large Language Models in Practice</a></td></tr><tr><td align=\"left\">Pretrained vision backbones &#x26; detectors (PyTorch/<code>timm</code>, YOLO family, Ultralytics, Detectron2, SAM for segmentation)</td><td align=\"left\">Fine-tune a custom classifier/detector/segmenter</td><td align=\"left\">OSS (some licence caveats)</td><td align=\"left\">Check commercial-use licences (e.g. YOLO variants) before shipping</td></tr><tr><td align=\"left\">Speech-to-text (Whisper-family OSS; cloud transcription APIs)</td><td align=\"left\">Transcription, subtitles, voice analytics</td><td align=\"left\">OSS + Paid</td><td align=\"left\">OSS gives you on-prem/privacy control; cloud gives you scale</td></tr><tr><td align=\"left\">Text-to-image &#x26; editing (hosted services; OSS Stable-Diffusion-family)</td><td align=\"left\">Marketing assets, mockups, retouching</td><td align=\"left\">OSS + Paid</td><td align=\"left\">OSS for control/privacy; check output-IP and indemnity terms</td></tr><tr><td align=\"left\">Annotation platforms (Label Studio, CVAT; managed labelling services)</td><td align=\"left\">Build labelled training sets</td><td align=\"left\">OSS + Paid</td><td align=\"left\">The cost centre of custom vision — budget time, not just licences</td></tr><tr><td align=\"left\">Edge runtimes (ONNX Runtime, TensorRT, OpenVINO, Core ML / mobile)</td><td align=\"left\">On-device / line-side inference</td><td align=\"left\">Mostly OSS/free</td><td align=\"left\">For latency/privacy; needs model compression/quantisation</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>Put volatile model and vendor names only in this table. The capability categories above are stable; the brands move fastest.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "when-is-this-overkill",
+   "kind": "overkill",
+   "title": "When Is This Overkill?",
+   "blocks": [
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Situation</th><th align=\"left\">Vision/generative AI is overkill — do this instead</th></tr></thead><tbody><tr><td align=\"left\">Documents are a single clean digital template</td><td align=\"left\">Parse the structured file / use a rules-based extractor; skip OCR entirely</td></tr><tr><td align=\"left\">You need to read text from clean PDFs</td><td align=\"left\">Use plain text extraction or a cheap OCR API — no custom model</td></tr><tr><td align=\"left\">A handful of images to classify, occasionally</td><td align=\"left\">Let a person look at them; automate the boring data prep around them</td></tr><tr><td align=\"left\">Defects are caught fine by a simple sensor (weight, dimension, threshold)</td><td align=\"left\">Use the sensor; vision adds cost and a new failure mode</td></tr><tr><td align=\"left\">You want \"an image\" for an internal slide</td><td align=\"left\">Use a hosted image model directly; no pipeline, no project</td></tr><tr><td align=\"left\">The task is generic (detect common objects, read a passport)</td><td align=\"left\">Call an off-the-shelf API; don't train anything</td></tr><tr><td align=\"left\">Faces/biometrics with shaky consent or legal basis</td><td align=\"left\">Stop; redesign to avoid identity, or don't build it (see <a class=\"wikilink\" data-module=\"15\" href=\"#/module/15\">Responsible AI: Interpretability, Fairness, Safety &#x26; the EU AI Act</a>)</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The senior move is the same as everywhere in this path: reach for the camera-and-neural-net only when a rule, a sensor, an off-the-shelf API, or a human plainly can't clear the bar.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "resources",
+   "kind": "resources",
+   "title": "Resources",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "books",
+     "number": null,
+     "title": "Books",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Szeliski — <em>Computer Vision: Algorithms and Applications</em> — the reference; skim for the task taxonomy and intuition, ignore the heavy maths.</li>\n<li>Foster — <em>Generative Deep Learning</em> — accessible intuition for how generative models (incl. diffusion) actually behave. <em>(Paid)</em></li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "courses--articles-free",
+     "number": null,
+     "title": "Courses & Articles (Free)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>fast.ai practical deep-learning lessons — the most leader-friendly way to <em>feel</em> transfer learning and fine-tuning without the maths.</li>\n<li>Cloud-vendor document-AI and vision quickstarts — fastest path to a working off-the-shelf prototype to demo to a client.</li>\n<li>Annual state-of-AI / model-capability reports — for current generative-media maturity. <em>Date everything.</em></li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "go-deeper",
+     "number": null,
+     "title": "Go Deeper",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Deeper math on CNNs and vision architectures → <span class=\"vault-ref\" title=\"In the Obsidian vault: 10 - CNNs &#x26; Computer Vision\">CNNs &#x26; Computer Vision</span> (AI Scientist Path).</li>\n<li>Deeper math on diffusion and adversarial generation → <span class=\"vault-ref\" title=\"In the Obsidian vault: 14 - Generative Models II: Adversarial &#x26; Diffusion\">Generative Models II: Adversarial &#x26; Diffusion</span> (AI Scientist Path).</li>\n<li>Deeper production code for training and serving vision/DL models → <span class=\"vault-ref\" title=\"In the Obsidian vault: 05 - Deep Learning Foundations\">Deep Learning Foundations</span> (ML Engineer Path).</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "practical-artifacts",
+   "kind": "artifacts",
+   "title": "Practical Artifacts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "decision-checklist--scoping-a-visionmultimodal-mission",
+     "number": null,
+     "title": "Decision Checklist — \"Scoping a vision/multimodal mission\"",
+     "blocks": [
+      {
+       "type": "checklist",
+       "checklistId": "07/practical-artifacts/1",
+       "items": [
+        {
+         "id": "0",
+         "html": "Which <strong>task</strong> is this really (classify / detect / segment / OCR / similarity / anomaly)?"
+        },
+        {
+         "id": "1",
+         "html": "Can an <strong>off-the-shelf API or a multimodal model</strong> clear the bar before we train anything?"
+        },
+        {
+         "id": "2",
+         "html": "If we must fine-tune, <strong>where do labels come from</strong>, how many, and who pays for annotation?"
+        },
+        {
+         "id": "3",
+         "html": "<strong>Cloud or edge?</strong> What latency / frame rate / connectivity does the deployment demand?"
+        },
+        {
+         "id": "4",
+         "html": "Are the images/video/audio <strong>personal data</strong> — what's the lawful basis, retention, and blurring need?"
+        },
+        {
+         "id": "5",
+         "html": "For generative work: <strong>rights, consent, disclosure</strong> — are they settled before we demo?"
+        },
+        {
+         "id": "6",
+         "html": "What's the <strong>failure mode</strong>, and is there a human-in-the-loop path for low-confidence cases?"
+        },
+        {
+         "id": "7",
+         "html": "How will we <strong>prove it worked</strong> in the client's terms (hours saved, defects caught, errors avoided)?"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "red-flags",
+     "number": null,
+     "title": "Red Flags",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"Just point an AI at the camera/documents.\" (Which task? What's the fallback when it's wrong?)</li>\n<li>\"We need pixel-perfect masks.\" (Often a classification or detection problem in disguise — confirm the decision needs the pixels.)</li>\n<li>\"We'll fine-tune our own model\" — before anyone has checked an off-the-shelf API.</li>\n<li>A document/defect pipeline with <strong>no human review queue</strong> for low-confidence cases.</li>\n<li>Generative assets promised with <strong>clean IP ownership</strong> and no vendor-terms check.</li>\n<li><strong>Voice cloning or face generation</strong> without explicit, documented consent.</li>\n<li>A \"real-time\" requirement nobody has put a number (FPS / ms) on.</li>\n<li>Annotation cost missing from the budget entirely.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "scoping-prompts-ask-the-client",
+     "number": null,
+     "title": "Scoping Prompts (ask the client)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"Show me five real examples of the images/documents — including the messy, ugly ones.\"</li>\n<li>\"When the model is wrong, what's the cost, and who catches it?\"</li>\n<li>\"Do you have labelled examples already, or are we building that dataset from zero?\"</li>\n<li>\"Does this run in the cloud, or does it have to run on the device / line, offline?\"</li>\n<li>\"Are there faces, plates, screens, or other personal data in this footage?\"</li>\n<li>\"For generated content — whose likeness, whose voice, and who owns the output?\"</li>\n<li>\"What do you do today without this, and what specifically is wrong with that?\"</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "self-assessment",
+   "kind": "self-assessment",
+   "title": "Self-Assessment",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Before moving on, you should be able to:</p>"
+    },
+    {
+     "type": "checklist",
+     "checklistId": "07/self-assessment/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Map any \"can AI see/read/hear/generate this?\" request to a named task and a realistic deliverable"
+      },
+      {
+       "id": "1",
+       "html": "Route a perception task to off-the-shelf API / fine-tune / (rarely) from-scratch with a one-line justification"
+      },
+      {
+       "id": "2",
+       "html": "Explain when a multimodal model beats a classic CV pipeline — and when it's the expensive wrong tool"
+      },
+      {
+       "id": "3",
+       "html": "Give an honest 2026 maturity read on image, speech, audio, and video generation, with the IP/consent caveats"
+      },
+      {
+       "id": "4",
+       "html": "Estimate the annotation, edge, latency, and privacy costs that decide whether a vision mission ships"
+      },
+      {
+       "id": "5",
+       "html": "Scope and price a document, defect, creative-asset, or transcription mission with a named buyer and a human-in-the-loop design"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  }
+ ]
+}

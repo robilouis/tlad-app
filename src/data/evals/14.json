@@ -1,0 +1,347 @@
+{
+ "moduleId": "14",
+ "quiz": [
+  {
+   "id": "q1",
+   "conceptRef": "anonymisation-vs-pseudonymisation--the-central-distinction",
+   "prompt": "<p>A client says: \"We replaced names and emails with tokens, so the dataset is anonymised — GDPR doesn't apply, we can use it freely for ML.\" What's the correct assessment?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "That's pseudonymisation, not anonymisation: the mapping back to people still exists (the token vault, plus quasi-identifiers), so the data is still personal data and fully in RGPD scope — you've reduced risk, not escaped the law.",
+     "correct": true,
+     "explanation": "The central distinction of the module. Pseudonymisation is a lock (reversible, key held elsewhere — still personal data); anonymisation is a shredder (irreversible, by anyone, by any reasonably likely means — only then out of scope). Claiming \"anonymised\" for tokenised data is one of the most common and expensive compliance errors."
+    },
+    {
+     "id": "b",
+     "text": "Correct — once direct identifiers are removed, the data is anonymous under the RGPD.",
+     "correct": false,
+     "explanation": "Removing direct identifiers is the <em>definition</em> of pseudonymisation, which the RGPD explicitly keeps in scope. Rich datasets remain notoriously re-identifiable through quasi-identifiers (age + postcode + job title can single someone out as surely as a name)."
+    },
+    {
+     "id": "c",
+     "text": "It becomes anonymous as long as a different team holds the token mapping table.",
+     "correct": false,
+     "explanation": "Separating the key is good practice — it's exactly how pseudonymisation should be done — but the test is whether re-identification is <em>reasonably possible by anyone</em>, not whether your org chart makes it inconvenient. The data stays personal data."
+    },
+    {
+     "id": "d",
+     "text": "It's anonymous if you additionally hash the tokens, since hashing is one-way.",
+     "correct": false,
+     "explanation": "A hash of a known value is still a stable identifier — anyone with the input space can rebuild the mapping (hence salting), and the quasi-identifiers in the rest of the row are untouched. Hashing typically still yields pseudonymised, in-scope data."
+    }
+   ],
+   "takeaway": "Pseudonymisation is a lock, anonymisation is a shredder: tokenised data is still personal data, still in RGPD scope — when in doubt, assume pseudonymised and keep it governed.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q2",
+   "conceptRef": "lawful-basis-consent-vs-legitimate-interest",
+   "prompt": "<p>A telco wants to score all subscribers for churn risk to drive retention calls. Which lawful-basis position is the defensible one to bring to the DPO?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Likely legitimate interest (retaining customers) — but it requires a documented balancing test (LIA), customers must be informed and able to object, and the DPO confirms the call before the project proceeds.",
+     "correct": true,
+     "explanation": "This mirrors the module's worked example. Legitimate interest fits a non-intrusive business purpose, but it is not a free pass: the written balancing test weighing the company's interest against subscribers' reasonable expectations is mandatory, and the lawful basis is a gate <em>before</em> the project, confirmed with the DPO."
+    },
+    {
+     "id": "b",
+     "text": "Consent — it's the gold standard, so collect an opt-in from every subscriber before scoring.",
+     "correct": false,
+     "explanation": "Consent isn't \"safer by default\": it must be granular, freely given, and <em>revocable</em> — meaning the system must actually stop scoring anyone who withdraws, forever. For routine retention analytics, a documented legitimate interest is usually the more honest and operationally workable basis."
+    },
+    {
+     "id": "c",
+     "text": "Contract — subscribers signed a service contract, and churn prevention is part of running the service.",
+     "correct": false,
+     "explanation": "Contract covers processing <em>needed to deliver</em> the service the person signed up for. Profiling them for retention marketing isn't necessary to provide phone service — the named trap is stretching \"contract\" to cover model-building it doesn't reach."
+    },
+    {
+     "id": "d",
+     "text": "No basis is needed — the company already holds the data and is only using it internally.",
+     "correct": false,
+     "explanation": "\"We had the data, so we used it\" is the exact failure the lawful-basis principle prevents: no basis means the processing is unlawful, however internal. Possession of data is not permission to process it for a new purpose."
+    }
+   ],
+   "takeaway": "Lawful basis is a gate before the project, not a footnote: legitimate interest can carry routine scoring, but only with a written balancing test, informed customers, an objection path, and the DPO's confirmation.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q3",
+   "conceptRef": "the-dpia-when-an-ai-project-triggers-one",
+   "prompt": "<p>For the same telco churn-scoring project, the PM says: \"A DPIA is paperwork — let's do it in the final week before launch, once the system is stable enough to describe.\" What's wrong with this plan?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "The project fires at least two DPIA triggers (large-scale processing + systematic profiling/scoring), so a DPIA is mandatory — and done early it's a design tool that surfaces the minimisation, retention, and human-in-the-loop decisions you need to build in, not bolt on.",
+     "correct": true,
+     "explanation": "Exactly. AI projects hit the DPIA triggers constantly, and two-or-more is the strong signal. Done in week one with the DPO (budget 1–2 weeks), the DPIA reshapes the project — fewer fields, a retention window, pseudonymised training data, a human gate — most of which is good engineering anyway. In the final week, it can only document problems you've already built."
+    },
+    {
+     "id": "b",
+     "text": "Nothing — a DPIA describes the finished system, so doing it last makes it most accurate.",
+     "correct": false,
+     "explanation": "This is the documented anti-pattern. A DPIA is an <em>impact assessment</em>, not an as-built description: its purpose is to identify risks while design decisions are still cheap to change. Retrofitting minimisation and retention onto a built system is where projects bleed time and trust."
+    },
+    {
+     "id": "c",
+     "text": "The plan is fine because a DPIA is only required for special-category data like health or biometrics.",
+     "correct": false,
+     "explanation": "Special-category data is <em>one</em> trigger among many. Large-scale processing, systematic profiling/scoring, automated decisions, systematic monitoring, novel technology, dataset matching, and vulnerable subjects all count — churn scoring fires the profiling and scale triggers with no health data anywhere."
+    },
+    {
+     "id": "d",
+     "text": "A DPIA is optional best practice — the CNIL only recommends it, so it can be skipped under deadline pressure.",
+     "correct": false,
+     "explanation": "A DPIA is <em>mandatory</em> when processing is likely to result in high risk to people's rights, and the CNIL publishes a list of operations requiring one. Skipping a mandatory DPIA isn't a process shortcut; it's a compliance breach with the regulator's name on it."
+    }
+   ],
+   "takeaway": "If your AI profiles people at scale, assume a DPIA is required and run it early with the DPO — done at design time it de-risks the project; done at the end it just documents the damage.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q4",
+   "conceptRef": "data-subject-rights",
+   "prompt": "<p>A customer invokes their right to erasure. The client's engineer responds: \"Easy — I'll delete their row from the customer table.\" Why is this answer dangerously incomplete for an AI/data platform?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Erasure means finding and deleting every copy — across pipelines, derived tables, caches, logs, and backups — which is impossible without lineage; and the model trained on that data has already absorbed it, where the honest position is \"deleted from sources and derived data, retrained without you on the next cycle.\"",
+     "correct": true,
+     "explanation": "The two technically hard rights are access and erasure, both requiring you to locate every copy of one person's data — a pipeline that fans data into a dozen tables without lineage can't honour the request honestly. And you can't surgically un-train one record cheaply: don't promise \"machine unlearning\" as a solved capability."
+    },
+    {
+     "id": "b",
+     "text": "Nothing is missing — the RGPD only requires deletion from the primary system of record.",
+     "correct": false,
+     "explanation": "The right covers the person's data wherever it lives, including datasets <em>derived</em> from it. \"We'll delete the row\" is the named red flag precisely because the warehouses, caches, backups, and feature tables keep the data alive after the source row dies."
+    },
+    {
+     "id": "c",
+     "text": "The main gap is timing — erasure must happen within 72 hours rather than at the next maintenance window.",
+     "correct": false,
+     "explanation": "The standard window for honouring data-subject requests is about one month (72 hours is the <em>breach notification</em> deadline — a different obligation). The real gap isn't the clock; it's that without lineage the client can't find the copies at all."
+    },
+    {
+     "id": "d",
+     "text": "Erasure doesn't apply here at all, because data used to train a model is exempt from the right to be forgotten.",
+     "correct": false,
+     "explanation": "There's no ML exemption. The trained-model question is genuinely hard with no clean answer, but the mitigation posture is documented: don't train on raw identifiable data, keep training sets and retention tight, retrain on schedules — not \"the right doesn't apply.\""
+    }
+   ],
+   "takeaway": "Access and erasure are the rights that bite: without catalog and lineage you can't find every copy, and for trained models the honest, documentable position is delete-from-sources + retrain-next-cycle — never a promised \"unlearning.\"",
+   "difficulty": "stretch"
+  },
+  {
+   "id": "q5",
+   "conceptRef": "rgpdgdpr-essentials-for-ai",
+   "prompt": "<p>A product lead proposes: \"We have five years of support tickets collected for customer service — let's train our new sales-targeting model on them. We own the data and it never leaves our servers.\" Which principle-level objection must you raise first?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Purpose limitation: data collected for purpose A (support) can't be silently reused for purpose B (sales targeting) — the new purpose needs a compatibility assessment and its own lawful basis, before anyone touches the data.",
+     "correct": true,
+     "explanation": "\"We had the data, so we used it for ML\" is the canonical AI failure mode the principles exist to prevent. Ownership of the database is not permission for a new purpose; staying on-premise addresses security, not lawfulness. Minimisation, retention, and special-category checks (support tickets can contain health mentions) follow right behind."
+    },
+    {
+     "id": "b",
+     "text": "No objection — the data stays internal, so the RGPD's transfer rules aren't triggered.",
+     "correct": false,
+     "explanation": "Transfers are one obligation among many. Processing personal data for a new, incompatible purpose without a basis is unlawful even if the bytes never leave the building — lawfulness and locality are independent questions."
+    },
+    {
+     "id": "c",
+     "text": "The only issue is consent: email all customers and proceed with whoever doesn't reply.",
+     "correct": false,
+     "explanation": "Silence is not consent — consent must be an unambiguous opt-in, and it isn't the only (or here, the most workable) basis anyway. The first-order issue is that nobody has assessed whether the new purpose is lawful at all."
+    },
+    {
+     "id": "d",
+     "text": "Storage limitation: five years is automatically too long to keep tickets, so the dataset must be deleted rather than reused.",
+     "correct": false,
+     "explanation": "Retention periods depend on the documented purpose — five years may be fine for support history. Storage limitation matters here, but reflexively deleting the data dodges the actual decision: whether a <em>new processing purpose</em> is lawful and compatible."
+    }
+   ],
+   "takeaway": "Possession is not permission: reusing data collected for one purpose to train a model for another is the textbook purpose-limitation breach — check compatibility and lawful basis before a single training run.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q6",
+   "conceptRef": "ai-specific-privacy-risks",
+   "prompt": "<p>A support team starts pasting full customer emails into a hosted LLM (US-based vendor, default tier) to draft replies. From a governance standpoint, what just happened — and what's the right fix?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Every prompt is a data transfer: personal data is leaving the perimeter — likely crossing a border — on a vendor's default terms nobody has read. Fix: redact/pseudonymise before text leaves your systems, and check the provider's data terms (no-train clause, retention, EU region, DPA) before sending a single real record.",
+     "correct": true,
+     "explanation": "The LLM era moved the perimeter: one prompt ships personal data to a third country in milliseconds. The two reflexes that keep you safe are exactly these — pseudonymise/redact before data leaves, and read the vendor's terms first. Often the strongest control is architectural: don't put personal data where the risk is."
+    },
+    {
+     "id": "b",
+     "text": "Nothing significant — prompts are transient, so the LLM call doesn't count as processing personal data.",
+     "correct": false,
+     "explanation": "Sending a customer's email to a third party is processing <em>and</em> (for a non-EU vendor) a cross-border transfer, however brief. Transience is irrelevant — and many default API tiers retain and may use inputs unless the terms say otherwise."
+    },
+    {
+     "id": "c",
+     "text": "The only compliant option is to ban hosted LLMs and self-host an open-weight model.",
+     "correct": false,
+     "explanation": "Overkill as a default. For most cases, an EU data region plus contractual no-train/retention terms plus PII redaction clears the bar at a fraction of self-hosting's cost. Residency-regulated clients may force self-hosting — but that's a scoping determination, not a reflex."
+    },
+    {
+     "id": "d",
+     "text": "It's fine as long as the vendor is a large, reputable company with good security.",
+     "correct": false,
+     "explanation": "Reputation is not a transfer mechanism and security is not lawfulness. What matters is checkable: does the tier train on your data, how long does it retain inputs, where is it processed, is there a DPA and an EU region? These vary by vendor <em>and by tier</em>, and they change."
+    }
+   ],
+   "takeaway": "Every prompt to a hosted LLM is a data transfer: redact or pseudonymise before text leaves your systems, and read the vendor's data terms before the first real record is sent.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q7",
+   "conceptRef": "cross-border-transfers-eu--us-etc",
+   "prompt": "<p>A client's new analytics SaaS processes EU customer data in a US region. The vendor's site mentions the EU–US Data Privacy Framework. What's the correct leadership posture?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Prefer an EU/EEA region if the vendor offers one; otherwise verify this vendor's actual DPF certification (or fall back to SCCs with a transfer impact assessment) and have the DPO/legal paper it — treating the mechanism's durability as perishable.",
+     "correct": true,
+     "explanation": "That's the practical move: EU region first, transfer mechanism only when you must, always with legal/DPO sign-off. The DPF is the successor to the struck-down Privacy Shield — history says treat its durability as perishable and verify the specific vendor's certification rather than trusting a marketing page."
+    },
+    {
+     "id": "b",
+     "text": "No action needed — the DPF means EU data can flow freely to any US company now.",
+     "correct": false,
+     "explanation": "The DPF covers transfers to <em>certified</em> US organisations only — it's vendor-specific, not a blanket adequacy for the US. And its predecessor was struck down in court; assuming it permanently settles the question is exactly the mistake the module flags."
+    },
+    {
+     "id": "c",
+     "text": "Transfers only matter when you physically migrate a database abroad — SaaS processing doesn't count.",
+     "correct": false,
+     "explanation": "The opposite: transfers most often happen <em>invisibly</em>, via a SaaS or LLM API. \"Where does this data physically live, and does it leave the EU?\" is a scoping question precisely because remote processing in a US region is a transfer."
+    },
+    {
+     "id": "d",
+     "text": "Encryption in transit and at rest removes the need for any transfer mechanism.",
+     "correct": false,
+     "explanation": "Encryption is a security measure, not a legal basis for transfer. If the US entity processes (and can access) the personal data, a mechanism — adequacy, verified DPF certification, SCCs with a transfer impact assessment, or BCRs — is still required."
+    }
+   ],
+   "takeaway": "Recognise that a transfer is happening — often invisibly via SaaS/LLM APIs — prefer an EU region, and when you can't, make legal/DPO paper a verified mechanism rather than trusting a vendor's marketing page.",
+   "difficulty": "stretch"
+  },
+  {
+   "id": "q8",
+   "conceptRef": "governance-as-an-enabler-not-a-blocker",
+   "prompt": "<p>A partner at your firm grumbles: \"Governance work is unbillable overhead — it slows every AI mission down.\" What's the strongest counter, per this module?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Governance maturity <em>is</em> delivery speed on sensitive data: a pole with a catalog, classification, pseudonymisation patterns, and a standing DPIA template can take regulated, high-value missions in days — while competitors either refuse them or get burned.",
+     "correct": true,
+     "explanation": "The enabler framing: each control buys speed — catalog/lineage make rights requests instant instead of fire drills, classification + RBAC grant exactly-right access fast, pseudonymisation patterns let modelling start in parallel with legal sign-off, a reusable DPIA clears new use cases in days. The boring foundational work is what wins the missions others can't safely touch."
+    },
+    {
+     "id": "b",
+     "text": "Concede the point but argue governance is a necessary evil for avoiding CNIL fines.",
+     "correct": false,
+     "explanation": "Fine-avoidance is real but it's the weak, cost-framed version of the argument — exactly the framing that loses budget battles. The winning frame is offensive: governance unlocks the AI roadmap and the regulated market segment, it doesn't just insure against the regulator."
+    },
+    {
+     "id": "c",
+     "text": "Agree to defer governance until after the first few missions prove the AI value.",
+     "correct": false,
+     "explanation": "\"We'll add governance later\" is a named red flag — it's a gate, not a phase. Personal data processed without basis or controls doesn't become lawful retroactively, and retrofitting is where projects bleed time and trust."
+    },
+    {
+     "id": "d",
+     "text": "Point out that governance can be fully outsourced to the client's DPO, so it costs the pole nothing.",
+     "correct": false,
+     "explanation": "The DPO advises and monitors — they don't build catalogs, pseudonymisation pipelines, or retention automation, and they're a partner to engage at scoping, not a unit to delegate delivery to. The engineering of compliance is exactly the pole's billable work."
+    }
+   ],
+   "takeaway": "Sell governance as the thing that unlocks the AI roadmap: the pole that has done the boring foundational work says yes safely and fast to the regulated missions the competition can't touch.",
+   "difficulty": "core"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "title": "Governance walkthrough: a health insurer's claim-cost model",
+   "estimatedMinutes": 35,
+   "scenario": "<p>A French mutuelle (health insurer) wants a model that predicts each member's expected claim cost next year, so case managers can proactively offer prevention programmes to the highest-risk members. The available data: membership records, demographics, full claims history including <strong>care types and diagnosis codes</strong>, and customer-service notes. The project sponsor wants modelling to start in three weeks and says: <em>\"Legal can review it once we have something working.\"</em></p>\n<p>Walk the governance before a line of modelling code — and reshape the project where the governance demands it.</p>",
+   "givens": [
+    "Data subjects: ~900,000 members (large scale); diagnosis codes and care types are health data (Article 9 special category)",
+    "Output: a per-member risk score that drives which members case managers contact",
+    "The data science team has requested a full copy of the raw member database in their sandbox",
+    "The client has a DPO, currently not in the loop"
+   ],
+   "tasks": [
+    "Run the lawfulness walkthrough: personal data? special category? plausible lawful basis (and the Article 9 problem)? Who must confirm?",
+    "Decide whether a DPIA is triggered, naming each trigger that fires, and place the DPIA in the project timeline.",
+    "Redesign the data-science team's request: what does the modelling environment actually receive, using which pseudonymisation/minimisation measures — and what may the client never claim about that dataset?",
+    "Check the Article 22 exposure: does the score create an automated-decision problem, and what design choice controls it?"
+   ],
+   "solution": "<p><strong>Step 1 — lawfulness walkthrough.</strong> Personal data: obviously — member records tied to identified individuals. <strong>Special category: yes</strong> — diagnosis codes and care types are health data, <em>prohibited to process by default</em> under Article 9 and needing an explicit exception on top of an Article 6 lawful basis. A documented legitimate interest (member health outcomes + cost management) might carry the Article 6 side with a written balancing test, but the Article 9 exception is a genuinely hard legal call (insurance-specific grounds vary) — <strong>this is exactly where you are not the lawyer</strong>: the DPO and legal counsel own this determination, and they must be engaged <em>now</em>, at scoping, not after a working prototype exists. The sponsor's \"legal can review it once it works\" is the project's biggest risk: if the basis fails, the work is unlawful and unusable.</p>\n<p><strong>Step 2 — DPIA.</strong> Mandatory, with multiple triggers firing: <strong>special-category data</strong> (health), <strong>large-scale</strong> processing (~900k members), <strong>systematic profiling/scoring</strong> of individuals, and arguably <strong>vulnerable data subjects</strong> (patients). Two or more triggers is the strong signal; this project has four. Budget 1–2 weeks to produce it <em>with the DPO</em>, starting in week one — done early it's a design tool that will surface the minimisation, retention, and oversight decisions below (the CNIL's free PIA tool is a sensible default template). It must be signed off before go-live, not drafted in launch week.</p>\n<p><strong>Step 3 — redesign the data request.</strong> Refuse the full-raw-copy request; the data scientist doesn't need names or contact details to learn cost patterns. The modelling environment receives: <strong>tokenised member IDs</strong> (mapping held in a secure vault, access-controlled, separate from the sandbox), <strong>direct identifiers stripped</strong>, <strong>minimised fields</strong> (only features with plausible predictive value and a business justification — precise address probably out, coarse region maybe in), and a <strong>retention window</strong> for the training set with automatic deletion. Crucially: this dataset is <strong>pseudonymised, not anonymised</strong> — it is still personal data, still in RGPD scope, and the client may never claim otherwise. With rich health histories, true anonymisation is close to unattainable (quasi-identifier linkage), so don't promise \"out of scope\" without a defensible, DPO-signed assessment — which here would almost certainly fail.</p>\n<p><strong>Step 4 — Article 22.</strong> If the score <em>automatically</em> triggers actions with significant effects (e.g. premium changes or coverage decisions — which would be an entirely different and more dangerous project), Article 22 bites hard. As designed — the score <strong>prioritises a human case manager's outreach list</strong>, and the human decides whom to contact and what to offer — the risk is far lower. Make that human-in-the-loop property an explicit, documented design constraint (not an accident of the current UI), and state in the DPIA that the score never drives automated decisions about coverage or pricing. Members must also be informed of the processing and able to object (the legitimate-interest path requires it).</p>\n<p><strong>The shape of the result:</strong> the governance walkthrough changed the project — DPO engaged at scoping, a four-trigger DPIA in week one, a pseudonymised and minimised modelling environment with a vaulted key, a retention window, and a documented human gate. Most of this is good engineering anyway; none of it is retrofittable at acceptable cost.</p>",
+   "rubric": {
+    "keyPoints": [
+     "Health data identified as Article 9 special category with the processing-prohibited-by-default consequence, and the legal call explicitly routed to the DPO/counsel at scoping time",
+     "DPIA correctly judged mandatory with the specific triggers named (special category, large scale, profiling, vulnerable subjects) and scheduled at design time",
+     "Full-raw-copy request refused and replaced by a tokenised, minimised, retention-bounded dataset — explicitly labelled pseudonymised and still in scope",
+     "Article 22 exposure analysed via the automated-vs-prioritisation distinction, with human-in-the-loop made a documented design constraint"
+    ],
+    "pitfalls": [
+     "Accepting \"legal reviews it once it works\" — if the Article 9 basis fails after the build, everything built is unlawful",
+     "Claiming the tokenised training set is \"anonymised\" or out of scope — the module's most expensive compliance error, near-impossible for rich health data",
+     "Shipping the full raw member table to the sandbox because the team asked for it — minimisation is a principle, not a courtesy",
+     "Treating the DPO as a final-week rubber stamp instead of a scoping-time partner who owns the legal call"
+    ],
+    "takeaways": [
+     "Governance walked early reshapes the project — fewer fields, pseudonymised environments, retention windows, a human gate — and most of it is good engineering you'd want anyway",
+     "You scope and design; the DPO and counsel decide the law — bring them options at scoping, never a finished system to bless"
+    ],
+    "transfer": "This walkthrough pattern — classify the data, find the legal gate, minimise what enters the working environment, document the human's role — is the same discipline as security threat-modelling (classify assets, find trust boundaries, least privilege) and as clinical-trial protocol design (ethics approval before, not after, the experiment). Any domain where a regulator can void finished work teaches the same lesson: the gate goes at the start, because passing it late is cheap only when you designed for it early."
+   }
+  },
+  {
+   "id": "ex2",
+   "title": "Pick the right privacy technique for each data flow",
+   "estimatedMinutes": 30,
+   "scenario": "<p>A retail client is launching four data initiatives at once, and the CDO asks you to specify the privacy-engineering approach for each:</p>\n<ol>\n<li><strong>Offshore analytics</strong>: a vendor team in India will build dashboards on customer transaction history.</li>\n<li><strong>Public stats</strong>: a marketing microsite will publish aggregate spending statistics by region and age group.</li>\n<li><strong>Support tooling</strong>: support staff need to view customer records to handle calls, including payment-card references.</li>\n<li><strong>Partner match</strong>: a loyalty partner wants to measure customer overlap by matching customer lists, without either side handing over raw emails.</li>\n</ol>\n<p>For each flow: choose the technique, state whether the resulting data is still personal data (in RGPD scope), and flag any additional obligation the flow triggers.</p>",
+   "givens": [
+    "Available techniques: masking/redaction, tokenisation (vaulted), hashing + salt, k-anonymity (with l-diversity as its patch), differential privacy",
+    "The offshore vendor is outside the EU/EEA; no transfer paperwork exists yet",
+    "The public microsite is fully public — anyone, including data brokers with auxiliary datasets, can read it",
+    "Customer overlap with the partner must support exact matching on email, both directions"
+   ],
+   "tasks": [
+    "Map each of the four flows to a primary technique, with a one-to-three sentence justification each.",
+    "For each flow, state whether the data remains personal data in RGPD scope, and why.",
+    "Identify the flow that triggers an obligation <em>beyond</em> technique choice, and specify what must be in place.",
+    "Name the technique most teams would over-engineer with here, and where it genuinely earns its complexity."
+   ],
+   "solution": "<p><strong>Flow 1 — offshore analytics → tokenisation (+ minimisation).</strong> Replace customer IDs/names/emails with vaulted tokens before data reaches the vendor; strip fields the dashboards don't need. The vendor can join and aggregate without ever holding raw identifiers. <strong>Still personal data</strong> — the vault reverses it, and transaction patterns are quasi-identifying — so fully in scope. <strong>This flow also triggers the extra obligation (Task 3): a cross-border transfer.</strong> India has no EU adequacy decision, so SCCs with a transfer impact assessment (papered by the DPO/legal), a processor agreement, and least-privilege access must be in place <em>before</em> any data moves. Pseudonymising does not waive the transfer rules — it just reduces the risk being transferred.</p>\n<p><strong>Flow 2 — public stats → differential privacy (or at minimum k-anonymity with l-diversity, with DP preferred).</strong> Publication is the adversarial case: anyone, with any auxiliary dataset, forever. k-anonymity alone is vulnerable to linkage and homogeneity attacks (if every 30–39-year-old in one region shares a spending bracket, the \"crowd\" leaks it anyway — that's what l-diversity patches). Differential privacy's guarantee is mathematical, composable, and <strong>holds whatever auxiliary data an attacker has</strong> — which is exactly the threat model of a public site. Tune the privacy budget (ε): smaller ε, more noise, stronger privacy. Done properly, the published aggregates <strong>can approach anonymous</strong> — the one flow that may end up out of scope, but claim it only after a defensible assessment with DPO sign-off.</p>\n<p><strong>Flow 3 — support tooling → masking/redaction (+ RBAC).</strong> Support staff need to <em>see enough to help</em>, not everything: mask card references (<code>****1234</code>), redact fields irrelevant to the role, and pair with role-based access and audit logging. <strong>Still personal data, obviously</strong> — the record is about an identified customer; masking just minimises exposure per role. This is classification + least privilege operationalised, not de-identification.</p>\n<p><strong>Flow 4 — partner match → salted hashing of emails.</strong> Both sides hash emails with a <strong>shared salt</strong> and compare hashes — exact matching without exchanging raw addresses. <strong>Still pseudonymised, still in scope</strong>: a hash of a known identifier is a stable identifier, and either party can re-hash its own list to re-identify matches. So the match itself still needs a lawful basis, customer transparency, and a data-sharing agreement — the hashing protects the channel, not the lawfulness.</p>\n<p><strong>Task 4 — the over-engineering trap:</strong> differential privacy on flows 1, 3, or 4. For internal/contracted access on lower-sensitivity flows, pseudonymisation + access control suffices; DP is specialist work with a real utility cost. It earns its complexity exactly where used here — <strong>publishing to an uncontrolled audience</strong> (flow 2), where no access control exists and auxiliary-data attacks are guaranteed.</p>",
+   "rubric": {
+    "keyPoints": [
+     "All four flows mapped sensibly: tokenisation (offshore), differential privacy or hardened k-anonymity (publication), masking + RBAC (support), salted hashing (partner match)",
+     "Scope verdicts correct: flows 1, 3, 4 remain personal data; only the DP-protected public aggregates can plausibly approach out-of-scope, and only with a DPO-signed assessment",
+     "The offshore flow identified as a cross-border transfer requiring SCCs + transfer impact assessment and a processor agreement, independent of the pseudonymisation",
+     "DP recognised as the publication-grade tool, with k-anonymity's homogeneity/linkage weakness (and the l-diversity patch) articulated"
+    ],
+    "pitfalls": [
+     "Believing salted hashes or tokens make a flow anonymous — a hash of a known value is a stable identifier; the vault reverses tokens",
+     "Treating pseudonymisation as a substitute for transfer mechanisms or lawful basis — it reduces risk, it doesn't waive obligations",
+     "Publishing k-anonymous tables to an open audience and ignoring linkage/homogeneity attacks the public threat model guarantees",
+     "Reaching for differential privacy on internal flows where access control suffices — complexity without a matching threat"
+    ],
+    "takeaways": [
+     "Match the technique to the threat model: who can see the output, with what auxiliary data, under what controls — publication is the adversarial extreme, internal access the mild one",
+     "Almost everything short of properly-tuned differential privacy on aggregates leaves you with pseudonymised, in-scope data — plan governance accordingly"
+    ],
+    "transfer": "Mapping protections to threat models is the core move of security engineering: you don't TLS-encrypt a file that never leaves a machine, and you don't trust a NAT to protect a public endpoint. The same matrix thinking applies to access-control design (capability vs audience), to API rate-limiting (internal vs public consumers), and to financial controls (petty cash vs wire transfers). The general skill: enumerate the flows, name each flow's adversary, and size the control to that adversary — uniform maximum protection is as much a design failure as uniform minimum."
+   }
+  }
+ ]
+}

@@ -1,0 +1,348 @@
+{
+  "moduleId": "01",
+  "quiz": [
+    {
+      "id": "q1",
+      "conceptRef": "the-landscape-one-picture",
+      "prompt": "A retailer asks for \"an AI assistant that answers questions about our sales.\" Two weeks in, the team discovers there is no warehouse, the sales data lives in three disconnected systems, and nobody trusts the numbers. According to the landscape model, what went wrong?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Value flows top-down but capability is built bottom-up — the request named the top box while delivery blocks on the data-platform and sources layers, which is why most \"AI projects\" are ~70% data work.",
+          "correct": true,
+          "explanation": "Exactly. Clients ask for the top of the stack (\"an AI assistant\"); delivery almost always blocks on the bottom two layers (no clean data, no platform). Scoping the mission without checking the foundation is the most common mis-scope."
+        },
+        {
+          "id": "b",
+          "text": "The team chose the wrong LLM — a stronger model would have coped with the messy source data.",
+          "correct": false,
+          "explanation": "No model compensates for absent or untrusted data — that belief is explicitly listed as oversold hype. The blockage is in the data-platform layer, which sits *below* the AI-methods row; model choice can't fix a layer beneath it."
+        },
+        {
+          "id": "c",
+          "text": "Nothing went wrong — discovering data problems mid-mission is normal and the timeline should simply absorb it.",
+          "correct": false,
+          "explanation": "Discovering it *mid-mission* is the failure. Data strategy belongs up front: \"does the data exist, can we access it, is it usable?\" is a pre-promise question, and the cleaning effort should have been a visible, priced line from day one."
+        },
+        {
+          "id": "d",
+          "text": "The request should have been refused — assistants over sales data are not feasible in 2026.",
+          "correct": false,
+          "explanation": "Retrieval over your own documents and data is listed among the things that genuinely ship in 2026. The capability is real; the failure was promising the top of the stack without verifying the bottom."
+        }
+      ],
+      "takeaway": "Clients buy the top box of the stack, but delivery is built bottom-up — always check the data and platform layers before promising anything above them.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q2",
+      "conceptRef": "the-decision-youll-make-most-rules-vs-ml-vs-dl-vs-llm-vs-buy-vs-dont",
+      "prompt": "An ops team wants to auto-flag purchase orders above €10k that lack a second approval. The logic is fully known and stable. A stakeholder proposes \"training a model on past approvals.\" What's the right call?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Compromise: build the rule now, but commit to replacing it with the ML model next quarter so the solution doesn't stagnate.",
+          "correct": false,
+          "explanation": "There is nothing to replace it *with* — a rule that fully solves a stable, known-logic problem is the destination, not a stopgap. Pre-committing to an ML upgrade treats 'higher on the methods ladder' as progress, which the module explicitly rejects: complexity must be justified by a failure of the rung below."
+        },
+        {
+          "id": "b",
+          "text": "Write the rule and ship it in days — the escalation ladder starts at rules, and stakeholders must justify each step up, not each step down.",
+          "correct": true,
+          "explanation": "Right. The default escalation is rule → buy → classical ML → DL/LLM, stopping at the first rung that clears the bar. Known, stable, explainable logic with few edge cases is the textbook rules case; a model would add cost and risk for no gain."
+        },
+        {
+          "id": "c",
+          "text": "Train a classical ML model anyway — it will catch edge cases the rule-writers haven't thought of.",
+          "correct": false,
+          "explanation": "When logic is known and stable there are no fuzzy edge cases for a model to discover — only the cost, opacity, and maintenance burden the model adds. \"Higher in the AI-methods row ≠ better\" is one of the module's two core rules of thumb."
+        },
+        {
+          "id": "d",
+          "text": "Use a hosted LLM — it's quick to set up and handles fuzzy approval logic well.",
+          "correct": false,
+          "explanation": "The logic here isn't fuzzy — it's a threshold and an approval check. An LLM would introduce hallucination risk, latency, and per-token cost into a problem a one-line rule solves deterministically."
+        }
+      ],
+      "takeaway": "Walk the ladder top-down — don't build, rules, buy, classical ML, DL/LLM — and stop at the first rung that clears the bar; make stakeholders justify steps up, never steps down.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q3",
+      "conceptRef": "the-roles-in-a-pole",
+      "prompt": "You're staffing a first 8-week mission: build a clean data pipeline and a churn model with a simple scoring app. Which staffing reflects the module's guidance?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Two generalists — one covering data + platform, one covering modelling + application — because staffing is a coverage problem, not a headcount problem.",
+          "correct": true,
+          "explanation": "Right. A two-person team with complementary coverage can deliver most early missions. The question to ask of each task is \"which hat does this want?\", then make sure every hat is covered."
+        },
+        {
+          "id": "b",
+          "text": "Four specialists — a data engineer, a data scientist, an ML engineer, and an MLOps engineer — so every role in the table is properly filled.",
+          "correct": false,
+          "explanation": "This is the named failure mode: hiring four narrow specialists for a job that needed two generalists. You don't need all the roles on day one; you need every needed hat *covered*."
+        },
+        {
+          "id": "c",
+          "text": "One strong data scientist who can wear all the hats — modelling is the core of the mission anyway.",
+          "correct": false,
+          "explanation": "Two traps at once: asking one person to wear all the hats is explicitly called out, and \"modelling is the core\" is backwards — most of a first mission is data work. One generalist for a job that needs a real data engineer is the mirror failure of over-specialising."
+        },
+        {
+          "id": "d",
+          "text": "It doesn't matter as long as total headcount matches the budget — roles are interchangeable at this scale.",
+          "correct": false,
+          "explanation": "Roles are not interchangeable — the module's table exists precisely because confusing them (data scientist vs ML engineer, data engineer vs analytics engineer) is how tasks land on people who can't own them. Coverage, not headcount, is the criterion."
+        }
+      ],
+      "takeaway": "Staffing a mission is a coverage problem, not a headcount problem — know which hat each task wants and ensure every hat is covered, with as few people as possible.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q4",
+      "conceptRef": "hype-vs-reality-as-of-2026",
+      "prompt": "A COMEX sponsor says: \"We want a fully autonomous AI agent that handles supplier negotiations end-to-end, no human involved.\" Which 2026 reality check is the honest response?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Agents that take actions are real but fragile in production — scope tightly, add guardrails, and keep a human in the loop; \"autonomous anything with no human\" is in the oversold column.",
+          "correct": true,
+          "explanation": "Exactly the module's framing: multi-step agents make powerful demos but production reliability is harder, and \"autonomous anything with no human in the loop\" is explicitly listed as oversold. The honest sell is a tightly scoped, guarded version."
+        },
+        {
+          "id": "b",
+          "text": "This is fully feasible — agent frameworks matured in 2025 and end-to-end autonomy is now standard.",
+          "correct": false,
+          "explanation": "This repeats the hype rather than checking it. Demos hide the long tail; production agents need tight scoping and guardrails, and high-stakes negotiation with no human review is precisely where they break trust."
+        },
+        {
+          "id": "c",
+          "text": "Agents are pure hype — recommend the client avoid anything agentic for at least five years.",
+          "correct": false,
+          "explanation": "Over-correction. The module classes agents as \"real but fragile,\" not fake — dismissing them entirely is as unhelpful as overselling them. The skill is calibrated scoping, not blanket refusal."
+        },
+        {
+          "id": "d",
+          "text": "Suggest fine-tuning a model on past negotiations first, so the agent has the company's negotiation style.",
+          "correct": false,
+          "explanation": "\"We'll just fine-tune it\" as a first move is itself on the oversold list. It doesn't address the actual risk (autonomous action without oversight) and jumps to the most expensive adaptation lever before the problem is even scoped."
+        }
+      ],
+      "takeaway": "Agents are real but fragile in 2026: scope tightly, add guardrails, keep a human in the loop — and treat any \"fully autonomous\" pitch as oversold until proven.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q5",
+      "conceptRef": "data-strategy-up-front",
+      "prompt": "During discovery, you learn the client wants to predict machine failures — but no sensor or maintenance event data has ever been recorded. What is the senior move?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Pivot the engagement: sell an instrumentation/data-collection mission first — \"no data → no AI\" is a stop condition, and collection is a legitimate, sellable engagement, not a failure.",
+          "correct": true,
+          "explanation": "Right. If the signal isn't recorded anywhere, the first mission is collection, not modelling. Framing it as a respectable data-engineering engagement keeps the relationship and builds the foundation the AI mission will later need."
+        },
+        {
+          "id": "b",
+          "text": "Proceed with the model using synthetic data and public datasets, then swap in real data once it accumulates.",
+          "correct": false,
+          "explanation": "A model of someone else's machines is not a model of the client's machines. This defers the real problem (\"we'll figure out the data later\" — a named red flag) while burning budget on a deliverable that can't be validated against reality."
+        },
+        {
+          "id": "c",
+          "text": "Use an LLM instead — generative models don't need the client's historical data.",
+          "correct": false,
+          "explanation": "AI that compensates for absent data is explicitly in the oversold column. An LLM has no knowledge of this plant's failure patterns; the missing signal is missing for every method."
+        },
+        {
+          "id": "d",
+          "text": "Decline the engagement entirely — without data there is nothing to sell this client.",
+          "correct": false,
+          "explanation": "Too final. \"No usable data\" kills the *modelling* promise, not the relationship: the instrumentation mission is real revenue, real value, and the natural prequel to the predictive work."
+        }
+      ],
+      "takeaway": "No data → no AI: detect it early, and pivot the conversation into a sellable instrumentation/collection mission instead of an impossible modelling promise.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q6",
+      "conceptRef": "data-strategy-up-front",
+      "prompt": "Your pole can fund two of three opportunities: (A) a frontier agent platform — huge value, low chance of success, high cost; (B) an automated weekly reporting pipeline — modest value, very likely to succeed, cheap; (C) a solid churn classifier — moderate value, likely to succeed, moderate cost. Using the expected-value portfolio lens, what should a healthy pole do?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Weight the portfolio toward B and C — high-probability, lower-cost wins — and let those fund occasional bets like A, after making the EV terms ($P(\\text{success})$, value, cost) explicit for each.",
+          "correct": true,
+          "explanation": "This is the module's portfolio intuition: frontier projects have huge value but low probability and high cost; boring wins have high probability and low cost. A healthy pole runs mostly the latter and funds a few of the former — and the discipline is naming the three terms before committing."
+        },
+        {
+          "id": "b",
+          "text": "Pick A — its potential value dwarfs the others, and expected value is dominated by the biggest payoff.",
+          "correct": false,
+          "explanation": "EV is probability-weighted: a huge payoff times a small probability, minus a high cost, can easily be the *worst* EV of the three. Reading only the value term is exactly the error the framework exists to prevent."
+        },
+        {
+          "id": "c",
+          "text": "Pick whichever the client is most excited about — enthusiasm is the best predictor of project success.",
+          "correct": false,
+          "explanation": "Enthusiasm usually attaches to the top of the hype curve, not to the highest-EV work. \"Success defined as 'use AI', not as an outcome\" is a named red flag; the EV framing exists to replace excitement with explicit terms."
+        },
+        {
+          "id": "d",
+          "text": "Compute EV to two decimal places for each and commit mechanically to the top two numbers.",
+          "correct": false,
+          "explanation": "The point is to make the three terms *explicit*, not to derive false precision — the inputs are rough estimates. EV here is a thinking discipline for the conversation, not a spreadsheet ritual that launders guesses into certainty."
+        }
+      ],
+      "takeaway": "Run the opportunity portfolio in expected-value terms — mostly high-probability boring wins that fund a few frontier bets — and make $P(\\text{success})$, value, and cost explicit before committing.",
+      "difficulty": "stretch"
+    },
+    {
+      "id": "q7",
+      "conceptRef": "the-decision-youll-make-most-rules-vs-ml-vs-dl-vs-llm-vs-buy-vs-dont",
+      "prompt": "A client needs invoice OCR and transcription of support calls — both generic capabilities — at modest volume. The internal team is excited to build both with deep learning. What does the decision framework say?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Buy the API/SaaS — OCR and transcription are commodities; build effort belongs where the client has proprietary advantage, while watching lock-in, data residency, and per-call cost at scale.",
+          "correct": true,
+          "explanation": "Right. \"Capability is a commodity\" is the buy trigger — OCR, transcription, generic chat, and translation are the module's own examples. The watch-outs (lock-in, residency, per-call cost) are managed risks, not reasons to rebuild a commodity."
+        },
+        {
+          "id": "b",
+          "text": "Build with deep learning — these are unstructured-data problems, which is exactly when DL is the right rung.",
+          "correct": false,
+          "explanation": "Unstructured data is necessary but not sufficient for the DL rung — the buy rung comes first in the ladder, and commodity capabilities at modest volume clear it easily. Rebuilding solved problems is over-engineering with extra steps."
+        },
+        {
+          "id": "c",
+          "text": "Build it to avoid vendor lock-in — owning the models is always safer long-term than renting.",
+          "correct": false,
+          "explanation": "Lock-in is a real watch-out, but the answer is contractual and architectural care (abstraction layers, exit clauses), not assuming the build cost, talent cost, and maintenance burden of two deep-learning systems. \"Always own\" ignores the cost/risk column entirely."
+        },
+        {
+          "id": "d",
+          "text": "Don't build and don't buy — wait until the client's data platform is mature enough to support deep learning.",
+          "correct": false,
+          "explanation": "A bought OCR/transcription API needs no in-house DL platform — that's its whole appeal. Deferring a cheap, immediate win for a platform the use case doesn't require inverts the value/complexity budget."
+        }
+      ],
+      "takeaway": "When the capability is a commodity, buy it and move on — spend build effort only where the client's proprietary data or problem gives you an edge.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q8",
+      "conceptRef": "hype-vs-reality-as-of-2026",
+      "prompt": "In a sales meeting, the prospect's CEO pushes for a flashy generative-AI showcase. Your assessment says their highest-value, highest-probability opportunities are a clean revenue metric, an automated monthly report, and a working internal search. What does the module advise — and why is it commercially smart?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Sell the boring wins — most realised value comes from them, they fund the ambitious bets, and saying \"you don't need AI for this\" builds the trust that wins the missions where they do.",
+          "correct": true,
+          "explanation": "The quiet truth of 2026: a clean metric, an automated report, a search that works — that's where realised value lives. And the most senior sentence in a sales meeting is \"you don't need AI for this\"; it converts a skeptical prospect into a long-term client."
+        },
+        {
+          "id": "b",
+          "text": "Lead with the generative showcase anyway — you have to match the CEO's energy to win the deal, then quietly deliver the boring work underneath.",
+          "correct": false,
+          "explanation": "Selling one thing and delivering another is how trust dies at the first demo. \"It worked in the demo\" is a named red flag precisely because showcases hide the long tail; anchor expectations on what will actually ship value."
+        },
+        {
+          "id": "c",
+          "text": "Decline the boring work — low-glamour missions position the pole as a data shop, not an AI consultancy.",
+          "correct": false,
+          "explanation": "Backwards: the boring wins are the *funding model* for the ambitious ones, and the entry missions (readiness, discovery) are how a pole earns the right to the frontier work. Positioning follows outcomes, not glamour."
+        },
+        {
+          "id": "d",
+          "text": "Propose both at equal priority — let the client choose, since prioritisation is their call, not yours.",
+          "correct": false,
+          "explanation": "Prioritisation *is* the deliverable at this stage — the client is buying judgment and direction, not a menu. A value × feasibility recommendation with 2-3 starters is what use-case discovery sells; abdicating it gives away your core value."
+        }
+      ],
+      "takeaway": "Most realised AI value is boring — sell the clean metric and the working search first; they fund the frontier bets and earn the trust that wins them.",
+      "difficulty": "stretch"
+    }
+  ],
+  "exercises": [
+    {
+      "id": "ex1",
+      "title": "Route four client requests through the decision ladder",
+      "estimatedMinutes": 30,
+      "scenario": "You're running a use-case discovery workshop at a mid-size logistics company. Four requests come out of the session:\n\n1. *\"Flag any shipment invoice where the billed amount differs from the contracted rate card.\"* The rate cards are documented and stable.\n2. *\"Automatically transcribe and summarise our ~200 weekly customer calls.\"*\n3. *\"Predict which of our 12,000 B2B customers will reduce volume next quarter.\"* They have 4 years of order history in a clean warehouse, and \"volume reduction\" is directly computable from orders.\n4. *\"Build an AI that autonomously renegotiates carrier contracts.\"*\n\nFor each, route it on the ladder (don't build / rules / buy / classical ML / DL / hosted LLM / fine-tune), justify the routing in 1-2 sentences, and flag any stop conditions or hype corrections you'd raise with the client.",
+      "givens": [
+        "Rate cards: documented, stable, structured; discrepancy logic is fully specifiable",
+        "Calls: ~200/week audio, no in-house speech expertise; transcription and summarisation are commodity capabilities",
+        "Churn-like prediction: 4 years of clean structured order history; the outcome (volume reduction) is computable from existing data — labels exist",
+        "Carrier negotiation: high-stakes, multi-step, real-world actions with financial consequences"
+      ],
+      "tasks": [
+        "Route each of the four requests to a rung on the ladder, with a 1-2 sentence justification each.",
+        "For each routing, name the main cost/risk watch-out from the module's table.",
+        "Identify which request needs a hype-vs-reality conversation, and script the 2-3 sentences you'd say to the sponsor.",
+        "Rank the four as a portfolio using the EV lens ($P(\\text{success})$ × value − cost) and recommend the order of attack."
+      ],
+      "solution": "**Step 1 — routing.**\n\n**Request 1 → Rules.** The logic is known, stable, and fully specifiable: join invoices to rate cards, flag mismatches. A SQL job ships in days and is explainable in one line. *Watch-out:* rule sprawl — if exceptions multiply (negotiated one-offs, currency effects), revisit whether the logic is actually fuzzy; until then, no model.\n\n**Request 2 → Buy.** Transcription and summarisation are commodity capabilities — exactly the module's buy examples. An off-the-shelf speech-to-text API plus a hosted LLM for summaries gets this live in a week. *Watch-out:* per-call cost at 200 calls/week (model it before quoting), data residency for customer audio, and lock-in (keep the pipeline vendor-swappable).\n\n**Request 3 → Classical ML.** Tabular, structured data with 4 years of history and a computable label — the classical-ML sweet spot: explainable, cheap inference, no GPU. *Watch-out:* the thing that quietly kills classical ML is \"no labels\" — here labels exist, but the label *definition* (\"what % drop over what window counts as reduction?\") must be agreed before any feature work.\n\n**Request 4 → Don't build (as specified); downscope if the pain is real.** \"Autonomously renegotiates\" is the oversold column: agents that take consequential actions are real but fragile, and no-human-in-the-loop on financial commitments is a 2026 non-starter. The legitimate downscope: an assistant that *drafts* negotiation positions from contract and market data, with a human approving every action.\n\n**Step 2 — the hype conversation (request 4).** *\"Agents that act autonomously are the most oversold capability right now — strong demos, fragile in production, and a contract negotiation is exactly where a silent failure costs real money. What ships today is the same intelligence with a human hand on the wheel: the system prepares the analysis and the draft, your negotiator approves. If that works, we widen the autonomy gradually, with guardrails.\"*\n\n**Step 3 — portfolio order.** Rank by EV: (1) **Request 1** — near-certain success, days of effort, immediate money found (billing errors are recovered cash). (2) **Request 2** — high probability, low cost, visible time savings. (3) **Request 3** — high value, good probability, but the most effort (the data/label work dominates — plan most of the timeline there). (4) **Request 4** — park it, or fund the downscoped assistant only after 1-3 have built trust and platform. The boring wins fund and de-risk the ambitious one — that's the healthy pole shape.",
+      "rubric": {
+        "keyPoints": [
+          "Request 1 routed to rules and request 2 to buy, with the correct triggers named (stable known logic; commodity capability) — not everything needs ML",
+          "Request 3 routed to classical ML *with* the label-definition caveat raised before modelling is promised",
+          "Request 4 identified as oversold-as-specified, with a human-in-the-loop downscope offered rather than a flat refusal",
+          "Portfolio ranking is EV-shaped: boring high-probability wins first, frontier bet last and explicitly funded by them"
+        ],
+        "pitfalls": [
+          "Routing request 1 or 2 to ML/DL because the workshop is 'an AI engagement' — higher on the methods ladder is not better",
+          "Accepting request 4 at face value to please the sponsor — promising autonomy you can't deliver burns the relationship at the first failure",
+          "Treating request 3's label as free — 'volume reduction' needs an agreed definition, and that conversation is part of the scope",
+          "Ranking the portfolio by excitement or deal size instead of probability-weighted value minus cost"
+        ],
+        "takeaways": [
+          "Walk every request down the ladder and stop at the first rung that clears the bar — the routing justification is one sentence each, and that's the point",
+          "The senior move is selling the right-sized thing: rules, a bought API, and a tractable model beat one inflated promise"
+        ],
+        "transfer": "This triage pattern is universal consulting hygiene: an architect routing 'should this be a microservice?' (monolith first, extract when proven), a security lead routing 'do we need a SIEM?' (start with the audit log you already have), or a CFO routing build-vs-buy on any internal tool. The shared skeleton: an escalation ladder ordered by cost and risk, a default of the cheapest adequate rung, and a burden of proof that sits on whoever wants to climb."
+      }
+    },
+    {
+      "id": "ex2",
+      "title": "Qualify-or-kill: the readiness conversation",
+      "estimatedMinutes": 25,
+      "scenario": "A 90-minute call with the COO of an industrial-equipment maker. She opens with: *\"Our board approved an AI budget. We want to predict machine breakdowns before they happen — our competitor announced something similar. Can you build it this quarter?\"*\n\nProbing reveals: machines have no sensors connected to anything; maintenance interventions are logged on paper and a shared spreadsheet, inconsistently; the maintenance chief is skeptical and wasn't invited to the call; nobody can say what an avoided breakdown is worth, though downtime \"is expensive.\"\n\nYou have the rest of the call to qualify, downscope, or kill — and to leave with a next step that's good for both sides.",
+      "givens": [
+        "No sensor data is collected anywhere — the failure signal is not recorded",
+        "Maintenance history: paper + inconsistent spreadsheet; no agreed event definitions",
+        "No named owner who feels the pain (the maintenance chief is absent and skeptical)",
+        "Motivation is competitor-driven; success is currently defined as 'use AI', not as an outcome",
+        "Budget exists and the board is watching"
+      ],
+      "tasks": [
+        "Run the 'Should we use AI here?' checklist against the situation and list which items fail.",
+        "Identify the red flags present, quoting or paraphrasing the module's red-flag list.",
+        "Decide: qualify, downscope, or kill — and design the engagement you'd actually propose, with scope, duration, and what you'd refuse to promise.",
+        "Script the 3-4 sentences that deliver the verdict to the COO without losing the relationship."
+      ],
+      "solution": "**Step 1 — checklist failures.** Of the six checklist items, at least four fail outright: ❌ *clear business outcome with a number* (downtime cost unquantified); ❌ *does the data exist* (no sensors; the failure signal is simply not recorded — this is the stop condition); ❌ *an owner accountable for acting on the output* (the maintenance chief — the person who'd act on predictions — is absent and skeptical); ❌ *do we know how we'll prove it worked* (success = \"use AI\"). The remaining items (cheaper alternatives, failure-mode tolerance) can't even be assessed yet.\n\n**Step 2 — red flags.** Practically the full list: *\"we'll figure out the data later\"* (implicit — they assume modelling can start now); success defined as \"use AI\", not an outcome; no owner who feels the pain; competitor-envy as the driver (a variant of demo-thinking). Each one individually is a caution; together they say: do not promise a model.\n\n**Step 3 — the verdict: downscope into a data mission + readiness assessment.** \"No data → no AI\" makes the predictive-maintenance model unbuildable this quarter — but killing the relationship would be wrong, because the underlying need is real. Propose: **(a)** a 2-4 week fixed-price **AI & Data Readiness Assessment** — scored maturity across data, platform, skills, governance, plus a prioritised gap list the board can see; **(b)** an **instrumentation roadmap** as its centrepiece: which machines to sensor first, how to standardise maintenance-event logging (digital, with agreed event definitions), and the realistic timeline to a modellable dataset. Explicitly refuse to promise: any accuracy figure, any model this quarter, any ROI number before the data exists — commit to a *method*, not a number. Insist the maintenance chief co-owns the assessment: without the person who feels the pain, even perfect predictions change nothing.\n\n**Step 4 — the script.** *\"The honest answer is that nobody can build this model this quarter — not us, not the competitor's vendor — because the signal it would learn from isn't being recorded yet. That's not a dead end; it's the actual first project. We'd start with a fixed-price readiness assessment and an instrumentation plan, so in two months you have a board-credible roadmap and the data collection underway — and you'll know precisely what the prediction system will cost and what a prevented breakdown is worth. And I'd want your maintenance chief in the room from day one: this only works if it's his tool, not something done to him.\"*",
+      "rubric": {
+        "keyPoints": [
+          "Recognises 'no recorded failure signal' as the stop condition that kills the modelling promise regardless of budget",
+          "Surfaces the organisational red flags (no owner, success-as-'use-AI', competitor envy) — not just the data gap",
+          "Downscopes into a sellable entry mission (readiness assessment + instrumentation roadmap) rather than killing or over-promising",
+          "Refuses to commit to accuracy/ROI numbers and commits to a method instead"
+        ],
+        "pitfalls": [
+          "Taking the budget because it's there — delivering a doomed model this quarter costs the relationship and your name",
+          "Killing the deal outright — the stop condition stops the *model*, not the engagement; collection is legitimate, billable work",
+          "Ignoring the absent maintenance chief — a use case with no owner who feels the pain fails even with perfect data",
+          "Letting 'the competitor has it' stand unchallenged instead of converting envy into a concrete outcome and number"
+        ],
+        "takeaways": [
+          "The most senior thing you can say is 'you can't build this yet — and here is the real first step': it converts a doomed project into a durable engagement",
+          "Qualify with the checklist, not with enthusiasm: outcome-with-a-number, data, owner, and proof method are the gates"
+        ],
+        "transfer": "This qualify-or-kill discipline is the same move as a VC passing on a great story with no market evidence, a surgeon refusing to operate before imaging, or an architect declining to quote a building without a soil survey. The transferable pattern: when the foundation for the asked-for deliverable doesn't exist, the professional response is to sell the foundation work as the engagement — naming the missing prerequisite is the expertise the client is actually buying."
+      }
+    }
+  ]
+}

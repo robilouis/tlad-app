@@ -1,0 +1,660 @@
+{
+ "nodes": [
+  {
+   "id": "01",
+   "title": "AI & Data Landscape & Tech-Lead Mindset",
+   "partIndex": 1,
+   "addon": false,
+   "weeks": [
+    1,
+    2
+   ]
+  },
+  {
+   "id": "02",
+   "title": "Math & Stats Intuition for Leaders",
+   "partIndex": 1,
+   "addon": false,
+   "weeks": [
+    3,
+    4
+   ]
+  },
+  {
+   "id": "03",
+   "title": "Working with Data: Sources, Quality & Feature Engineering",
+   "partIndex": 2,
+   "addon": false,
+   "weeks": [
+    5,
+    6
+   ]
+  },
+  {
+   "id": "04",
+   "title": "Classical ML & Forecasting in Practice",
+   "partIndex": 2,
+   "addon": false,
+   "weeks": [
+    7,
+    9
+   ]
+  },
+  {
+   "id": "05",
+   "title": "Model Evaluation, Validation & Experimentation",
+   "partIndex": 2,
+   "addon": false,
+   "weeks": [
+    10,
+    11
+   ]
+  },
+  {
+   "id": "06",
+   "title": "Deep Learning Essentials",
+   "partIndex": 3,
+   "addon": false,
+   "weeks": [
+    12,
+    13
+   ]
+  },
+  {
+   "id": "07",
+   "title": "Computer Vision & Multimodal in Practice",
+   "partIndex": 3,
+   "addon": false,
+   "weeks": [
+    14,
+    15
+   ]
+  },
+  {
+   "id": "08",
+   "title": "NLP & Embeddings in Practice",
+   "partIndex": 3,
+   "addon": false,
+   "weeks": [
+    16,
+    17
+   ]
+  },
+  {
+   "id": "09",
+   "title": "Large Language Models in Practice",
+   "partIndex": 3,
+   "addon": false,
+   "weeks": [
+    18,
+    19
+   ]
+  },
+  {
+   "id": "10",
+   "title": "RAG & Knowledge Systems",
+   "partIndex": 3,
+   "addon": false,
+   "weeks": [
+    20,
+    21
+   ]
+  },
+  {
+   "id": "11",
+   "title": "Agentic Architectures & LLM App Patterns",
+   "partIndex": 3,
+   "addon": false,
+   "weeks": [
+    22,
+    23
+   ]
+  },
+  {
+   "id": "12",
+   "title": "Data Engineering & Platforms",
+   "partIndex": 4,
+   "addon": false,
+   "weeks": [
+    24,
+    25
+   ]
+  },
+  {
+   "id": "13",
+   "title": "MLOps & Productionization",
+   "partIndex": 4,
+   "addon": false,
+   "weeks": [
+    26,
+    27
+   ]
+  },
+  {
+   "id": "14",
+   "title": "Data Governance, Privacy & Pseudonymisation",
+   "partIndex": 5,
+   "addon": false,
+   "weeks": null
+  },
+  {
+   "id": "15",
+   "title": "Responsible AI: Interpretability, Fairness, Safety & the EU AI Act",
+   "partIndex": 5,
+   "addon": false,
+   "weeks": null
+  },
+  {
+   "id": "16",
+   "title": "Scoping, Estimating & Delivering AI & Data Missions",
+   "partIndex": 6,
+   "addon": false,
+   "weeks": [
+    30,
+    31
+   ]
+  },
+  {
+   "id": "17",
+   "title": "Building the AI & Data Offer & Leading the Pole",
+   "partIndex": 6,
+   "addon": false,
+   "weeks": [
+    32,
+    33
+   ]
+  },
+  {
+   "id": "18",
+   "title": "Time Series & Forecasting in Practice",
+   "partIndex": 2,
+   "addon": true,
+   "weeks": [
+    34,
+    35
+   ]
+  },
+  {
+   "id": "19",
+   "title": "Automated Machine Learning (AutoML)",
+   "partIndex": 2,
+   "addon": true,
+   "weeks": [
+    36,
+    37
+   ]
+  },
+  {
+   "id": "20",
+   "title": "Reinforcement Learning & Bandits in Practice",
+   "partIndex": 3,
+   "addon": true,
+   "weeks": [
+    38,
+    39
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "01",
+   "target": "02",
+   "weight": 2
+  },
+  {
+   "source": "01",
+   "target": "09",
+   "weight": 1
+  },
+  {
+   "source": "01",
+   "target": "11",
+   "weight": 2
+  },
+  {
+   "source": "01",
+   "target": "03",
+   "weight": 3
+  },
+  {
+   "source": "01",
+   "target": "12",
+   "weight": 4
+  },
+  {
+   "source": "01",
+   "target": "14",
+   "weight": 2
+  },
+  {
+   "source": "01",
+   "target": "17",
+   "weight": 6
+  },
+  {
+   "source": "02",
+   "target": "03",
+   "weight": 2
+  },
+  {
+   "source": "02",
+   "target": "05",
+   "weight": 5
+  },
+  {
+   "source": "03",
+   "target": "04",
+   "weight": 4
+  },
+  {
+   "source": "03",
+   "target": "12",
+   "weight": 8
+  },
+  {
+   "source": "03",
+   "target": "05",
+   "weight": 2
+  },
+  {
+   "source": "03",
+   "target": "08",
+   "weight": 2
+  },
+  {
+   "source": "03",
+   "target": "14",
+   "weight": 3
+  },
+  {
+   "source": "04",
+   "target": "05",
+   "weight": 5
+  },
+  {
+   "source": "04",
+   "target": "18",
+   "weight": 4
+  },
+  {
+   "source": "04",
+   "target": "13",
+   "weight": 1
+  },
+  {
+   "source": "05",
+   "target": "06",
+   "weight": 5
+  },
+  {
+   "source": "05",
+   "target": "09",
+   "weight": 3
+  },
+  {
+   "source": "05",
+   "target": "12",
+   "weight": 1
+  },
+  {
+   "source": "05",
+   "target": "13",
+   "weight": 5
+  },
+  {
+   "source": "06",
+   "target": "07",
+   "weight": 6
+  },
+  {
+   "source": "04",
+   "target": "06",
+   "weight": 6
+  },
+  {
+   "source": "06",
+   "target": "08",
+   "weight": 5
+  },
+  {
+   "source": "03",
+   "target": "06",
+   "weight": 1
+  },
+  {
+   "source": "02",
+   "target": "06",
+   "weight": 2
+  },
+  {
+   "source": "06",
+   "target": "10",
+   "weight": 1
+  },
+  {
+   "source": "06",
+   "target": "15",
+   "weight": 3
+  },
+  {
+   "source": "06",
+   "target": "13",
+   "weight": 2
+  },
+  {
+   "source": "07",
+   "target": "08",
+   "weight": 2
+  },
+  {
+   "source": "05",
+   "target": "07",
+   "weight": 2
+  },
+  {
+   "source": "04",
+   "target": "07",
+   "weight": 1
+  },
+  {
+   "source": "07",
+   "target": "09",
+   "weight": 2
+  },
+  {
+   "source": "07",
+   "target": "15",
+   "weight": 3
+  },
+  {
+   "source": "07",
+   "target": "14",
+   "weight": 1
+  },
+  {
+   "source": "08",
+   "target": "09",
+   "weight": 7
+  },
+  {
+   "source": "08",
+   "target": "10",
+   "weight": 9
+  },
+  {
+   "source": "08",
+   "target": "14",
+   "weight": 1
+  },
+  {
+   "source": "05",
+   "target": "08",
+   "weight": 1
+  },
+  {
+   "source": "09",
+   "target": "10",
+   "weight": 7
+  },
+  {
+   "source": "09",
+   "target": "14",
+   "weight": 6
+  },
+  {
+   "source": "09",
+   "target": "13",
+   "weight": 2
+  },
+  {
+   "source": "09",
+   "target": "11",
+   "weight": 3
+  },
+  {
+   "source": "04",
+   "target": "09",
+   "weight": 1
+  },
+  {
+   "source": "10",
+   "target": "11",
+   "weight": 5
+  },
+  {
+   "source": "10",
+   "target": "14",
+   "weight": 2
+  },
+  {
+   "source": "10",
+   "target": "15",
+   "weight": 2
+  },
+  {
+   "source": "11",
+   "target": "12",
+   "weight": 2
+  },
+  {
+   "source": "11",
+   "target": "15",
+   "weight": 7
+  },
+  {
+   "source": "11",
+   "target": "13",
+   "weight": 3
+  },
+  {
+   "source": "12",
+   "target": "13",
+   "weight": 5
+  },
+  {
+   "source": "12",
+   "target": "14",
+   "weight": 8
+  },
+  {
+   "source": "13",
+   "target": "14",
+   "weight": 2
+  },
+  {
+   "source": "01",
+   "target": "13",
+   "weight": 1
+  },
+  {
+   "source": "13",
+   "target": "15",
+   "weight": 1
+  },
+  {
+   "source": "14",
+   "target": "15",
+   "weight": 14
+  },
+  {
+   "source": "15",
+   "target": "16",
+   "weight": 2
+  },
+  {
+   "source": "05",
+   "target": "15",
+   "weight": 2
+  },
+  {
+   "source": "15",
+   "target": "17",
+   "weight": 9
+  },
+  {
+   "source": "16",
+   "target": "17",
+   "weight": 4
+  },
+  {
+   "source": "01",
+   "target": "16",
+   "weight": 3
+  },
+  {
+   "source": "10",
+   "target": "16",
+   "weight": 1
+  },
+  {
+   "source": "13",
+   "target": "16",
+   "weight": 2
+  },
+  {
+   "source": "05",
+   "target": "16",
+   "weight": 2
+  },
+  {
+   "source": "14",
+   "target": "16",
+   "weight": 1
+  },
+  {
+   "source": "10",
+   "target": "17",
+   "weight": 7
+  },
+  {
+   "source": "06",
+   "target": "17",
+   "weight": 2
+  },
+  {
+   "source": "14",
+   "target": "17",
+   "weight": 9
+  },
+  {
+   "source": "13",
+   "target": "17",
+   "weight": 7
+  },
+  {
+   "source": "02",
+   "target": "17",
+   "weight": 1
+  },
+  {
+   "source": "03",
+   "target": "17",
+   "weight": 1
+  },
+  {
+   "source": "05",
+   "target": "17",
+   "weight": 3
+  },
+  {
+   "source": "09",
+   "target": "17",
+   "weight": 3
+  },
+  {
+   "source": "04",
+   "target": "17",
+   "weight": 2
+  },
+  {
+   "source": "07",
+   "target": "17",
+   "weight": 2
+  },
+  {
+   "source": "08",
+   "target": "17",
+   "weight": 1
+  },
+  {
+   "source": "11",
+   "target": "17",
+   "weight": 4
+  },
+  {
+   "source": "12",
+   "target": "17",
+   "weight": 5
+  },
+  {
+   "source": "18",
+   "target": "19",
+   "weight": 2
+  },
+  {
+   "source": "05",
+   "target": "18",
+   "weight": 3
+  },
+  {
+   "source": "13",
+   "target": "18",
+   "weight": 1
+  },
+  {
+   "source": "19",
+   "target": "20",
+   "weight": 2
+  },
+  {
+   "source": "03",
+   "target": "19",
+   "weight": 3
+  },
+  {
+   "source": "13",
+   "target": "19",
+   "weight": 2
+  },
+  {
+   "source": "15",
+   "target": "19",
+   "weight": 1
+  },
+  {
+   "source": "05",
+   "target": "19",
+   "weight": 1
+  },
+  {
+   "source": "04",
+   "target": "19",
+   "weight": 1
+  },
+  {
+   "source": "06",
+   "target": "20",
+   "weight": 1
+  },
+  {
+   "source": "09",
+   "target": "20",
+   "weight": 3
+  },
+  {
+   "source": "05",
+   "target": "20",
+   "weight": 4
+  },
+  {
+   "source": "15",
+   "target": "20",
+   "weight": 3
+  },
+  {
+   "source": "11",
+   "target": "20",
+   "weight": 1
+  }
+ ]
+}

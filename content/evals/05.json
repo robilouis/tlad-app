@@ -1,0 +1,387 @@
+{
+  "moduleId": "05",
+  "quiz": [
+    {
+      "id": "q1",
+      "conceptRef": "pick-the-metric-from-the-business-problem-not-the-textbook",
+      "prompt": "A team reports a fraud model is \"99% accurate\" on a dataset where 1% of transactions are fraud. Why is this number a trap, and what should you ask for instead?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A model that predicts \"never fraud\" is also 99% accurate and 100% useless — on imbalanced data demand precision and recall on the fraud class (and PR-AUC rather than ROC-AUC), tied to what each error costs.",
+          "correct": true,
+          "explanation": "Accuracy is the textbook default and a trap whenever one class is rare or one mistake costs more than the other. The confusion-matrix vocabulary — of what we flagged, how much was real (precision); of what was real, how much we caught (recall) — is where the honest conversation starts."
+        },
+        {
+          "id": "b",
+          "text": "99% isn't high enough for fraud — insist the team reach 99.9% accuracy before deployment.",
+          "correct": false,
+          "explanation": "More of the wrong metric is still the wrong metric: 99.9% accuracy is achievable while catching almost no fraud at all. The failure is the lens, not the threshold — no accuracy target fixes a metric that ignores the rare class."
+        },
+        {
+          "id": "c",
+          "text": "The number is fine — accuracy is the standard, comparable metric, and 99% objectively beats most published models.",
+          "correct": false,
+          "explanation": "Comparability across papers is irrelevant to whether the client's fraud gets caught. 'A headline accuracy with no baseline and no class balance mentioned' is the module's first red flag — the number is meaningless until you know the base rate and the error costs."
+        },
+        {
+          "id": "d",
+          "text": "Switch the headline to F1, because F1 is the standard metric for fraud problems.",
+          "correct": false,
+          "explanation": "\"We picked F1 because it's standard\" is itself a named red flag — standard for *what* cost structure? F1 weights precision and recall equally; if a missed fraud costs far more than a false alarm, the operating point should come from those costs, not from a default blend."
+        }
+      ],
+      "takeaway": "Accuracy lies on imbalanced data — pick the metric from the business cost of each error, and never accept a headline number without the base rate behind it.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q2",
+      "conceptRef": "pick-the-metric-from-the-business-problem-not-the-textbook",
+      "prompt": "A data scientist asks: \"Should the churn model's threshold favour precision or recall?\" According to the module, who should answer, and on what basis?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The threshold is a business decision, not a modelling one — slide it based on what a false alarm costs versus a missed case, decided with the people who live with the consequences.",
+          "correct": true,
+          "explanation": "Precision vs recall is a dial, not a fact: lower the threshold and you catch more real cases but raise more false alarms. There is no universally right point — only the point that minimises the client's total cost, which is why the room must include the consequence-owners."
+        },
+        {
+          "id": "b",
+          "text": "The data scientist — threshold selection is a technical optimisation best solved by maximising F1 on the validation set.",
+          "correct": false,
+          "explanation": "Maximising F1 silently assumes both error types cost the same — a value judgement smuggled in as mathematics. The technically optimal F1 point can be commercially wrong whenever the costs are asymmetric, which is almost always."
+        },
+        {
+          "id": "c",
+          "text": "Neither — a good model makes the threshold choice irrelevant because its scores separate the classes cleanly.",
+          "correct": false,
+          "explanation": "Even an excellent ranker leaves a genuine trade-off at the boundary — the threshold determines who gets called, blocked, or flagged. Hoping separation makes the business decision disappear just means someone makes it by default, unexamined."
+        },
+        {
+          "id": "d",
+          "text": "Whoever runs the A/B test — only online experimentation can determine thresholds.",
+          "correct": false,
+          "explanation": "An experiment can *validate* a chosen operating point, but the choice itself comes from the cost structure — false-alarm cost vs miss cost — which is known before any test runs. Deferring every judgement to experimentation confuses confirming a decision with making one."
+        }
+      ],
+      "takeaway": "The precision-recall threshold encodes what mistakes cost — it's a business decision to be made with the people who live with the consequences, not a knob the modeller sets alone.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q3",
+      "conceptRef": "always-have-a-baseline",
+      "prompt": "A team reports an 82%-accurate churn classifier; 18% of customers churn. What is the single question that exposes this, and what does it reveal?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "\"What's the baseline?\" — predicting \"nobody churns\" is also 82% accurate, so the model has demonstrated zero skill; the real result must be stated against the current process.",
+          "correct": true,
+          "explanation": "This is the module's worked example. The honest reframe was recall on churners at a capacity-tuned threshold: 46% caught versus the marketing team's 31% from gut feel — +15 points against the real-world process, translatable into retained revenue. The 82% was a vanity number."
+        },
+        {
+          "id": "b",
+          "text": "\"What algorithm was used?\" — 82% suggests an underpowered model that a stronger algorithm would fix.",
+          "correct": false,
+          "explanation": "The algorithm is irrelevant to the diagnosis: *any* number is meaningless without a comparison point. Swapping models before establishing the naïve floor and the current-process bar just produces a different uninterpretable number."
+        },
+        {
+          "id": "c",
+          "text": "\"Is 82% statistically significant?\" — with enough data, the accuracy becomes trustworthy.",
+          "correct": false,
+          "explanation": "Significance tests whether the estimate is stable, not whether it means anything. A precisely measured 82% still equals the do-nothing baseline exactly — the problem is the missing comparison, not sampling noise."
+        },
+        {
+          "id": "d",
+          "text": "\"Can we see the training curve?\" — the issue is most likely overfitting.",
+          "correct": false,
+          "explanation": "Nothing here suggests a train/test gap; the score may be perfectly honest and still worthless. The trap is presentational, not technical: a metric in isolation, with no naïve floor, no current process, no simplest-model comparison."
+        }
+      ],
+      "takeaway": "Never present or accept a model metric in isolation — always pair it with \"…versus what?\": the naïve floor, the current process, and the simplest model.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q4",
+      "conceptRef": "validation-done-right",
+      "prompt": "Over three months, a team evaluated each of a dozen model variants on the test set, picked the best performer, and now quotes its test score in the client proposal. What's the problem?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The test set was burned — using it to choose between models makes it a validation set, and the quoted score is now an optimistically biased estimate, not a forecast of real-world performance.",
+          "correct": true,
+          "explanation": "The test set is sacred: judged once, at the end. The moment decisions are made on it, it silently stops being an unbiased estimate — twelve looks means the 'winner' partly won by fitting the test set's quirks. Model selection belongs on the validation set (or cross-validation)."
+        },
+        {
+          "id": "b",
+          "text": "Nothing — the test set exists precisely to compare models, and picking the best test score is best practice.",
+          "correct": false,
+          "explanation": "That's the validation set's job — used many times for tuning and selection. The test set answers exactly one question, once: how will the chosen model do on data nobody has optimised against? Conflating the two roles is how flattering numbers get into proposals."
+        },
+        {
+          "id": "c",
+          "text": "Twelve variants is too few — a proper model search should sweep hundreds before quoting a result.",
+          "correct": false,
+          "explanation": "More variants would make the contamination *worse*: every additional peek increases the chance the apparent winner is fitting test-set noise. The defect is which data was used for selection, not how thorough the search was."
+        },
+        {
+          "id": "d",
+          "text": "The only issue is reproducibility — as long as the test split is seeded and documented, the score stands.",
+          "correct": false,
+          "explanation": "Reproducibility makes the biased number reproducible. Documentation doesn't restore unbiasedness — once the test set has informed decisions, an honest estimate requires fresh held-out data the selection process never touched."
+        }
+      ],
+      "takeaway": "Treat the test set like a sealed exam: tune and select on validation data, judge once on test — a test set that influenced decisions is no longer a test set.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q5",
+      "conceptRef": "validation-done-right",
+      "prompt": "A pipeline scales all features using statistics computed over the full dataset, then runs 5-fold cross-validation and reports a strong average score. What's wrong?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Preprocessing was fit on all the data before splitting, so every fold's validation rows leaked into training statistics — fit every transformation inside the training fold only, then apply it outward.",
+          "correct": true,
+          "explanation": "This is the cross-validation-specific killer the module names: fitting any preprocessing on all data and *then* cross-validating leaks the validation folds into training every single round. The score is inflated by construction, and the inflation won't survive production."
+        },
+        {
+          "id": "b",
+          "text": "Five folds is too few for a stable estimate — rerun with ten folds and the issue disappears.",
+          "correct": false,
+          "explanation": "Fold count trades off stability and compute; it does nothing about contamination. Ten folds of leaked preprocessing produce a more *stable* inflated score — the leak is in when the scaler was fit, not how many rotations were run."
+        },
+        {
+          "id": "c",
+          "text": "Scaling statistics are aggregate and harmless — means and standard deviations can't leak meaningful information.",
+          "correct": false,
+          "explanation": "The module names this exact move — scaling or imputing using whole-dataset statistics before splitting — as a classic leakage trap. The validation rows' values shaped the transformation applied to training rows; the model has 'studied the exam in advance', subtly but systematically."
+        },
+        {
+          "id": "d",
+          "text": "Cross-validation itself is the mistake — a single hold-out split is the rigorous standard.",
+          "correct": false,
+          "explanation": "Cross-validation is the right tool when data is scarce — it gives a more stable estimate plus a variance reading (a model whose score swings wildly across folds is fragile, which is itself a finding). The defect is the preprocessing order, not the rotation."
+        }
+      ],
+      "takeaway": "The leakage rule for validation: fit every transformation inside the training fold only, then apply it outward — and ask the team to walk you through when each transformation was fit.",
+      "difficulty": "stretch"
+    },
+    {
+      "id": "q6",
+      "conceptRef": "business-metric-vs-model-metric",
+      "prompt": "A recommender team lifts click-through rate by 20% — but revenue stays flat, because the model learned to surface cheap, clicky, low-margin items. What's the general lesson?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A proxy metric is only as good as its link to the real outcome — the link must be checked, not assumed, and the chain from model metric to business KPI is a deliverable with each arrow's assumption written down.",
+          "correct": true,
+          "explanation": "The lesson isn't 'CTR is bad' — it's that optimising a proxy can diverge from the goal it stands in for. The mapping (model metric → leading indicator → business KPI → € impact) is the bridge the tech lead builds and defends; a team that can't draw it doesn't know what 'good' means yet."
+        },
+        {
+          "id": "b",
+          "text": "CTR is a discredited metric — recommendation systems should always be optimised on revenue directly.",
+          "correct": false,
+          "explanation": "Often you *can't* measure the real KPI directly in the loop — that's precisely why proxies exist. The discipline is choosing the proxy most tightly coupled to the goal and validating the coupling, not banning proxies (and inheriting a sparser, slower signal that may be impossible to train on)."
+        },
+        {
+          "id": "c",
+          "text": "The model is overfitting — more regularisation would have aligned clicks with revenue.",
+          "correct": false,
+          "explanation": "The model generalised perfectly well — at the wrong objective. It did exactly what it was asked: maximise clicks. No amount of regularisation realigns an objective that points away from the business goal; that's a metric-selection failure, not a training failure."
+        },
+        {
+          "id": "d",
+          "text": "The experiment ran too short — novelty effects explain the flat revenue, and a longer test would show the lift.",
+          "correct": false,
+          "explanation": "Novelty effects produce a *fading lift*, not a structurally absent one. The diagnosis here is mechanistic and verified: the clicks landed on low-margin items. Wishing the gap away with more runtime avoids the real finding — the proxy decoupled from the goal."
+        }
+      ],
+      "takeaway": "Model metrics are instruments, not outcomes: map metric → KPI → € impact with assumptions written down, and treat the proxy-goal coupling as a thing to validate, not assume.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q7",
+      "conceptRef": "ab-testing-practically",
+      "prompt": "Ten days into a planned 30-day A/B test, the dashboard shows the new model significantly ahead (p < 0.05) — on one of the twelve metrics being tracked. The PM wants to stop and ship. What are the two disciplines being violated?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Peeking (stopping the moment a result looks significant inflates false positives — fix duration up front) and multiple comparisons (test twelve metrics and one will look significant by chance — pre-declare the primary metric).",
+          "correct": true,
+          "explanation": "Both pitfalls straight from the module's table. Checking repeatedly and stopping on the first significant readout makes 'significance' largely a function of how often you look; and across twelve metrics, one winner is roughly what pure chance produces. Pre-declared duration and a pre-declared primary metric are the antidotes."
+        },
+        {
+          "id": "b",
+          "text": "None — early significance means the effect is strong, and shipping sooner captures the gains faster.",
+          "correct": false,
+          "explanation": "Early significance is *expected* under the null when you peek repeatedly — extreme fluctuations happen early, and stopping on them locks in noise. Add the multiple-metrics issue, and this result is closer to a coin-flip artefact than a strong effect."
+        },
+        {
+          "id": "c",
+          "text": "The test should simply run on more metrics — twelve is too narrow a view of system behaviour.",
+          "correct": false,
+          "explanation": "More metrics makes the multiple-comparisons problem worse: each added metric is another lottery ticket for a chance 'win'. The fix runs the other way — one pre-declared primary metric, the rest explicitly exploratory."
+        },
+        {
+          "id": "d",
+          "text": "The sample is fine but the p-value threshold should be tightened to 0.01 for shipping decisions.",
+          "correct": false,
+          "explanation": "A stricter threshold doesn't repair the procedure: peeking and metric-shopping bias the process itself, so the nominal p-value no longer means what it claims at any threshold. Discipline beats threshold-tuning — fix duration, pre-declare the primary metric."
+        }
+      ],
+      "takeaway": "Fix the duration and pre-declare the primary metric before launch — peeking and metric-shopping are how teams ship noise with a significant-looking stamp on it.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q8",
+      "conceptRef": "how-to-read-a-data-scientists-eval-critically",
+      "prompt": "You have five minutes to pressure-test a glowing model evaluation. According to the module, weak evals fail on three fronts. Which question set probes all three?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "\"What's the baseline and why this metric?\" (honest comparison) · \"How was the split done, when was each transformation fit, has the test set made any decisions?\" (contaminated estimate) · \"Which business KPI does this move, and how do we confirm it live?\" (bridge to business).",
+          "correct": true,
+          "explanation": "The three seams: no honest comparison (no baseline, wrong metric), a contaminated estimate (leakage, burned test set, wrong split), and a missing bridge to the business (offline only, proxy optimisation). You don't need to out-maths the data scientist — ask these and listen for confident, specific answers."
+        },
+        {
+          "id": "b",
+          "text": "\"Which algorithm did you use, what hardware did it train on, and how many epochs did it run?\"",
+          "correct": false,
+          "explanation": "All implementation trivia — a model can be impeccably trained on great hardware and still be evaluated against no baseline, on leaked data, toward a KPI nobody named. The review targets the evaluation's seams, not the training logistics."
+        },
+        {
+          "id": "c",
+          "text": "\"Is the headline score above 90%, is the p-value below 0.05, and did you use the standard metric for this problem type?\"",
+          "correct": false,
+          "explanation": "Three rubber stamps. Thresholds without baselines are vanity, p-values without effect sizes answer the lesser question, and 'standard metric' is the textbook-default trap the module tells you to expose — what does each error *cost*?"
+        },
+        {
+          "id": "d",
+          "text": "\"Can you re-run it with a different random seed to confirm the score holds?\"",
+          "correct": false,
+          "explanation": "Seed stability is one narrow slice of one front (fragility — better probed by variance across folds). It says nothing about baselines, leakage, the burned test set, or the business bridge — the seams where flattering evals actually hide."
+        }
+      ],
+      "takeaway": "Probe the three seams of every eval — honest comparison, clean estimate, bridge to the business — and if the answers are vague or defensive, the problem is the evaluation, not the question.",
+      "difficulty": "stretch"
+    }
+  ],
+  "exercises": [
+    {
+      "id": "ex1",
+      "title": "Read the confusion matrix like a CFO: the fraud-review queue",
+      "estimatedMinutes": 30,
+      "scenario": "A payments client pilots a fraud model on one month of traffic: **200,000 transactions, of which 1,000 (0.5%) are fraudulent**. At the proposed threshold, the model flags **2,600 transactions**: it catches **800 of the 1,000 frauds** and wrongly flags **1,800 legitimate ones**.\n\nEconomics: a missed fraud costs on average **€450**; each flagged transaction goes to a human review queue costing **€8 per review**; reviews of legitimate customers also create friction the client prices at a further **€12 each**. The current rules-based system catches **550 of 1,000 frauds** while flagging **4,000 legitimate transactions**.\n\nThe vendor's slide says: *\"99.4% accuracy.\"* The CFO asks you what the model is actually worth.",
+      "givens": [
+        "Month: 200,000 transactions; 1,000 fraud (base rate 0.5%)",
+        "Model at proposed threshold: TP = 800, FN = 200, FP = 1,800 (TN = 197,200)",
+        "Costs: missed fraud €450; review €8 per flagged item; extra friction €12 per *legitimate* flagged customer",
+        "Current rules: TP = 550, FN = 450, FP = 4,000",
+        "Vendor headline: \"99.4% accuracy\""
+      ],
+      "tasks": [
+        "Compute the model's precision and recall, and show why the 99.4% accuracy headline is uninformative here (include what a \"never fraud\" model would score).",
+        "Compute the monthly cost of the model's errors and of the current rules system, and state the model's net monthly value over the rules.",
+        "The same model at a lower threshold gives TP = 900, FP = 5,000. Should the client prefer it? Show the arithmetic.",
+        "Write the two-sentence answer to the CFO."
+      ],
+      "solution": "**Step 1 — precision, recall, and the accuracy trap.**\n\n- Recall = TP/(TP+FN) = 800/1,000 = **80%** — of real frauds, we catch 4 in 5.\n- Precision = TP/(TP+FP) = 800/2,600 ≈ **30.8%** — of what we flag, less than a third is real.\n- Accuracy = (800 + 197,200)/200,000 = **99.0%**… while a model that never flags anything scores (199,000/200,000) = **99.5% — *higher* than the vendor's own headline**. At a 0.5% base rate, accuracy is dominated by the easy true negatives and contains almost no information about fraud-catching. (The vendor's 99.4% is also just arithmetic on a matrix they chose not to show.)\n\n**Step 2 — cost the errors, versus the real baseline.**\n\n*Model:* missed fraud: 200 × €450 = €90,000; reviews: 2,600 × €8 = €20,800; friction: 1,800 × €12 = €21,600. **Total ≈ €132,400/month.**\n\n*Current rules:* missed fraud: 450 × €450 = €202,500; reviews: 4,550 × €8 = €36,400; friction: 4,000 × €12 = €48,000. **Total ≈ €286,900/month.**\n\nNet value of the model over the current process: **≈ €154,500/month** — *that* is the result, not any accuracy figure. Note the comparison that matters is against the *current process* (the only commercially meaningful baseline), not against zero.\n\n**Step 3 — the lower threshold.** TP = 900 → FN = 100; FP = 5,000 → flags = 5,900.\n\nMissed fraud: 100 × €450 = €45,000; reviews: 5,900 × €8 = €47,200; friction: 5,000 × €12 = €60,000. **Total ≈ €152,200/month** — about **€19,800/month worse** than the proposed threshold, despite catching 100 more frauds. The extra recall costs more in review and friction than the prevented fraud saves (100 × €450 = €45,000 saved vs ≈ €64,800 added). The threshold is a business dial: this client's costs say stay nearer the higher threshold — and also check the review team can actually absorb ~2,600 cases/month, because an unworked queue catches nothing.\n\n**Step 4 — the CFO answer.** *\"Ignore the 99.4% — at your fraud rate, doing nothing scores 99.5%, so accuracy measures nothing here. What matters: versus your current rules, this model at the proposed threshold prevents about €112k more fraud per month and cuts review and friction costs by roughly €42k, for a net gain of about €155k/month — and we've checked that pushing it to catch even more would cost more in false alarms than it saves.\"*",
+      "rubric": {
+        "keyPoints": [
+          "Precision ≈ 31%, recall = 80% computed correctly, and the \"never fraud\" model shown to beat the vendor's accuracy headline (99.5% vs 99.4%)",
+          "Costs assembled per error type and compared against the *current process* — ≈ €132k vs ≈ €287k, net ≈ €155k/month",
+          "Threshold comparison done in euros, concluding the higher-recall point is net-negative (≈ €20k/month worse) — recall is not free",
+          "CFO answer leads with the business comparison, not the model metrics"
+        ],
+        "pitfalls": [
+          "Letting the 99.4% accuracy stand without computing the do-nothing score — the base rate makes accuracy decorative here",
+          "Comparing the model to perfection (zero fraud) instead of the current rules system — the only bar that matters commercially",
+          "Treating more recall as automatically better — every threshold move buys catches with false alarms, and the exchange rate is set by the client's costs",
+          "Forgetting operational capacity: a flag volume the review team can't work converts 'caught' frauds back into missed ones"
+        ],
+        "takeaways": [
+          "The confusion matrix only becomes a decision once money is attached to each cell — cost-sensitive evaluation is what turns metrics into a business case",
+          "The honest result is always a comparison: model versus the process the client runs today, in the client's own units (euros, hours, cases)"
+        ],
+        "transfer": "Costing the four cells generalises to every detection-and-response system: medical screening (missed diagnosis vs unnecessary biopsy), predictive maintenance (failure vs needless inspection), content moderation (harmful post vs wrongly removed creator), security operations (breach vs analyst alert fatigue). The portable method: build the matrix, price each cell, evaluate thresholds in money, and benchmark against the incumbent process — the same arithmetic settles arguments in all of them."
+      }
+    },
+    {
+      "id": "ex2",
+      "title": "Design the experiment — or the honest fallback",
+      "estimatedMinutes": 30,
+      "scenario": "A marketplace client has a new search-ranking model that improved offline metrics (NDCG up meaningfully on historical clicks). The product VP wants it rolled out to all users next week, arguing: *\"Offline says it's better — why waste six weeks testing?\"* Meanwhile the pricing team, hearing about experiments, asks you to also A/B test a new **fee structure** — which contractually must apply to *all* sellers at once.\n\nDesign the path to trustworthy conclusions for both changes.",
+      "givens": [
+        "Search model: strong offline gains (NDCG on historical clicks); ~400k weekly active buyers — ample traffic for an A/B test",
+        "Primary business KPI: purchase conversion; secondary: revenue per session; guardrails: latency, refund rate",
+        "Expected conversion lift from the search model: ~1-2% relative",
+        "Fee change: must hit all sellers simultaneously (contractual uniformity) — no per-seller randomisation possible"
+      ],
+      "tasks": [
+        "Explain to the VP, in module terms, why strong offline NDCG does not guarantee business impact — name at least three distinct gap mechanisms.",
+        "Design the search-model A/B test: hypothesis, primary metric, guardrails, and the three disciplines that prevent self-deception.",
+        "For the fee change, explain why a standard A/B test is impossible and choose the least-bad causal design, with its caveat stated honestly.",
+        "Write the one-paragraph recommendation reconciling speed and rigour for the VP."
+      ],
+      "solution": "**Step 1 — why offline ≠ online.** (1) **Distribution shift**: the model was scored on *historical* clicks; live traffic includes new users, seasonal queries, and behaviour the logs don't contain. (2) **Feedback loops**: ranking changes what gets seen and bought, which changes the data — historical clicks can't price that. (3) **The metric isn't the outcome**: NDCG rewards ranking 'clickable' items higher; a more accurate ranker can leave revenue flat if it surfaces what people would have found anyway (the proxy trap). (4) **Integration reality**: latency, stale features, UI burying. Offline is the necessary filter — don't ship what fails it — never the sufficient proof; only live behaviour change pays the bills.\n\n**Step 2 — the search A/B test.** *Hypothesis first:* \"the new ranker lifts purchase conversion by ≥1% relative within 3 weeks.\" *Design:* randomise buyers (not sessions — one user seeing both experiences contaminates), 50/50; **primary metric: purchase conversion**, pre-declared; revenue per session as secondary; **guardrails:** latency and refund rate must not degrade. *Duration:* with a ~1% expected relative lift, power the test properly — small lifts need big samples; estimate the run length *before* launch (at 400k weekly actives, roughly 2-3 weeks is plausible — compute it, don't vibe it). *The three disciplines:* fix the duration up front and **don't peek-and-stop**; **one pre-declared primary metric**, everything else exploratory; run long enough to let any **novelty effect** settle before judging.\n\n**Step 3 — the fee change.** Randomisation is impossible by contract — every seller gets the new fees at once. Before/after alone is the weakest evidence (confounded by seasonality, marketing, the economy). If the marketplace operates across comparable regions *and* fees can legally differ by region, a **geo/regional rollout** — introduce in some regions, hold others back, compare — is the least-bad design; caveat: regions must be genuinely comparable and seller spillover between them muddies the read. If even geo-splitting is contractually barred, fall back to **before/after with explicit controls**: pre-register the expected effect, compare against the same period last year and against categories least exposed to the fee, and state plainly that the conclusion is suggestive, not proven. The honest answer is never 'skip evaluation' — it's a weaker-but-real design with its weakness named up front.\n\n**Step 4 — the recommendation.** *\"We can have the search model decision in about three weeks with evidence a board can trust: a buyer-randomised test, one pre-declared success metric, guardrails on latency and refunds, and no early stopping — offline scores got the model a ticket to the test, not past it. The fee change can't be randomised by contract, so we'll stage it by region and compare against held-back regions, and where that's barred we'll use a controlled before/after and label its confidence honestly. Shipping both blind next week saves three weeks and costs us the ability to ever know whether either change worked — or to catch them quietly hurting conversion before it shows up in the quarterlies.\"*",
+      "rubric": {
+        "keyPoints": [
+          "Names at least three offline-online gap mechanisms (shift, feedback loops, metric≠outcome, integration) rather than a generic \"offline isn't reliable\"",
+          "Test design includes a pre-stated hypothesis, one pre-declared primary metric, guardrail metrics, correct randomisation unit (buyer), and powered duration estimated before launch",
+          "Fee change correctly identified as non-randomisable, with geo/holdout chosen over naive before/after and its comparability/spillover caveat stated",
+          "Recommendation frames the experiment as the bridge from 'technically capable' to 'actually changes outcomes', with the cost of skipping it made concrete"
+        ],
+        "pitfalls": [
+          "Treating offline NDCG gains as proof of business impact — the trap that humbles experienced teams",
+          "Randomising by session or query so users straddle both experiences — contaminated groups",
+          "Tracking a dozen metrics and crowning whichever wins — multiple comparisons dressed as success",
+          "Claiming the before/after fee analysis 'proves' impact instead of labelling the strength of evidence honestly"
+        ],
+        "takeaways": [
+          "Offline evaluation filters candidates; only a controlled experiment on live traffic shows the model causes a better outcome",
+          "When you can't randomise, the answer is a weaker-but-real causal design with its caveat stated — never skipping evaluation, and never overclaiming"
+        ],
+        "transfer": "This decision pattern — controlled experiment where possible, explicit fallback hierarchy where not — is the backbone of evidence-based decisions far beyond ML: drug trials vs observational studies in medicine, regional pilots for policy changes, staged rollouts in infrastructure (canary deployments are A/B tests for reliability), and marketing-mix changes that hit all channels at once. The transferable hierarchy: randomise if you can; geo/holdout if you can't; controlled before/after as the floor — and always state which rung you're on and why."
+      }
+    },
+    {
+      "id": "ex3",
+      "title": "Audit the eval deck: find what the slide isn't saying",
+      "estimatedMinutes": 35,
+      "scenario": "You're brought in for a one-week independent validation before a logistics client deploys a vendor's \"delivery-delay prediction\" model. The vendor's evaluation deck claims:\n\n1. *\"94% accuracy predicting delayed shipments\"* — delays are 8% of shipments.\n2. *\"AUC of 0.97\"* — achieved using features including `customer_complaint_received` and `refund_issued`.\n3. *\"Validated by 5-fold cross-validation on three years of shipment data, randomly shuffled\"* — the model will run as a daily forecast.\n4. *\"The model improved during development from 0.89 to 0.97 AUC across 40 iterations evaluated on the held-out test set.\"*\n5. The deck contains no comparison to the client's current method (a dispatcher checklist that operations says flags \"maybe two-thirds\" of problem shipments).\n\nWrite the audit findings and the go / fix / no-go recommendation.",
+      "givens": [
+        "Base rate: 8% of shipments delayed — so 'predict never delayed' = 92% accurate",
+        "Suspect features: `customer_complaint_received`, `refund_issued` — both occur *after* a delay manifests",
+        "Validation: random shuffle + 5-fold CV on three years of time-ordered shipment data; deployment is a daily forward-looking forecast",
+        "Test set reused across ~40 development iterations",
+        "Incumbent process: dispatcher checklist, anecdotally ~2/3 recall; never formally measured"
+      ],
+      "tasks": [
+        "For each of the five points, name the specific evaluation failure (use the module's vocabulary) and its consequence for the quoted numbers.",
+        "Rank the five issues by how much they invalidate the headline result, with one sentence of justification for your top two.",
+        "Specify what a trustworthy re-evaluation would look like, step by step.",
+        "Give the go / fix / no-go recommendation with the reasoning a non-technical sponsor can follow."
+      ],
+      "solution": "**Step 1 — findings.**\n\n1. **94% accuracy, 8% base rate → vanity metric.** 'Never delayed' scores 92%, so the headline demonstrates ~2 points over doing nothing — and accuracy is the wrong lens anyway when misses and false alarms cost differently. Demand precision/recall on the delayed class (and PR-AUC, since ROC flatters under imbalance).\n2. **`customer_complaint_received`, `refund_issued` → target leakage.** Complaints and refunds happen *because* the delay already happened — these features won't exist at prediction time. They fail the one-question test ('would we know this at the moment of prediction?'), and an AUC of 0.97 built on them is the model reading the answer off the back of the card.\n3. **Random shuffle + CV on time-ordered data → temporal leakage.** A daily forecast must be validated by time-based splits (train on the past, test on later periods). Shuffling three years lets the model learn from the future; the structure of the validation guarantees inflation regardless of the features.\n4. **40 iterations against the test set → burned test set.** The test score stopped being an unbiased estimate around iteration two; the 0.89→0.97 'improvement' is, in unknown part, the development process fitting the test set's quirks. The final number is a validation score wearing a test set's badge.\n5. **No baseline → no result.** Without measuring the dispatcher checklist on the same data, there is no answer to 'versus what?' — and operations' 'two-thirds' anecdote suggests the incumbent is decent, so the commercial case is entirely unproven.\n\n**Step 2 — ranking.** (1st) **Leakage — issues 2 and 3 jointly**: they corrupt the estimate itself; with the answer encoded in features *and* the future visible in training, every number in the deck is fiction, not merely unflattered. (2nd) **Burned test set (4)**: even absent leakage, the selection process has spent the test set's evidential value, so nothing in the deck estimates production performance. Then: no baseline (5) — which makes even a *true* number commercially uninterpretable — and the vanity accuracy (1), the most visible but most easily repaired flaw.\n\n**Step 3 — trustworthy re-evaluation.** (a) Leakage review of every feature against the prediction-time question; drop the post-outcome fields. (b) **Time-based validation**: train on months 1-30, evaluate on the most recent 6 months, walking forward; all preprocessing fit inside training windows only. (c) A **fresh, sealed test period** never touched during development, judged once. (d) Metrics: recall and precision on delayed shipments at a threshold sized to operations' intervention capacity, with the confusion matrix shown. (e) **Measure the dispatcher checklist on the same evaluation period** — the only bar that matters commercially. (f) Report variance across folds/periods, and pre-agree the offline→online plan (a limited live pilot against the checklist) before full deployment.\n\n**Step 4 — recommendation: no-go as evaluated; re-evaluate before any deployment decision.** Sponsor version: *\"The model may be good — we genuinely can't tell. Its two headline numbers were produced with tomorrow's information baked in twice over: features that only exist after a delay occurs, and a validation that let it train on the future. Its test score was also reused forty times during development, which quietly turns it into a tuning dial, and there's no measurement of your current checklist to compare against. We propose a two-week honest re-evaluation — if the model still beats your dispatchers on clean, time-respecting data, deploy it with confidence; if it doesn't, you've avoided wiring a fiction into daily operations.\"*",
+      "rubric": {
+        "keyPoints": [
+          "All five failures named with the right vocabulary: vanity accuracy vs base rate, target leakage, temporal leakage from shuffled CV, burned test set, missing baseline",
+          "Leakage (features + split) ranked as most invalidating because it corrupts the estimate itself, with the burned test set close behind",
+          "Re-evaluation plan includes time-based splits, transformations fit inside training only, a sealed fresh test period, imbalance-aware metrics, and measuring the incumbent checklist on the same data",
+          "Recommendation distinguishes 'the model is bad' from 'the evidence is bad' and proposes the cheap path to a real answer"
+        ],
+        "pitfalls": [
+          "Auditing only the metric choice and missing that the validation *structure* (shuffled time data, reused test set) invalidates any metric computed on it",
+          "Accepting `customer_complaint_received` as a legitimately strong predictor — predictive power is exactly how leakage disguises itself",
+          "Issuing a flat no-go on the model rather than on the evaluation — the audit's value is the path to a trustworthy answer, not a verdict on vibes",
+          "Forgetting the incumbent: without measuring the dispatcher checklist, even a clean 0.9 AUC has no commercial meaning"
+        ],
+        "takeaways": [
+          "A weak eval fails on three seams — honest comparison, clean estimate, business bridge — and this deck fails all three; the audit questions find it without out-mathsing anyone",
+          "Independent validation sells trust: the deliverable is a defensible go/fix/no-go with the reasoning, and 'this number was produced unsoundly' is worth real money before deployment"
+        ],
+        "transfer": "This audit structure transfers to any claim built on retrospective data: clinical-model validations in healthcare (post-diagnosis codes leaking into 'early detection' models are notorious), credit-risk models reviewed by regulators, academic results that tuned on the test benchmark, even financial backtests (lookahead bias is temporal leakage with a Bloomberg terminal). The reusable checklist: could each input exist at decision time, does the validation respect time's arrow, how many times was the 'final' number peeked at, and what does the incumbent process score on identical data?"
+      }
+    }
+  ]
+}

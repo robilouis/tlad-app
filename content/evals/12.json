@@ -1,0 +1,346 @@
+{
+  "moduleId": "12",
+  "quiz": [
+    {
+      "id": "q1",
+      "conceptRef": "why-the-platform-is-the-foundation",
+      "prompt": "A prospect opens with: *\"Our data is all ready — we just need you to build the AI on top.\"* What does experience say you should expect, and how should it shape your scoping?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Expect the data to be split across a production database nobody wants queried, SaaS export buttons, a hand-updated spreadsheet, and an uncaptured event stream — and scope the platform work explicitly, because most AI projects block on the plumbing, not the model.",
+          "correct": true,
+          "explanation": "This is the single most reliable prediction about an AI mission: the data won't be where the client thinks it is, in the shape they think it's in. The famous \"70% data work\" figure is mostly *platform* work — ingestion, scheduling, transformation, monitoring — and it must be scoped, not assumed."
+        },
+        {
+          "id": "b",
+          "text": "Take the claim at face value — modelling is the long pole, so staff data scientists first and treat data access as a week-one formality.",
+          "correct": false,
+          "explanation": "Backwards. The model is rarely the constraint, and a mission scoped against the wrong layer is a mission that overruns. Treating data access as a formality is how the most common cause of blown AI timelines gets baked into the plan on day one."
+        },
+        {
+          "id": "c",
+          "text": "Expect data friction but treat it as a solved commodity problem — the real project risk is whether the model reaches the target accuracy.",
+          "correct": false,
+          "explanation": "The plumbing *tools* are commodities; the client's plumbing *state* never is. A model retrained on stale or broken inputs degrades silently — without a reliable data flow there is no reliable AI, whatever the offline accuracy says."
+        },
+        {
+          "id": "d",
+          "text": "Propose building a data lake first, since every AI initiative needs one before modelling can start.",
+          "correct": false,
+          "explanation": "A lake is something you grow *into*, not a universal prerequisite. Defaulting to a lake is the storage-layer version of over-architecting — the right platform is the smallest one that reliably feeds the consumers you actually have today."
+        }
+      ],
+      "takeaway": "Most AI projects don't fail on the model — they block on the plumbing; scope the platform work explicitly, because the data is never where the client thinks it is.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q2",
+      "conceptRef": "the-modern-data-stack-four-layers",
+      "prompt": "A 300-person retailer asks for \"an AI platform.\" The board sees conflicting revenue numbers and analysts copy CSVs around by hand. What is your first diagnostic move?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Locate which of the four stack layers is actually broken — here ingestion (data trapped in source systems) and transformation (no agreed definition of revenue) — because the AI at the top is rarely the constraint.",
+          "correct": true,
+          "explanation": "The four layers — ingestion → storage → transformation → consumption — let you read any client architecture. Hand-copied CSVs scream broken ingestion; conflicting board numbers scream a missing transformation/semantic layer. Scope against the broken layer, not the shiny top."
+        },
+        {
+          "id": "b",
+          "text": "Start at the consumption layer: deploy a modern BI tool so the board sees value quickly, then work downward.",
+          "correct": false,
+          "explanation": "A BI tool pointed at untrusted, unconsolidated data just renders the conflicting numbers more beautifully. Consumption is only as good as the layers under it — the disagreement lives in the transformation layer, and that's where the fix is."
+        },
+        {
+          "id": "c",
+          "text": "Build a quick churn model to demonstrate AI value, and harden the platform afterwards.",
+          "correct": false,
+          "explanation": "A model is a function of its data; with no reliable flow it ships late or degrades silently. This is exactly the inversion the module warns about — the platform work dominates the effort, and \"harden later\" becomes a stalled mission."
+        },
+        {
+          "id": "d",
+          "text": "Recommend a lakehouse, since it covers all four layers in a single product.",
+          "correct": false,
+          "explanation": "No storage product fixes ingestion or missing business definitions. The lakehouse answers a *storage* question (BI and ML on one store) — it doesn't diagnose which layer is broken, and for a mostly-structured BI workload a plain warehouse is likely right anyway."
+        }
+      ],
+      "takeaway": "When a client says \"AI platform,\" find which of the four layers is actually broken — usually ingestion or transformation — and scope the mission against that.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q3",
+      "conceptRef": "etl-vs-elt--what-changed-and-why-elt-won",
+      "prompt": "A client's architect asks why you propose ELT rather than the ETL pattern their old on-prem warehouse used. What's the honest answer?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Cloud storage became nearly free and warehouse compute elastic, so you load raw data first, keep it forever, and re-derive business logic in SQL whenever definitions change — no re-extraction, and the transformations become code analysts can own.",
+          "correct": true,
+          "explanation": "The three flips, in one paragraph: storage costs collapsed (keep raw data forever), warehouse compute became elastic (transform in place, fast), and storage/compute separated (throw compute at a transform without paying 24/7). ETL cooked the meal and discarded the ingredients; ELT stocks the pantry and re-cooks on demand — exactly what you want when \"active customer\" gets redefined quarterly. It also democratised the \"T\" into analyst-owned SQL, which is what made the dbt-style layer possible."
+        },
+        {
+          "id": "b",
+          "text": "ELT is faster because it skips the transformation step entirely.",
+          "correct": false,
+          "explanation": "ELT doesn't skip the \"T\" — it relocates it *inside* the warehouse, after loading. The transformations still happen (and still cost compute); what changes is where they run and that the raw data survives for re-derivation."
+        },
+        {
+          "id": "c",
+          "text": "ETL is obsolete: no modern workload ever needs to transform before loading.",
+          "correct": false,
+          "explanation": "ETL still fits genuine cases — heavy pre-processing, on-prem constraints, tight storage. ELT is the cloud *default*, not a law; the senior answer explains why the default flipped rather than declaring the old pattern dead."
+        },
+        {
+          "id": "d",
+          "text": "ELT is strictly cheaper, because transformations inside the warehouse don't hit the compute bill.",
+          "correct": false,
+          "explanation": "The opposite risk is the documented one: ELT's failure mode is \"load everything\" sprawl and compute-bill creep, precisely because every transform runs on metered warehouse compute. ELT wins on flexibility and re-derivability, not on a free lunch."
+        }
+      ],
+      "takeaway": "ELT won because cheap storage plus elastic warehouse compute made \"keep the raw pantry, re-cook on demand\" the winning move — at the price of watching the compute bill.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q4",
+      "conceptRef": "warehouse-vs-data-lake-vs-lakehouse",
+      "prompt": "A 30-person e-commerce startup with structured sales and CRM data wants \"a data lake, like the big players have.\" What do you recommend?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A single managed cloud warehouse — mostly structured data and BI as the main job make it the right first answer; a lake is something you grow into when unstructured files force it.",
+          "correct": true,
+          "explanation": "Exactly the module's fast-path: structured data + BI → warehouse, don't overthink it. Selling a lake (or lakehouse) to a 30-person company is the storage equivalent of fine-tuning an LLM on day one — capability they can't use, complexity they'll pay for."
+        },
+        {
+          "id": "b",
+          "text": "A data lake — object storage is the cheapest per GB, so it minimises their bill.",
+          "correct": false,
+          "explanation": "Cheapest storage, but you must bring a query engine and governance, and the documented failure mode is the **data swamp**: dumped, undocumented, unused. Nobody on a 30-person team will be able to query it — and storage was never the expensive line anyway."
+        },
+        {
+          "id": "c",
+          "text": "A lakehouse — it future-proofs them for both BI and ML on one store.",
+          "correct": false,
+          "explanation": "The lakehouse collapses the two-system tax only when you genuinely need BI *and* heavy ML on the same data at scale — and it comes with younger, more operationally demanding tooling. For this client it's pure over-architecture; let them grow into it."
+        },
+        {
+          "id": "d",
+          "text": "A self-hosted warehouse, to avoid the lock-in of managed cloud vendors.",
+          "correct": false,
+          "explanation": "Self-hosting means weeks-to-months of setup and a permanent ops burden a 30-person company can't staff. Managed pay-per-use is right for almost every early client; self-hosting is justified by strict residency or huge stable scale, not lock-in anxiety."
+        }
+      ],
+      "takeaway": "Small or early client → a single cloud warehouse is almost always the right first answer; a lake is grown into when files force it, never bought because it sounds modern.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q5",
+      "conceptRef": "batch-vs-streaming--event-driven",
+      "prompt": "A client insists their new sales dashboard \"has to be real-time.\" Which response is the senior move?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Ask: *\"what decision changes in the next five minutes if you had this sooner?\"* — and if no answer survives, sell nightly or hourly batch and save them a large slice of platform spend.",
+          "correct": true,
+          "explanation": "Most \"real-time\" requests don't survive the five-minute-decision question. A daily sales dashboard does not need streaming; batch is the honest default, and saying so saves the client roughly a quarter of platform spend — and earns the trust that wins the next mission."
+        },
+        {
+          "id": "b",
+          "text": "Agree — streaming is the modern pattern, and managed streaming services make it cheap now.",
+          "correct": false,
+          "explanation": "Managed or not, streaming is always-on infrastructure plus a whole class of distributed-systems problems — ordering, replay, state, backpressure — that roughly multiplies build and run cost. \"Modern\" is not a latency requirement."
+        },
+        {
+          "id": "c",
+          "text": "Refuse streaming on principle — it's never worth the complexity tax.",
+          "correct": false,
+          "explanation": "Wrong direction. Fraud you can block before the charge clears, recommendations reflecting the click that just happened, alerts worthless an hour late — these are real, quantified latency needs where streaming *is* the product. The discipline is qualification, not prohibition."
+        },
+        {
+          "id": "d",
+          "text": "Compromise: build the streaming pipeline but on a smaller cluster to contain cost.",
+          "correct": false,
+          "explanation": "A smaller always-on system is still an always-on system, with the same ops burden and the same failure classes. If no sub-hour decision exists, the honest answer is batch — not discounted streaming."
+        }
+      ],
+      "takeaway": "Streaming is justified only when the value of acting within seconds is real and quantified — the five-minute-decision question is how you find out.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q6",
+      "conceptRef": "orchestration-pipelines--the-analytics-engineering-layer",
+      "prompt": "The CEO complains: \"the numbers are wrong this morning — and worse, finance and sales report different revenue every quarter.\" Which pair of platform capabilities addresses these two complaints at the root?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "An orchestrator running the pipeline DAG with retries and failure alerts (for \"wrong this morning\"), plus a version-controlled, tested dbt-style transformation layer giving one definition of revenue that everything inherits (for \"different numbers\").",
+          "correct": true,
+          "explanation": "\"Wrong this morning\" is almost always a DAG step that failed overnight — the orchestrator is the heartbeat that retries, alerts, and shows what ran. \"Three revenue numbers\" is business logic scattered across dashboards — the dbt-style layer makes it one definition, in code, tested. That trust is worth more than any model on top."
+        },
+        {
+          "id": "b",
+          "text": "A data catalog plus reverse-ETL, so everyone can find the data and sync it back into their tools.",
+          "correct": false,
+          "explanation": "A catalog documents what exists; reverse-ETL pushes modelled data into operational tools. Neither restarts a failed overnight job nor reconciles conflicting metric definitions — they're valuable, but they sit beside the problem, not on it."
+        },
+        {
+          "id": "c",
+          "text": "Hand-certify each team's dashboard and schedule a weekly reconciliation meeting between finance and sales.",
+          "correct": false,
+          "explanation": "This is the pre-analytics-engineering world the module describes: business logic living in a hundred dashboards, each subtly different, none documented. Process can't durably fix what one tested definition in code fixes structurally."
+        },
+        {
+          "id": "d",
+          "text": "More warehouse compute, so the overnight jobs finish faster and fresher.",
+          "correct": false,
+          "explanation": "\"Wrong this morning\" is a *failed* step, not a slow one — speed doesn't help a job that silently didn't run. And definitional disagreement between teams has nothing to do with compute at all."
+        }
+      ],
+      "takeaway": "\"Wrong numbers this morning\" means a DAG step failed overnight; \"three revenue numbers\" means business logic needs one tested definition in code — orchestration and the analytics-engineering layer are the structural fixes.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q7",
+      "conceptRef": "data-quality--observability-in-pipelines",
+      "prompt": "Two pipeline incidents land the same week: (1) the nightly load crashed and paged the on-call engineer; (2) a source column silently changed from numbers to text, a join started dropping half the rows — and every job reported \"success.\" Which is more dangerous, and what's the structural defence?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "(2) — failures that succeed while producing garbage are the dangerous ones; the defence is data observability (freshness, schema, volume monitors that alert on deviation) plus data contracts that move the failure upstream to the producer who can fix it.",
+          "correct": true,
+          "explanation": "The crash pages someone and gets fixed — that's the system working. The silent success feeds confidently-wrong numbers to every consumer until someone important notices. Observability catches the silent failures; contracts make the producing team accountable for schema and freshness."
+        },
+        {
+          "id": "b",
+          "text": "(1) — a crash means lost data, whereas wrong data can always be corrected later.",
+          "correct": false,
+          "explanation": "A crashed batch job is usually just rerun — nothing is lost. The silent failure is the one that quietly corrupts everything downstream; the cost of decisions made on garbage typically dwarfs the cost of a rerun. A dashboard fed by a broken pipe isn't missing — it's *confidently wrong*."
+        },
+        {
+          "id": "c",
+          "text": "They're equivalent — both are solved by adding retries in the orchestrator.",
+          "correct": false,
+          "explanation": "Retries fix transient crashes. A job that \"succeeds\" while mis-mapping a retyped column will retry-succeed identically. You need monitors that watch the *data* — schema drift, volume and distribution anomalies — not just the job status."
+        },
+        {
+          "id": "d",
+          "text": "(2), and the defence is asking downstream dashboard users to report anomalies they spot.",
+          "correct": false,
+          "explanation": "Right diagnosis, wrong defence — that's finding out *after* the CEO does. Observability tooling learns normal freshness/volume/schema and alerts on deviation automatically; relying on humans to eyeball dashboards is hope, not monitoring."
+        }
+      ],
+      "takeaway": "The dangerous pipeline failure isn't the crash — it's the silent success producing garbage; observability and data contracts exist to catch it before the CEO does.",
+      "difficulty": "stretch"
+    },
+    {
+      "id": "q8",
+      "conceptRef": "build-choices--cost--the-bill-that-surprises-people",
+      "prompt": "Two clients store the same ~2 TB in the same cloud warehouse product. One pays about 8× more per month. What most plausibly explains the gap — and therefore what's the lever for controlling a warehouse bill?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Compute: the bill is dominated by query patterns — an auto-refreshing dashboard, full-table scans, clusters left running — so you govern compute (refresh cadence, query hygiene, auto-suspend), not delete data.",
+          "correct": true,
+          "explanation": "The cloud deliberately split storage (cheap, flat) from compute (the swingy, expensive line), so two clients holding the same bytes pay wildly different amounts depending entirely on how they query. The same dashboard refreshed every minute instead of hourly can 10× the compute line while storage doesn't move."
+        },
+        {
+          "id": "b",
+          "text": "Storage tiering: the cheaper client compresses and archives better — storage is what drives warehouse bills.",
+          "correct": false,
+          "explanation": "Storage is the small, flat, forgettable line: same bytes ≈ same storage cost. Cutting data volume barely dents a bill driven by query compute — which is why \"we store too much\" is the most common wrong diagnosis a client makes."
+        },
+        {
+          "id": "c",
+          "text": "Egress: cross-region transfer fees are the structurally dominant warehouse cost.",
+          "correct": false,
+          "explanation": "Egress is real and easy to forget — a cross-region copy or a busy reverse-ETL shows up on the invoice — but it's the occasional surprise, not a structural 8× on the same workload. The structurally variable line is compute."
+        },
+        {
+          "id": "d",
+          "text": "It must be a billing error — the same data in the same product should cost roughly the same.",
+          "correct": false,
+          "explanation": "That assumption is exactly what the storage/compute separation breaks. Identical bytes, wildly different bills, is the *design* of consumption pricing — and it's why a platform that's cheap in the pilot can be alarming at adoption."
+        }
+      ],
+      "takeaway": "You control a warehouse bill by governing compute — query patterns, refresh cadence, auto-suspend — not by deleting data; storage is the cheap, flat line.",
+      "difficulty": "stretch"
+    }
+  ],
+  "exercises": [
+    {
+      "id": "ex1",
+      "title": "Platform recommendation for a B2B SaaS scale-up",
+      "estimatedMinutes": 30,
+      "scenario": "A 150-person B2B SaaS company calls you in. Their data lives in the app's Postgres database, HubSpot (CRM), Zendesk (support), and Stripe (billing); product events aren't captured at all. Analysts export CSVs by hand, and the board regularly sees two different MRR figures. The CTO's brief: *\"We want a data lake, real-time dashboards, and an AI churn agent.\"*\n\nYou have one meeting to come back with an architecture recommendation and a rough estimate.",
+      "givens": [
+        "All five sources are standard SaaS tools or databases; data is almost entirely structured (~80 GB total, growing modestly)",
+        "Exec dashboards are reviewed in a weekly business review; the customer-success team would act on a churn list each Monday morning",
+        "No data engineer on staff; one analyst writes SQL",
+        "Customer data includes personal data; no governance review has been done yet"
+      ],
+      "tasks": [
+        "Place the CTO's request on the four-layer stack and name the layer(s) actually broken.",
+        "Make the three judgment calls: storage (warehouse vs lake vs lakehouse), batch vs streaming — applying the five-minute-decision test to both \"real-time dashboards\" and the churn list — and buy-vs-build per layer.",
+        "Sketch the target architecture in a short paragraph (including how raw data matures into trusted, BI-ready tables) and give a ranged build estimate with the run-cost warning you'd attach.",
+        "Name two things you explicitly refuse to promise, with the one-sentence justification for each."
+      ],
+      "solution": "**Step 1 — diagnose the layer.** The broken layers are **ingestion** (data trapped in four SaaS tools and a prod DB, moved by hand) and **transformation** (two MRR figures = no single tested definition). Storage barely exists yet, and consumption (dashboards, churn model) is blocked *by* the layers below. The \"AI churn agent\" at the top is not the constraint.\n\n**Step 2 — the three calls.**\n- **Storage: a single managed cloud warehouse.** ~80 GB of structured data with BI as the main job is the textbook warehouse case. The requested \"data lake\" is the classic red flag — they heard it sounds modern. A lake is grown into when unstructured files force it; a lakehouse buys operational complexity they can't staff (no data engineer).\n- **Batch, not streaming.** Apply the five-minute test: exec dashboards feed a *weekly* review; the churn list is consumed *Monday morning*. No decision changes within five minutes — nightly batch serves both at a fraction of the cost. Product-event capture can land events into the warehouse on a batch cadence too; revisit streaming only if a genuine sub-hour decision emerges (none named today).\n- **Buy vs build: buy the layers, build the modelling.** Buy managed connectors for the five standard sources (custom connectors here are wasted budget), the warehouse, a managed orchestrator, and basic observability tooling. Build the **dbt-style transformation/semantic layer** — *their* definitions of MRR, active customer, churn — in version-controlled, tested SQL, plus the integration glue. That layer is the differentiated, defensible work.\n\n**Step 3 — architecture and estimate.** Managed connectors land raw data into the warehouse (an immutable bronze/raw zone, append-only). A tested dbt-style layer conforms and joins it (silver), then serves **star-schema gold tables**: one certified MRR/revenue model for BI, and a clean churn feature table for the model later. A managed scheduler runs the whole DAG nightly with alerting; freshness and schema tests guard the key tables so a silent upstream change fails loudly. Estimate: **8–12 weeks to a usable v1**, most of it ingestion plus the trusted transformation layer — the churn model itself is a small final slice (state this inversion explicitly, because it's the opposite of what the CTO expects). Run: a modest, mostly-predictable monthly bill **with a written warning that compute scales with adoption** — set a cost alert from day one, and propose a run retainer (monitoring, schema-drift firefighting, cost tuning), because a platform is a product, not a project.\n\n**Step 4 — what you refuse to promise.**\n1. **A flat monthly cloud bill** — compute scales with users, dashboards, and retrains; you commit to *visibility and alerting*, not a fixed number.\n2. **\"Real-time\"** — no five-minute decision exists; promising it would burn a quarter of the budget on complexity with zero decision value.\n(Also flag: the churn model processes personal data — lawful-basis/governance review is a *gate* before that phase, not an add-on.)",
+      "rubric": {
+        "keyPoints": [
+          "Bottleneck correctly diagnosed as ingestion + transformation, with the AI explicitly identified as not the constraint",
+          "Warehouse chosen over lake/lakehouse with the structured-data/BI justification, and batch chosen via the five-minute-decision test applied to both requests",
+          "Buy-the-layers / build-the-modelling split stated, with the transformation/semantic layer named as the differentiated build",
+          "Estimate names the inversion (model is the small part), attaches a compute-scales-with-adoption warning plus cost alert, and proposes a run retainer"
+        ],
+        "pitfalls": [
+          "Selling the lake or lakehouse because the client asked for it — the module's most-named storage mistake",
+          "Promising a flat cloud bill or \"real-time\" dashboards nobody can justify with a sub-hour decision",
+          "Scoping the churn model as the main effort instead of the small final slice",
+          "Ignoring the governance gate on personal data before churn scoring (it's a prerequisite, not a later phase)"
+        ],
+        "takeaways": [
+          "The right platform is the smallest one that reliably feeds the consumers you actually have today — qualify every stated requirement against the decision it serves",
+          "Buy the commodity layers; build the transformation/semantic layer where the client's business logic lives — that's the durable value and the durable revenue"
+        ],
+        "transfer": "This is the general consulting move of converting \"we want X\" into \"which layer is broken and what decision changes\" — the same pattern as right-sizing availability tiers in SRE work, bandwidth in network design, or security controls in a threat model. Whenever a client requests a technology by name (lake, streaming, Kubernetes, microservices), route the conversation through the decision it's supposed to serve; the smallest architecture that serves today's real decisions, with seams to grow, beats the impressive one every time."
+      }
+    },
+    {
+      "id": "ex2",
+      "title": "Diagnose the warehouse bill that tripled",
+      "estimatedMinutes": 25,
+      "scenario": "A mid-market retailer's cloud warehouse bill went from **€3,200 to €9,800/month** in four months, while data volume grew only ~15%. The CFO wants it explained and fixed, and opens with: *\"We obviously store too much — let's delete old data.\"*\n\nYou get the billing export and a list of what changed in the period.",
+      "givens": [
+        "Bill decomposition: storage €400 → €470; compute €2,500 → €8,700; egress €300 → €630",
+        "Changes over the period: 12 new dashboards shipped, one of which (the exec sales dashboard) auto-refreshes every minute; BI users grew from 25 to 70; a dev environment cloned from prod was left running 24/7; a new reverse-ETL sync pushes modelled data to the CRM every 15 minutes",
+        "Underlying data is loaded nightly — source tables update once a day",
+        "Cost model: monthly cost ≈ storage GB × rate + compute units × rate + egress GB × rate"
+      ],
+      "tasks": [
+        "Use the three-line cost model to locate the growth and rebut (politely) the CFO's \"delete data\" hypothesis with the numbers.",
+        "Map each change in the period to one of the three documented ways a warehouse bill surprises people.",
+        "Propose a ranked remediation list with expected impact, and state what you commit to going forward (and what you don't)."
+      ],
+      "solution": "**Step 1 — locate the growth.** Decompose the increase: storage +€70 (+17.5%, tracking the ~15% volume growth — exactly as expected), egress +€330 (+110%, but small in absolute terms), **compute +€6,200 (+248%) — that's €6,200 of the €6,600 increase, ~94% of the problem.** Rebuttal for the CFO: deleting data attacks the €470 line, not the €8,700 one. Same bytes, wildly different bills — the warehouse charges for *how you query*, not just what you keep. The fix is governing compute, not deleting history (which would also destroy the raw layer that makes re-deriving business logic cheap).\n\n**Step 2 — map to the three surprise patterns.**\n1. **A few heavy queries dominate** → the exec dashboard auto-refreshing **every minute** against data that only changes **nightly**: ~1,440 refreshes/day, each one warehouse compute, for zero new information. Likely the single biggest line. The 15-minute reverse-ETL sync is the same pattern in miniature (and it's also driving the egress doubling).\n2. **Success scales the bill linearly** → BI users 25 → 70 and 12 new dashboards: more queries, more compute. This part is *healthy* growth — budget for the adopted state instead of being surprised by it.\n3. **Always-on by accident** → the prod-clone dev environment running 24/7 bills like production while doing nothing at night and weekends.\n\n**Step 3 — ranked remediation.**\n1. **Exec dashboard: refresh hourly, or better, trigger refresh when the nightly load completes** — minute-level refresh on daily data is pure waste; expect a large cut in the dominant compute line.\n2. **Auto-suspend on all warehouses/clusters** and schedule the dev environment to office hours — kills the always-on line (and dev rarely needs a full prod-size clone).\n3. **Reverse-ETL cadence**: ask the five-minute question — does any CRM decision change in 15 minutes? If the team works it daily, sync hourly or nightly; this also trims egress.\n4. **Query hygiene review** on the top-10 most expensive queries (full-table scans, unfiltered joins), plus **per-team/warehouse budgets with alerts** so the next surprise pages someone before the invoice does.\n\n**Commitment:** visibility, alerts, and a governed refresh policy — explicitly **not** a flat monthly number, because compute scales with adoption and adoption is the point. Frame the healthy part of the growth (more users actually using data) as success to budget for, not waste to eliminate.",
+      "rubric": {
+        "keyPoints": [
+          "Growth correctly located in compute (~94% of the increase) using the three-line decomposition, with the \"delete data\" hypothesis rebutted numerically",
+          "All three surprise patterns identified and mapped to the right change (minute-refresh dashboard / user growth / 24-7 dev clone)",
+          "Remediation ranked by impact, led by refresh cadence vs the nightly data-update reality, plus auto-suspend and budget alerts",
+          "Commits to visibility and alerting, not a flat bill — and distinguishes wasteful spend from healthy adoption-driven spend"
+        ],
+        "pitfalls": [
+          "Accepting the storage framing and proposing data deletion or archiving as the main lever",
+          "Treating all compute growth as waste — user adoption growth is success and should be budgeted, not 'fixed'",
+          "Missing that a dashboard refreshing every minute against nightly-loaded data does 1,400+ pointless refreshes a day",
+          "Promising the CFO a fixed monthly number — the exact promise the module says never to make"
+        ],
+        "takeaways": [
+          "Decompose a cloud bill into storage + compute + egress before proposing anything: the swing line is almost always compute, and compute is driven by query patterns, not data size",
+          "The three surprise patterns — heavy queries, adoption scaling, accidental always-on — cover nearly every shocked invoice; check for all three every time"
+        ],
+        "transfer": "This is the universal cost-triage pattern: decompose by driver, find the swing line, attack the dominant term with the lever designed for it — identical to an AWS bill review, a SaaS seat audit, or LLM token-cost work (where output tokens vs input tokens play the storage-vs-compute role). It also previews FinOps discipline from the missions module: a unit-cost dashboard and budget alerts turn the next surprise into a page instead of an invoice."
+      }
+    }
+  ]
+}

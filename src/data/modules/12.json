@@ -1,0 +1,511 @@
+{
+ "id": "12",
+ "title": "Data Engineering & Platforms",
+ "weeks": [
+  24,
+  25
+ ],
+ "part": "IV — Data & Production Platform",
+ "partIndex": 4,
+ "addon": false,
+ "pitchHtml": "<p>Every module before this one assumed the data was <em>there</em> — clean, fresh, reachable. This is the module about making that assumption true. The data platform is the plumbing under the whole stack: the pipelines that move data from the apps where it's born to the place where it can be analysed, modelled, and served. The only arithmetic that matters here is the cloud bill — otherwise it's architecture and judgment. For a tech lead the lesson is blunt and repeated: <strong>most AI projects don't fail on the model, they block on the plumbing.</strong> A model is a function of its data, and the platform is what guarantees that data keeps arriving, correct and on time. Where <a class=\"wikilink\" data-module=\"03\" href=\"#/module/03\">Working with Data: Sources, Quality &#x26; Feature Engineering</a> was about <em>one dataset for one model</em>, this module is about the <em>infrastructure that feeds everything</em> — and how to scope, cost, and sell it without being burned by a runaway cloud bill.</p>",
+ "prev": "11",
+ "next": "13",
+ "sectionCount": 8,
+ "quizCount": 8,
+ "exerciseCount": 2,
+ "sections": [
+  {
+   "id": "learning-objectives",
+   "kind": "objectives",
+   "title": "Learning Objectives",
+   "blocks": [
+    {
+     "type": "checklist",
+     "checklistId": "12/learning-objectives/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Draw the modern data stack — ingestion → storage → transformation → serving — and place any client's tooling on it"
+      },
+      {
+       "id": "1",
+       "html": "Decide <strong>ETL vs ELT</strong>, and explain in one sentence why ELT won in the cloud"
+      },
+      {
+       "id": "2",
+       "html": "Choose between <strong>warehouse, data lake, and lakehouse</strong> for a given workload, and say what each costs"
+      },
+      {
+       "id": "3",
+       "html": "Decide when <strong>streaming / real-time</strong> is worth the complexity tax, and when nightly batch is the honest answer"
+      },
+      {
+       "id": "4",
+       "html": "Explain orchestration (DAGs), the analytics-engineering (dbt-style) layer, and the medallion pattern at a leader's altitude"
+      },
+      {
+       "id": "5",
+       "html": "Scope a data-platform, ingestion, or warehouse mission with a concrete deliverable, and decide buy-vs-build"
+      },
+      {
+       "id": "6",
+       "html": "Anticipate the storage-vs-compute cost model and the three ways a warehouse bill surprises people"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "key-concepts",
+   "kind": "concepts",
+   "title": "Key Concepts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "why-the-platform-is-the-foundation",
+     "number": 1,
+     "title": "Why the Platform Is the Foundation",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The single most reliable prediction you can make about an AI or analytics mission: <strong>the data won't be where the client thinks it is, in the shape they think it's in.</strong> It will be split across a production database nobody wants you to query, three SaaS tools' export buttons, a spreadsheet a person updates by hand, and an event stream nobody is capturing. Before any model, any dashboard, any agent, <em>something</em> has to consolidate that into a reliable, queryable place — and keep it arriving every day without a human babysitting it.</p>\n<p>That \"something\" is the data platform, and building or fixing it is where missions actually live. The reframing for a leader:</p>\n<ul>\n<li><strong>No reliable data flow → no reliable AI.</strong> A model retrained on stale or broken inputs degrades silently. A dashboard fed by a pipeline that failed last Tuesday lies to the board. The platform is what makes the layers above it <em>trustworthy</em>, not just <em>possible</em>.</li>\n<li><strong>\"AI projects are 70% data work\" is mostly platform work.</strong> The famous statistic from <a class=\"wikilink\" data-module=\"01\" href=\"#/module/01\">AI &#x26; Data Landscape &#x26; Tech-Lead Mindset</a> isn't only cleaning a dataset — it's the ingestion, the scheduling, the transformations, the monitoring. That work doesn't disappear when the model ships; it becomes the thing you run forever.</li>\n<li><strong>The platform is a product, not a project.</strong> It has uptime, on-call, cost, and users (the analysts and models downstream). Sell it that way.</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Think of the platform as a city's water supply. Nobody is impressed by pipes — they're impressed by the AI \"fountain\" at the top. But the fountain runs dry the day a pipe bursts upstream, and <em>that day always comes</em>. Your value as a lead is partly in knowing that the unglamorous pipework is what makes the fountain a product instead of a demo.</p>"
+      }
+     ]
+    },
+    {
+     "id": "the-modern-data-stack-four-layers",
+     "number": 2,
+     "title": "The Modern Data Stack: Four Layers",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Almost every data platform, regardless of vendor, is the same four layers. Learn them once and you can read any client's architecture.</p>"
+      },
+      {
+       "type": "diagram",
+       "text": "   CONSUMPTION   │ BI dashboards · ML training · reverse-ETL · APIs · agents\n                 └──────────────────────────────────────────────────────────\n                                          ▲   serving / semantic layer\n   TRANSFORMATION│ clean · join · model · aggregate   (the \"T\" — dbt-style)\n                 └──────────────────────────────────────────────────────────\n                                          ▲\n   STORAGE       │ warehouse · data lake · lakehouse   (the single source of truth)\n                 └──────────────────────────────────────────────────────────\n                                          ▲\n   INGESTION     │ batch loaders · CDC · streaming · connectors   (move data in)\n                 └──────────────────────────────────────────────────────────\n                                          ▲\n   SOURCES       │ app DBs · SaaS tools · events/logs · files · 3rd-party APIs"
+      },
+      {
+       "type": "html",
+       "html": "<ul>\n<li><strong>Ingestion</strong> — get data <em>in</em>, from sources you often don't control. Connectors for SaaS tools, change-data-capture (CDC) off production databases, file drops, event streams.</li>\n<li><strong>Storage</strong> — the central place data lands and lives: warehouse, lake, or lakehouse (§4). This is the \"single source of truth\" everything else reads from.</li>\n<li><strong>Transformation</strong> — turn raw landed data into clean, modelled, business-ready tables: deduplicate, join, conform definitions, aggregate. This is the analytics-engineering layer (§6).</li>\n<li><strong>Consumption / serving</strong> — where value is extracted: BI tools, ML training jobs, \"reverse-ETL\" pushing modelled data <em>back</em> into operational tools, APIs and agents reading features.</li>\n</ul>\n<p>Cutting across all four: <strong>orchestration</strong> (what runs what, in what order, on what schedule — §6) and <strong>observability</strong> (is it fresh, correct, and not silently broken — §7).</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>When a client says \"we need an AI platform,\" your first job is to find out <em>which layer is actually broken</em>. Usually it's ingestion (data trapped in source systems) or transformation (nobody agrees what \"active customer\" means). The AI at the top is rarely the constraint — and a mission scoped against the wrong layer is a mission that overruns.</p>"
+      }
+     ]
+    },
+    {
+     "id": "etl-vs-elt--what-changed-and-why-elt-won",
+     "number": 3,
+     "title": "ETL vs ELT — What Changed and Why ELT Won",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The order of two letters encodes a decade of platform evolution.</p>\n<ul>\n<li><strong>ETL (Extract → Transform → Load):</strong> pull data out, transform it on a <em>separate</em> processing tier, then load the finished result into the warehouse. The historical default when warehouse storage and compute were scarce and expensive — you transformed <em>before</em> loading because you couldn't afford to store raw data or compute over it cheaply.</li>\n<li><strong>ELT (Extract → Load → Transform):</strong> pull data out, load it <em>raw</em> into the warehouse first, then transform <em>inside</em> the warehouse using its own compute (usually SQL). The modern cloud default.</li>\n</ul>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\"></th><th align=\"left\">ETL</th><th align=\"left\">ELT</th></tr></thead><tbody><tr><td align=\"left\"><strong>Transform happens</strong></td><td align=\"left\">Before load, on a separate engine</td><td align=\"left\">After load, inside the warehouse</td></tr><tr><td align=\"left\"><strong>Raw data kept?</strong></td><td align=\"left\">Often discarded</td><td align=\"left\">Retained — you can re-transform anytime</td></tr><tr><td align=\"left\"><strong>Skills needed</strong></td><td align=\"left\">Data engineers, bespoke pipelines</td><td align=\"left\">Analysts/analytics engineers writing SQL</td></tr><tr><td align=\"left\"><strong>Fits best when</strong></td><td align=\"left\">Heavy pre-processing, on-prem, tight storage</td><td align=\"left\">Cloud warehouse, cheap storage, SQL-first teams</td></tr><tr><td align=\"left\"><strong>Main risk</strong></td><td align=\"left\">Brittle, slow to change, logic hidden in code</td><td align=\"left\">\"Load everything\" sprawl; compute bill creep</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Why ELT won in the cloud:</strong> three things flipped. Cloud storage became nearly free, so keeping raw data costs almost nothing. Warehouse compute became elastic and powerful, so transforming <em>in place</em> is fast. And separating the two (§9) means you can throw compute at a transform without paying for it 24/7. The payoff: you load raw, keep it forever, and re-derive your business logic whenever definitions change — no re-extraction needed. ELT also democratised the \"T\": transformations became SQL that analysts can read and own, which is what made the dbt-style layer (§6) possible.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>ETL throws away the raw ingredients and ships you a cooked meal — if the recipe was wrong, you re-shop and re-cook. ELT stocks the pantry with raw ingredients (cheap now) and cooks on demand — change the recipe and re-cook the <em>same</em> ingredients in minutes. In a world where \"active customer\" gets redefined quarterly, keeping the raw pantry is the winning move.</p>"
+      }
+     ]
+    },
+    {
+     "id": "warehouse-vs-data-lake-vs-lakehouse",
+     "number": 4,
+     "title": "Warehouse vs Data Lake vs Lakehouse",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The storage layer is the decision clients most often get wrong — usually by buying a lake because it sounds modern, then discovering nobody can query it.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\"></th><th align=\"left\">Data Warehouse</th><th align=\"left\">Data Lake</th><th align=\"left\">Lakehouse</th></tr></thead><tbody><tr><td align=\"left\"><strong>Stores</strong></td><td align=\"left\">Structured tables, schema-on-write</td><td align=\"left\">Any file, raw, schema-on-read</td><td align=\"left\">Files + a table layer giving warehouse-like structure</td></tr><tr><td align=\"left\"><strong>Best for</strong></td><td align=\"left\">BI, SQL analytics, metrics</td><td align=\"left\">Cheap mass storage, unstructured data, ML</td><td align=\"left\">Both — one store for BI <em>and</em> ML</td></tr><tr><td align=\"left\"><strong>Query</strong></td><td align=\"left\">Fast SQL out of the box</td><td align=\"left\">Needs an engine on top; easy to make a \"swamp\"</td><td align=\"left\">SQL + ML on the same data</td></tr><tr><td align=\"left\"><strong>Cost shape</strong></td><td align=\"left\">Higher storage cost, managed compute</td><td align=\"left\">Cheapest storage, you bring compute</td><td align=\"left\">Cheap object storage + open table format</td></tr><tr><td align=\"left\"><strong>Governance</strong></td><td align=\"left\">Mature, built-in</td><td align=\"left\">Weak by default — must be added</td><td align=\"left\">Improving; depends on the table format</td></tr><tr><td align=\"left\"><strong>Failure mode</strong></td><td align=\"left\">Expensive at huge unstructured scale</td><td align=\"left\">The <strong>data swamp</strong>: dumped, undocumented, unused</td><td align=\"left\">Younger tooling; more moving parts to operate</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>How to choose, fast:</p>\n<ul>\n<li><strong>Mostly structured data, BI and dashboards the main job → warehouse.</strong> Don't overthink it. This covers the majority of first platforms.</li>\n<li><strong>Lots of unstructured data (images, audio, raw text, logs) at scale, or heavy ML training → lake (or lakehouse).</strong> Object storage is the only economical home for terabytes of files.</li>\n<li><strong>You genuinely need both BI <em>and</em> ML on the same data, and want one place → lakehouse.</strong> It collapses the old \"copy from lake to warehouse\" two-system tax — at the cost of younger, more operationally demanding tooling.</li>\n<li><strong>Small or early client → a single cloud warehouse is almost always the right first answer.</strong> A lake is something you grow <em>into</em>, not start with. Selling a lakehouse to a 30-person company is the storage equivalent of fine-tuning an LLM on day one.</li>\n</ul>\n<p>(Category leaders for each are named only in the Tools table below — keep the vendor names quarantined and dated.)</p>"
+      }
+     ]
+    },
+    {
+     "id": "batch-vs-streaming--event-driven",
+     "number": 5,
+     "title": "Batch vs Streaming / Event-Driven",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Does the data need to move on a <em>schedule</em> (batch — every night, every hour) or <em>continuously</em> as events happen (streaming — within seconds)? This is a direct application of the path's value/complexity budget, and it's where leads most often over-build.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\"></th><th align=\"left\">Batch</th><th align=\"left\">Streaming / Event-Driven</th></tr></thead><tbody><tr><td align=\"left\"><strong>Latency</strong></td><td align=\"left\">Minutes to a day</td><td align=\"left\">Sub-second to seconds</td></tr><tr><td align=\"left\"><strong>Complexity</strong></td><td align=\"left\">Low — schedule a job</td><td align=\"left\">High — always-on infra, ordering, replay, backpressure</td></tr><tr><td align=\"left\"><strong>Cost</strong></td><td align=\"left\">Run compute only when the job runs</td><td align=\"left\">Pay for an always-running system + ops</td></tr><tr><td align=\"left\"><strong>Reasoning</strong></td><td align=\"left\">Easy: \"the 2am run did X\"</td><td align=\"left\">Hard: state, late/out-of-order events, exactly-once</td></tr><tr><td align=\"left\"><strong>Fits</strong></td><td align=\"left\">Reports, dashboards, most ML retraining, finance</td><td align=\"left\">Fraud blocking, live personalisation, monitoring, IoT</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>When you <em>do</em> size a pipeline, two axes set the bill and the design: <strong>throughput</strong> (events per second it must absorb at peak) and <strong>latency</strong> (how soon a single event must be usable). Throughput drives how much you provision; latency drives whether batch will do at all. A leader only needs the back-of-envelope peak — <em>\"~2,000 orders/sec on Black Friday, usable within the hour\"</em> tells you the shape immediately. (Latency <em>percentiles</em> — p95/p99 service targets — belong to the serving discussion in <a class=\"wikilink\" data-module=\"13\" href=\"#/module/13\">MLOps &#x26; Productionization</a>, not here.)</p>\n<p>The honest default is <strong>batch</strong>. Most \"real-time\" requests don't survive the question <em>\"what decision changes in the next five minutes if you had this sooner?\"</em> A daily sales dashboard does not need streaming. A churn model retrained nightly does not need streaming. Reach for streaming only when <strong>the value of acting within seconds is real and quantified</strong> — fraud you can block before the charge clears, a recommendation that must reflect the click that <em>just</em> happened, an alert that's worthless an hour late.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Streaming roughly multiplies the build and run cost of a pipeline while adding a whole class of distributed-systems problems (out-of-order events, replay, state). That's a large slice of the complexity budget. Spend it only where latency <em>is</em> the product. The senior move in a sales meeting is to ask for the five-minute decision; if the client can't name one, you've just saved them a quarter of platform spend — and earned the trust that wins the next mission.</p>"
+      }
+     ]
+    },
+    {
+     "id": "orchestration-pipelines--the-analytics-engineering-layer",
+     "number": 6,
+     "title": "Orchestration, Pipelines & the Analytics-Engineering Layer",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Two ideas a leader must be fluent in.</p>\n<p><strong>Orchestration &#x26; DAGs.</strong> A pipeline is rarely one step — it's \"load this, then transform that, then refresh the model, then notify.\" The dependencies form a <strong>DAG</strong> (directed acyclic graph): a map of <em>what must finish before what can start</em>, with no loops. An orchestrator runs the DAG on a schedule (every night at 2am) or a trigger (a new file landed), retries failed steps, alerts on failure, and shows you what ran when. This is the heartbeat of the platform — when a CEO says \"the numbers are wrong this morning,\" the answer is almost always a DAG step that failed overnight.</p>"
+      },
+      {
+       "type": "diagram",
+       "text": "   extract_sales ─┐\n                  ├─→ build_staging ─→ build_customer_360 ─→ refresh_churn_model ─→ notify\n   extract_crm  ──┘                                      └─→ refresh_exec_dashboard"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>The analytics-engineering (dbt-style) layer.</strong> Once raw data is loaded (the \"L\" of ELT), the transformations that turn it into business-ready tables used to be buried in stored procedures or notebooks nobody could read. The modern pattern treats those transformations as <strong>version-controlled SQL with tests and documentation</strong> — software-engineering discipline applied to analytics. Its hallmarks:</p>\n<ul>\n<li>Transformations are <strong>code in Git</strong>: reviewed, versioned, rolled back.</li>\n<li>Each model is <strong>tested</strong> (uniqueness, not-null, accepted values, freshness) so a bad upstream change fails loudly instead of silently corrupting a dashboard.</li>\n<li><strong>Lineage</strong> is automatic: you can see that <code>exec_revenue</code> depends on <code>orders</code> which depends on <code>raw_stripe</code> — invaluable when something breaks or an auditor asks.</li>\n<li>It creates the <strong>Analytics Engineer</strong> role from <a class=\"wikilink\" data-module=\"01\" href=\"#/module/01\">AI &#x26; Data Landscape &#x26; Tech-Lead Mindset</a>: someone who owns the <em>modelled, documented, trusted</em> data layer.</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Before this layer, business logic (\"what counts as revenue?\") lived in a hundred dashboards, each subtly different, none documented. The dbt-style layer makes it <em>one definition, in code, tested, that everything inherits</em>. For a client this is the difference between \"the board sees three different revenue numbers\" and \"everyone reads one trusted figure.\" That trust is worth more than any model you'll put on top.</p>"
+      }
+     ]
+    },
+    {
+     "id": "data-modelling-star-schema--the-medallion-pattern",
+     "number": 7,
+     "title": "Data Modelling: Star Schema & the Medallion Pattern",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>You don't need to <em>design</em> schemas at expert depth, but you must recognise the two patterns clients live in.</p>\n<p><strong>Star schema (dimensional modelling).</strong> The classic way to model data <em>for analytics</em>. At the centre, a <strong>fact</strong> table records events (one row per sale, click, payment) with measures (amount, quantity). Around it, <strong>dimension</strong> tables describe the <em>who/what/where/when</em> (customer, product, store, date). Queries \"join the star\" — sales by product by region by month. It's optimised for the way humans ask analytical questions, and it's why BI tools feel fast and intuitive on a well-modelled warehouse.</p>"
+      },
+      {
+       "type": "diagram",
+       "text": "        dim_date        dim_product\n            \\               /\n             \\             /\n   dim_customer ── FACT_SALES ── dim_store      (a \"star\": facts in the middle, dimensions around)\n             /             \\\n            /               \\\n       dim_channel      dim_promotion"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>The medallion pattern (bronze / silver / gold).</strong> A layered convention — common in lakehouses — for <em>how raw data matures into trusted data</em>:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Layer</th><th align=\"left\">Contains</th><th align=\"left\">State</th><th align=\"left\">Who uses it</th></tr></thead><tbody><tr><td align=\"left\"><strong>Bronze</strong></td><td align=\"left\">Raw, as-ingested, append-only</td><td align=\"left\">Untouched source copy</td><td align=\"left\">Engineers; reprocessing source</td></tr><tr><td align=\"left\"><strong>Silver</strong></td><td align=\"left\">Cleaned, deduplicated, conformed, joined</td><td align=\"left\">Validated, queryable</td><td align=\"left\">Analysts, ML feature builds</td></tr><tr><td align=\"left\"><strong>Gold</strong></td><td align=\"left\">Business-level aggregates &#x26; metrics</td><td align=\"left\">Curated, presentation-ready</td><td align=\"left\">BI, executives, products</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The point isn't the colours — it's the <strong>discipline of progressive refinement</strong>: never let consumers read raw data directly, never bury business logic in the raw layer, and always keep an immutable bronze copy so you can rebuild silver/gold when logic changes. (Note how bronze→silver→gold is the medallion expression of the same \"keep raw, transform on demand\" logic that makes ELT work in §3.)</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Star schema answers \"how should the <em>trusted</em> data be shaped for analysis?\"; medallion answers \"how does data <em>get</em> trustworthy on the way there?\" They're complementary, not competing — gold-layer tables are very often modelled <em>as</em> star schemas. A leader who can say \"we'll land raw in bronze, conform in silver, and serve a star-schema gold layer to BI\" sounds — correctly — like they've done this before.</p>"
+      }
+     ]
+    },
+    {
+     "id": "data-quality--observability-in-pipelines",
+     "number": 8,
+     "title": "Data Quality & Observability in Pipelines",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p><a class=\"wikilink\" data-module=\"03\" href=\"#/module/03\">Working with Data: Sources, Quality &#x26; Feature Engineering</a> judged the quality of <em>one dataset</em> before modelling. Here the concern is continuous: the platform feeds many consumers every day, so quality must be <em>monitored in flight</em>, not checked once. Three things break pipelines in practice:</p>\n<ul>\n<li><strong>Freshness.</strong> Did the data arrive on time? A dashboard fed by a job that silently stopped three days ago is worse than no dashboard — it's confidently wrong. Freshness checks (\"this table must update by 6am\") are the single highest-value monitor.</li>\n<li><strong>Schema drift.</strong> A source system adds, renames, or retypes a column without telling you. Downstream transforms break or, worse, <em>silently</em> mis-map. CDC and SaaS connectors make this routine, not rare.</li>\n<li><strong>Volume / distribution anomalies.</strong> Row counts halve overnight (an upstream filter changed); a category that's normally 5% of rows is suddenly 80% (a join went wrong). Quietly corrupts everything downstream.</li>\n</ul>\n<p>The governance answer is a <strong>data contract</strong>: an explicit, enforced agreement between a data <em>producer</em> (often a software team that owns a source) and the platform — \"this table will have these columns, these types, this freshness, and we'll version any change.\" Contracts move the failure <em>upstream</em>, to the team that can actually fix it, instead of leaving the platform to absorb every surprise. <strong>Data observability</strong> tooling automates the watching: it learns normal freshness/volume/schema and alerts on deviation, so you find out before the CEO does.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>The dangerous pipeline failure isn't the one that crashes — that one pages someone and gets fixed. It's the one that <em>succeeds while producing garbage</em>: the join that silently drops half the rows, the column that started arriving as text instead of numbers. Observability exists to catch the <em>silent</em> failures. Frame it to a client as \"insurance against confidently-wrong decisions,\" which is a cost they understand. (This is the platform-scale sibling of the train/serve skew and leakage discipline in <a class=\"wikilink\" data-module=\"03\" href=\"#/module/03\">Working with Data: Sources, Quality &#x26; Feature Engineering</a>.)</p>"
+      }
+     ]
+    },
+    {
+     "id": "build-choices--cost--the-bill-that-surprises-people",
+     "number": 9,
+     "title": "Build Choices & Cost — The Bill That Surprises People",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The decision that determines a platform's total cost of ownership: <strong>managed cloud vs self-host</strong>, and underneath it, how the cloud <em>charges</em>.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\"></th><th align=\"left\">Managed Cloud (SaaS / serverless)</th><th align=\"left\">Self-Host (own the infra)</th></tr></thead><tbody><tr><td align=\"left\"><strong>Time to value</strong></td><td align=\"left\">Days — connectors and warehouse ready</td><td align=\"left\">Weeks/months of setup</td></tr><tr><td align=\"left\"><strong>Ops burden</strong></td><td align=\"left\">Low — vendor runs it</td><td align=\"left\">High — you patch, scale, on-call</td></tr><tr><td align=\"left\"><strong>Cost shape</strong></td><td align=\"left\">Pay-per-use; scales with usage</td><td align=\"left\">Fixed infra + heavy people cost</td></tr><tr><td align=\"left\"><strong>Best for</strong></td><td align=\"left\">Most clients, especially early</td><td align=\"left\">Strict data residency, huge stable scale, niche needs</td></tr><tr><td align=\"left\"><strong>Main risk</strong></td><td align=\"left\">Lock-in; bills that scale with success</td><td align=\"left\">Under-resourced ops; reinventing the wheel</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>The storage-vs-compute model.</strong> Modern cloud warehouses bill <strong>storage and compute separately</strong>. Storage (keeping the data) is cheap and predictable. <strong>Compute</strong> (running queries and transforms) is the expensive, <em>variable</em> line — and it's where bills explode. This separation is exactly what makes ELT and elastic scaling work (§3), but it's also the trap. The monthly bill decomposes into three lines a leader can reason about on a whiteboard:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\text{Cost}_{\\text{month}} \\approx (\\text{storage GB} \\times \\$/\\text{GB}) + (\\text{compute units} \\times \\$/\\text{unit}) + (\\text{egress GB} \\times \\$/\\text{GB})",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><msub><mtext>Cost</mtext><mtext>month</mtext></msub><mo>≈</mo><mo stretchy=\"false\">(</mo><mtext>storage GB</mtext><mo>×</mo><mi mathvariant=\"normal\">$</mi><mi mathvariant=\"normal\">/</mi><mtext>GB</mtext><mo stretchy=\"false\">)</mo><mo>+</mo><mo stretchy=\"false\">(</mo><mtext>compute units</mtext><mo>×</mo><mi mathvariant=\"normal\">$</mi><mi mathvariant=\"normal\">/</mi><mtext>unit</mtext><mo stretchy=\"false\">)</mo><mo>+</mo><mo stretchy=\"false\">(</mo><mtext>egress GB</mtext><mo>×</mo><mi mathvariant=\"normal\">$</mi><mi mathvariant=\"normal\">/</mi><mtext>GB</mtext><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">\\text{Cost}_{\\text{month}} \\approx (\\text{storage GB} \\times \\$/\\text{GB}) + (\\text{compute units} \\times \\$/\\text{unit}) + (\\text{egress GB} \\times \\$/\\text{GB})</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8333em;vertical-align:-0.15em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">Cost</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3361em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">month</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">≈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mopen\">(</span><span class=\"mord text\"><span class=\"mord\">storage GB</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">×</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">$/</span><span class=\"mord text\"><span class=\"mord\">GB</span></span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mopen\">(</span><span class=\"mord text\"><span class=\"mord\">compute units</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">×</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">$/</span><span class=\"mord text\"><span class=\"mord\">unit</span></span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mopen\">(</span><span class=\"mord text\"><span class=\"mord\">egress GB</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">×</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">$/</span><span class=\"mord text\"><span class=\"mord\">GB</span></span><span class=\"mclose\">)</span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<ul>\n<li><strong>Storage</strong> — how much data you keep, times the per-GB rate. Small, flat, forgettable.</li>\n<li><strong>Compute</strong> — how much querying and transforming you do, times the per-unit rate (credits, slot-seconds, DBUs). The big, swingy term.</li>\n<li><strong>Egress</strong> — data <em>leaving</em> the cloud/region, times the per-GB transfer rate. Easy to forget until a cross-region copy or a busy reverse-ETL shows up on the invoice.</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>The cloud deliberately split storage (cheap) from compute (the bill), so two clients holding the <em>same bytes</em> can pay wildly different amounts — the difference is entirely in how they query. The same dashboard, refreshed every minute instead of every hour, can 10× the compute line while storage doesn't move. So you control the platform bill by governing <em>compute</em> (query patterns, refresh cadence, auto-suspend), not by deleting data.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The three ways the bill surprises people, every time:</p>\n<ol>\n<li><strong>A few heavy queries dominate.</strong> One badly-written dashboard auto-refreshing every minute, or a full-table scan in a loop, can cost more than the entire rest of the platform. Cost is driven by <em>compute</em>, and compute is driven by <em>query patterns</em>, not data size.</li>\n<li><strong>Success scales the bill linearly.</strong> More users, more dashboards, more model retrains → more compute → a bigger invoice. A platform that's cheap in the pilot can be alarming at adoption. Budget for the <em>adopted</em> state, not the pilot.</li>\n<li><strong>\"Always-on\" by accident.</strong> A warehouse cluster left running 24/7, a streaming system nobody turned off, dev environments mirroring prod. Idle infra bills the same as busy infra.</li>\n</ol>\n<h4>Worked Example — Costing a Platform Mission</h4>\n<p><em>Setup.</em> A 200-person retailer wants \"a data platform for analytics and a churn model.\" Data sources: their app's Postgres DB, Shopify, a marketing tool, and Stripe. Today: analysts pull CSVs by hand; the board gets conflicting numbers.</p>\n<p><em>A leader's plan and rough envelope:</em></p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Component</th><th align=\"left\">Choice</th><th align=\"left\">Why</th><th align=\"left\">Rough cost driver</th></tr></thead><tbody><tr><td align=\"left\">Ingestion</td><td align=\"left\">Managed connectors (SaaS)</td><td align=\"left\">4 standard sources; building custom connectors is wasted effort</td><td align=\"left\">Per-connector / per-row monthly fee</td></tr><tr><td align=\"left\">Storage</td><td align=\"left\">Single cloud <strong>warehouse</strong></td><td align=\"left\">Mostly structured; BI is the main job; no lake needed yet</td><td align=\"left\">Cheap, predictable storage</td></tr><tr><td align=\"left\">Transform</td><td align=\"left\">dbt-style SQL layer in Git</td><td align=\"left\">One trusted definition of revenue/active-customer; tested</td><td align=\"left\">Analytics-engineer time + warehouse compute</td></tr><tr><td align=\"left\">Orchestration</td><td align=\"left\">Managed scheduler, <strong>nightly batch</strong></td><td align=\"left\">No five-minute decision exists; streaming unjustified</td><td align=\"left\">Low — runs once a day</td></tr><tr><td align=\"left\">Serving</td><td align=\"left\">BI tool on gold layer + churn feature table</td><td align=\"left\">Dashboards for the board; one clean table feeds the model</td><td align=\"left\">BI seats; modest compute</td></tr><tr><td align=\"left\">Observability</td><td align=\"left\">Freshness + schema tests on key tables</td><td align=\"left\">Stop the \"wrong numbers\" problem at the source</td><td align=\"left\">Small tooling fee</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><em>Estimate.</em> Build: ~8-12 weeks for a usable v1 (most of it ingestion + the trusted transformation layer, <strong>not</strong> the model). Run: a predictable monthly platform bill, with the explicit warning that <strong>compute cost will rise as adoption rises</strong> and a cap/alert configured from day one. The churn model is a <em>small</em> part of the effort — exactly the inversion clients don't expect, and the one you must set early.</p>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "client-mission-patterns--commercial-angle",
+   "kind": "missions",
+   "title": "Client Mission Patterns / Commercial Angle",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>These are the highest-volume, most repeatable missions in an AI &#x26; Data pole — the ones that fund the flashier work above them.</p>\n<ul>\n<li><strong>Modern Data Platform Setup or Migration</strong> — <em>Problem:</em> data is trapped in source systems and SaaS exports; the board sees conflicting numbers; analysts copy CSVs by hand (or: a legacy on-prem warehouse is costly and brittle and they want to move to the cloud). <em>Deliverable:</em> a deployed four-layer platform — managed ingestion for their named sources, a cloud warehouse/lakehouse, a tested dbt-style transformation layer, orchestrated nightly pipelines, freshness/schema monitoring, and BI connected to a trusted gold layer. For a migration: a phased cut-over plan that runs old and new in parallel until trusted. <em>Scope:</em> 8-16 weeks for v1; migrations longer. <em>Who buys:</em> CTO/CDO, Head of Data, a finance/ops leader sick of untrustworthy numbers.</li>\n<li><strong>Ingestion + Transformation Pipeline for a Use Case</strong> — <em>Problem:</em> one specific need (feed a churn model, power one executive dashboard, consolidate two systems after an acquisition) is blocked because the data isn't flowing. <em>Deliverable:</em> a production pipeline for <em>that</em> data — connectors/CDC from the named sources, modelled and tested tables, scheduled in an orchestrator with alerting, documented lineage. <em>Scope:</em> 4-8 weeks. <em>Who buys:</em> a data/analytics lead, or the AI team you're unblocking downstream. <em>(This is the platform-side companion to a modelling or <a class=\"wikilink\" data-module=\"13\" href=\"#/module/13\">MLOps &#x26; Productionization</a> engagement.)</em></li>\n<li><strong>Data Warehouse / Analytics Foundation</strong> — <em>Problem:</em> the client has data but no single source of truth; every team has its own definition of the core metrics. <em>Deliverable:</em> a warehouse with a dimensional/medallion model, a governed metrics/semantic layer (one definition of revenue, active user, churn), documentation, and a handful of certified dashboards. <em>Scope:</em> 6-12 weeks. <em>Who buys:</em> Head of Data/Analytics, a CFO who wants one number.</li>\n<li><strong>Real-Time / Streaming Pipeline</strong> — <em>Problem:</em> a decision genuinely must happen in seconds — fraud blocking, live personalisation, operational monitoring, IoT. <em>Deliverable:</em> an event-ingestion + stream-processing pipeline with a serving layer (low-latency store or feature service), plus the batch layer for history. <em>Scope:</em> 8-16+ weeks — and you say up front it's the expensive lane. <em>Who buys:</em> product or risk leadership with a quantified latency need. <em>Qualify hard first</em> (§5): if there's no five-minute decision, downscope to batch and save them a fortune.</li>\n</ul>\n<p><strong>Buy-vs-build for the client:</strong> <strong>buy the layers, build the modelling.</strong> Ingestion connectors, the warehouse, the orchestrator, observability tooling — all commodities; rent them. Your differentiated, defensible build is the <strong>transformation/semantic layer</strong> (their business logic, in code) and the <strong>integration</strong> wiring it to their specific sources and consumers. That's the \"buy the commodity, build the differentiator\" motto applied to the platform.</p>\n<p><strong>What to charge for:</strong> the <em>build</em> as a fixed-or-capped project; then a <strong>managed-platform / run retainer</strong> (monitoring, on-call, cost tuning, schema-drift firefighting) — because a platform is a product that needs running, not a project that ends. The retainer is the durable revenue.</p>\n<p><strong>What NOT to promise:</strong> a flat monthly cloud bill (compute scales with adoption — commit to <em>visibility and alerting</em>, not a fixed number); \"real-time\" when the client means \"fresher than yesterday\" (sell batch); a migration with zero downtime and no parallel-run period; or that the platform removes the need for data governance (that's <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>, and it's a prerequisite, not an add-on).</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "tools--vendor-landscape",
+   "kind": "tools",
+   "title": "Tools & Vendor Landscape",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p><em>As of 2026 — treat names/prices as perishable; re-check before quoting.</em></p>"
+    },
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Tool / Category</th><th align=\"left\">Use here</th><th align=\"left\">OSS / Paid</th><th align=\"left\">Note (lock-in / caveat)</th></tr></thead><tbody><tr><td align=\"left\">Cloud warehouses (Snowflake, BigQuery, Databricks SQL, Redshift)</td><td align=\"left\">Storage + SQL compute</td><td align=\"left\">Paid (consumption)</td><td align=\"left\">The category leaders; compute bill is the variable risk</td></tr><tr><td align=\"left\">Lakehouse platforms (Databricks, Snowflake; open table formats: Apache Iceberg, Delta Lake, Hudi)</td><td align=\"left\">One store for BI + ML</td><td align=\"left\">Paid + OSS formats</td><td align=\"left\">Open table format reduces lock-in; younger ops</td></tr><tr><td align=\"left\">Object storage (S3, GCS, Azure Blob)</td><td align=\"left\">Cheap mass storage for lakes</td><td align=\"left\">Paid (cheap)</td><td align=\"left\">Easy to make a \"swamp\" without governance</td></tr><tr><td align=\"left\">Managed ingestion (Fivetran, Airbyte, Stitch)</td><td align=\"left\">Connectors / CDC from SaaS &#x26; DBs</td><td align=\"left\">Paid / OSS (Airbyte)</td><td align=\"left\">Often priced per-row; can surprise at volume</td></tr><tr><td align=\"left\">Transformation / analytics engineering (dbt)</td><td align=\"left\">Version-controlled, tested SQL models</td><td align=\"left\">OSS core / paid cloud</td><td align=\"left\">The de-facto standard for the \"T\"</td></tr><tr><td align=\"left\">Orchestration (Airflow, Dagster, Prefect; managed variants)</td><td align=\"left\">Run &#x26; monitor DAGs</td><td align=\"left\">OSS / managed</td><td align=\"left\">Airflow ubiquitous; Dagster/Prefect more modern DX</td></tr><tr><td align=\"left\">Streaming (Apache Kafka / Confluent, Kinesis, Flink, Spark Streaming)</td><td align=\"left\">Event ingestion &#x26; stream processing</td><td align=\"left\">OSS / Paid</td><td align=\"left\">The expensive lane — justify the latency need first</td></tr><tr><td align=\"left\">Data observability (Monte Carlo, Soda, dbt tests, Great Expectations)</td><td align=\"left\">Freshness / schema / volume monitoring</td><td align=\"left\">Paid / OSS</td><td align=\"left\">dbt tests + GX cover a lot before buying a platform</td></tr><tr><td align=\"left\">Reverse-ETL (Hightouch, Census)</td><td align=\"left\">Push modelled data back into ops tools</td><td align=\"left\">Paid</td><td align=\"left\">Useful once the gold layer is trusted</td></tr><tr><td align=\"left\">Feature stores (Feast, Tecton)</td><td align=\"left\">Serve features train↔serve consistently</td><td align=\"left\">OSS / Paid</td><td align=\"left\">Platform-tier; see <a class=\"wikilink\" data-module=\"03\" href=\"#/module/03\">Working with Data: Sources, Quality &#x26; Feature Engineering</a></td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The whole-stack cloud suites (AWS / Azure / GCP) from <a class=\"wikilink\" data-module=\"01\" href=\"#/module/01\">AI &#x26; Data Landscape &#x26; Tech-Lead Mindset</a> bundle most of these — convenient, with the usual lock-in and egress caveats.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "when-is-this-overkill",
+   "kind": "overkill",
+   "title": "When Is This Overkill?",
+   "blocks": [
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Situation</th><th align=\"left\">A platform build is overkill — do this instead</th></tr></thead><tbody><tr><td align=\"left\">One analyst, a few small CSVs, monthly reporting</td><td align=\"left\">A spreadsheet or a managed BI tool pointed straight at the source</td></tr><tr><td align=\"left\">Single source, modest data, one dashboard</td><td align=\"left\">A direct warehouse + BI connection; skip the full pipeline</td></tr><tr><td align=\"left\">Client asked for \"real-time\" but has no sub-hour decision</td><td align=\"left\">Nightly (or hourly) batch — a fraction of the cost and complexity</td></tr><tr><td align=\"left\">Tempted to build a data lake for a 30-person company</td><td align=\"left\">A single cloud warehouse; grow into a lake only when files force it</td></tr><tr><td align=\"left\">Considering self-hosting the whole stack</td><td align=\"left\">Managed cloud — pay per use, skip the ops burden, revisit only at huge stable scale</td></tr><tr><td align=\"left\">Building custom connectors for standard SaaS tools</td><td align=\"left\">A managed connector — building your own is wasted budget</td></tr><tr><td align=\"left\">No governance/lawful basis for personal data yet</td><td align=\"left\">Stop and do <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a> first — it's a gate</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The senior instinct: <strong>the right platform is the smallest one that reliably feeds the consumers you actually have today</strong>, with clear seams to grow. Over-architecting a platform for imagined future scale is the most expensive mistake in this module.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "resources",
+   "kind": "resources",
+   "title": "Resources",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "books",
+     "number": null,
+     "title": "Books",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Martin Kleppmann — <em>Designing Data-Intensive Applications</em> — the authoritative reference on the foundations under everything in this module (storage, replication, batch vs stream, consistency). The one book to actually read here. <em>(Paid)</em></li>\n<li>Joe Reis &#x26; Matt Housley — <em>Fundamentals of Data Engineering</em> — the modern data stack and its lifecycle, at exactly this module's altitude. <em>(Paid)</em></li>\n<li>Ralph Kimball &#x26; Margy Ross — <em>The Data Warehouse Toolkit</em> — the canonical source on dimensional/star-schema modelling. <em>(Paid; reference)</em></li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "articles--reports-free",
+     "number": null,
+     "title": "Articles & Reports (Free)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>dbt Labs' \"analytics engineering\" guide &#x26; the <em>Modern Data Stack</em> writeups — the de-facto vocabulary of §6. <em>Date everything.</em></li>\n<li>Cloud-vendor architecture centres (AWS/Azure/GCP well-architected &#x26; data-platform reference architectures) — patterns and, crucially, <strong>cost models</strong>.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "go-deeper",
+     "number": null,
+     "title": "Go Deeper",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>This isn't a modelling topic, so there's <strong>no AI-Scientist maths analogue</strong> — the depth here is architectural, and the authoritative external reference is <strong>Kleppmann</strong>, above.</li>\n<li>Deeper hands-on data/feature code → <span class=\"vault-ref\" title=\"In the Obsidian vault: 03 - Data Processing &#x26; Feature Engineering\">Data Processing &#x26; Feature Engineering</span> (ML Engineer Path).</li>\n<li>What runs <em>on</em> this platform — serving, monitoring, and retraining models → <a class=\"wikilink\" data-module=\"13\" href=\"#/module/13\">MLOps &#x26; Productionization</a>.</li>\n<li>Governing the data flowing through it — lawful basis, pseudonymisation, retention → <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>.</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "practical-artifacts",
+   "kind": "artifacts",
+   "title": "Practical Artifacts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "decision-checklist--scoping-a-data-platform-mission",
+     "number": null,
+     "title": "Decision Checklist — \"Scoping a data-platform mission\"",
+     "blocks": [
+      {
+       "type": "checklist",
+       "checklistId": "12/practical-artifacts/1",
+       "items": [
+        {
+         "id": "0",
+         "html": "Which of the four layers is <em>actually</em> the bottleneck — ingestion, storage, transformation, or serving?"
+        },
+        {
+         "id": "1",
+         "html": "Are the sources standard SaaS/DBs (buy connectors) or genuinely custom (build)?"
+        },
+        {
+         "id": "2",
+         "html": "Is the workload structured-BI (warehouse) or unstructured/ML-heavy (lake/lakehouse)?"
+        },
+        {
+         "id": "3",
+         "html": "Is there a real sub-hour decision that justifies streaming — or is batch the honest answer?"
+        },
+        {
+         "id": "4",
+         "html": "Who owns each source, and will they sign a data contract for schema/freshness?"
+        },
+        {
+         "id": "5",
+         "html": "Have we sized the <em>compute</em> bill at adopted scale, not pilot scale, and set a cost alert?"
+        },
+        {
+         "id": "6",
+         "html": "Is there a lawful basis for any personal data before it lands? (→ <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>)"
+        },
+        {
+         "id": "7",
+         "html": "Have we agreed who <em>runs</em> this after go-live (the retainer), not just who builds it?"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "red-flags",
+     "number": null,
+     "title": "Red Flags",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"We need a data lake.\" (Often: they need a warehouse and heard \"lake\" sounds modern.)</li>\n<li>\"It has to be real-time.\" (Ask for the five-minute decision; usually there isn't one.)</li>\n<li>\"Just point the model at our production database.\" (No isolation, no history, no contract — it will break prod <em>and</em> the model.)</li>\n<li>A flat monthly cloud-cost expectation. (Compute scales with success; promise visibility, not a fixed number.)</li>\n<li>No owner for the platform after launch. (A platform with no on-call is a future outage you're holding.)</li>\n<li>Business logic (\"what is an active customer?\") that nobody can define. (Build the transformation layer <em>and</em> the definition.)</li>\n<li>\"We'll add governance later.\" (It's a gate, not a phase — see module 14.)</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "scoping-prompts-ask-the-client",
+     "number": null,
+     "title": "Scoping Prompts (ask the client)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"Where does each piece of data live today, who owns the source, and how does it get to an analyst now?\"</li>\n<li>\"When the board sees a number, can everyone agree how it's calculated? Show me the last time they didn't.\"</li>\n<li>\"What decision changes if you had this data within five minutes instead of tomorrow morning?\"</li>\n<li>\"What's your current monthly cloud bill, and who watches it?\"</li>\n<li>\"When a pipeline breaks at 2am, who finds out, and how?\"</li>\n<li>\"What happens to a downstream dashboard or model when a source system renames a column?\"</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "self-assessment",
+   "kind": "self-assessment",
+   "title": "Self-Assessment",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Before moving on, you should be able to:</p>"
+    },
+    {
+     "type": "checklist",
+     "checklistId": "12/self-assessment/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Sketch the four-layer modern data stack and locate any client's tooling and bottleneck on it"
+      },
+      {
+       "id": "1",
+       "html": "Explain ETL vs ELT and why cheap storage + elastic compute made ELT the cloud default"
+      },
+      {
+       "id": "2",
+       "html": "Route a workload to warehouse / lake / lakehouse, and batch vs streaming, with a one-line justification"
+      },
+      {
+       "id": "3",
+       "html": "Describe DAG orchestration, the dbt-style analytics layer, and the medallion pattern at a leader's altitude"
+      },
+      {
+       "id": "4",
+       "html": "Name the three ways a warehouse compute bill surprises people and how you'd cap each"
+      },
+      {
+       "id": "5",
+       "html": "Scope and price a platform, ingestion, warehouse, or streaming mission with a concrete deliverable and a run retainer"
+      },
+      {
+       "id": "6",
+       "html": "Decide buy-vs-build per layer and defend \"buy the layers, build the modelling\" to a client"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  }
+ ]
+}

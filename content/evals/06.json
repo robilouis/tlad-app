@@ -1,0 +1,346 @@
+{
+  "moduleId": "06",
+  "quiz": [
+    {
+      "id": "q1",
+      "conceptRef": "when-deep-learning-beats-classical-ml--and-when-it-doesnt",
+      "prompt": "A client wants churn prediction from their CRM — 80,000 rows of tabular customer data. A stakeholder insists: \"Use deep learning, it's more powerful.\" What is the right call?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Gradient-boosted trees — on tabular data they're cheaper, faster, more explainable, and usually *more* accurate than a deep net, with no GPU bill.",
+          "correct": true,
+          "explanation": "Right. Deep learning's superpower is learning features automatically from *unstructured* inputs. On tabular data the features are already columns, so that superpower is wasted — and power you don't need is just cost. Route by the data, not the buzzword."
+        },
+        {
+          "id": "b",
+          "text": "Deep learning — 80,000 rows is plenty of data, and more data is exactly where deep nets shine.",
+          "correct": false,
+          "explanation": "Scale alone doesn't settle it; *data type* comes first. Deep learning earns its cost on perception and language, where features can't be hand-written. On rows and columns, boosted trees beat deep nets on cost, speed, and usually accuracy too."
+        },
+        {
+          "id": "c",
+          "text": "Transfer learning — start from a pretrained tabular network so you get deep-learning power without the from-scratch cost.",
+          "correct": false,
+          "explanation": "Transfer learning is the cost-collapsing move for *unstructured* inputs (images, audio, text), where pretrained models have learned general perceptual features. For a CRM table there is no useful pretrained perception to transfer — and trees would still win."
+        },
+        {
+          "id": "d",
+          "text": "Deep learning for maximum accuracy, then explain its decisions with a simpler surrogate model afterwards.",
+          "correct": false,
+          "explanation": "This buys the worst of both: a GPU bill and a black box, for accuracy that is *usually lower* than boosted trees on tabular data. You'd be paying extra to obscure a problem classical ML solves better."
+        }
+      ],
+      "takeaway": "Route each problem by its data: unstructured inputs push toward deep learning; tabular and modest-sized data make classical ML not the cautious choice but usually the better one.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q2",
+      "conceptRef": "what-a-neural-network-actually-is",
+      "prompt": "In a design review someone asks: \"Why do neural networks need activation functions at all — aren't the layers and weights doing the work?\" What is the correct answer?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Without activations, stacking any number of layers collapses into one big linear transformation — a straight line that can't fit curves, corners, or interactions. Activations add the bends.",
+          "correct": true,
+          "explanation": "Exactly. Each layer is `activation(W·input + b)`; remove the activation and the whole stack is just one linear map, no matter how deep. The non-linearity is what lets depth build complex concepts from simple parts."
+        },
+        {
+          "id": "b",
+          "text": "Activations are what the network learns during training — they encode everything the model knows.",
+          "correct": false,
+          "explanation": "That's the *weights*. The weights are the millions of dials training turns; the weights *are* the model. Activations are fixed, simple functions (like ReLU) that add non-linearity — they aren't learned."
+        },
+        {
+          "id": "c",
+          "text": "Activations prevent overfitting by randomly switching neurons off during training.",
+          "correct": false,
+          "explanation": "Randomly switching neurons off is *dropout*, a regularisation technique against overfitting. Activations serve a different purpose entirely: they bend the space so the stack can represent non-linear relationships."
+        },
+        {
+          "id": "d",
+          "text": "Activations are an optimisation that lets GPUs parallelise the matrix multiplications.",
+          "correct": false,
+          "explanation": "GPUs parallelise matrix maths regardless of activations — that's why deep learning needs them at all. Activations are about *representational power* (bending the space), not about compute speed; ReLU is popular partly because it's cheap, but that's a side benefit."
+        }
+      ],
+      "takeaway": "A neural network is stacked transformations — weights are the learned dials, activations add the bends, and depth lets it invent its own features from raw data.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q3",
+      "conceptRef": "how-it-learns-intuition-no-derivation",
+      "prompt": "During training, the loss oscillates wildly and then diverges instead of decreasing. Which knob is the most likely culprit, and why?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The learning rate is too high — the steps overshoot the minimum and bounce up the far wall of the valley instead of descending.",
+          "correct": true,
+          "explanation": "This is the textbook signature. The learning rate is the stride length of gradient descent: too large and you leap clean over the bottom and the loss diverges or oscillates; too small and training crawls. It's the single most fiddly knob."
+        },
+        {
+          "id": "b",
+          "text": "Too few epochs — the network simply hasn't seen the data enough times yet.",
+          "correct": false,
+          "explanation": "More epochs means more passes over the data, which helps a *converging* run learn more (until overfitting). It does nothing for a run that is actively diverging — each oscillating step is making the weights worse, and repeating that won't fix it."
+        },
+        {
+          "id": "c",
+          "text": "The batch size is too large, so the gradient estimates are too noisy to descend.",
+          "correct": false,
+          "explanation": "Backwards: *smaller* batches give noisier gradient estimates (and that mild noise is often helpful for escaping bad spots). Batch size mainly trades GPU speed against memory and stability — it isn't the classic cause of divergence."
+        },
+        {
+          "id": "d",
+          "text": "ReLU activations are causing vanishing gradients in the hidden layers.",
+          "correct": false,
+          "explanation": "ReLU was adopted precisely because it *mitigates* vanishing gradients — it doesn't saturate for positive inputs. And vanishing gradients make training stall (loss won't go down), not explode and oscillate."
+        }
+      ],
+      "takeaway": "The learning rate is the stride of gradient descent: too large overshoots and diverges, too small crawls forever — it's the knob teams fight with most.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q4",
+      "conceptRef": "how-it-learns-intuition-no-derivation",
+      "prompt": "Which statement correctly describes what backpropagation actually does in the training loop?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "It's the blame-assignment step: it pushes the error backward through the layers via the chain rule, computing each weight's share of responsibility so gradient descent knows which dials to turn and by how much.",
+          "correct": true,
+          "explanation": "Right. With millions of weights you need to know how much each contributed to the error. Backprop computes exactly that, cheaply, for every weight at once — like walking back down a relay team asking each runner how much of the lost time was theirs."
+        },
+        {
+          "id": "b",
+          "text": "It's the optimiser itself — backprop is the algorithm that updates the weights toward lower loss.",
+          "correct": false,
+          "explanation": "Close but conflated: *gradient descent* updates the weights. Backprop's job is to compute the gradients (the blame shares) that gradient descent then uses. Backprop answers \"who's responsible?\"; gradient descent takes the step."
+        },
+        {
+          "id": "c",
+          "text": "It runs the network in reverse to reconstruct training inputs from outputs, checking the model's understanding.",
+          "correct": false,
+          "explanation": "Nothing is reconstructed. \"Backward\" refers to the direction the *error signal* flows — from the loss back through the layers — not to running the network in reverse to generate anything."
+        },
+        {
+          "id": "d",
+          "text": "It's a regularisation technique that stops the network from memorising the training data.",
+          "correct": false,
+          "explanation": "Backprop is core machinery for *all* training — including the overfitting kind. Fighting memorisation is the job of dropout, early stopping, augmentation, more data, and transfer learning, not of backprop."
+        }
+      ],
+      "takeaway": "Backprop is blame assignment — the chain rule pushed backward through the layers — and it's the engineers' problem to run, not the leader's to derive.",
+      "difficulty": "stretch"
+    },
+    {
+      "id": "q5",
+      "conceptRef": "overfitting-in-deep-learning-and-the-practical-fixes",
+      "prompt": "A team's image classifier shows training loss still falling while validation loss has started rising. Their plan: \"We just need more epochs.\" What's the correct read?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "That curve is the signature of overfitting — more epochs will deepen the memorisation, not improve quality. Reach for early stopping, augmentation, more data, or transfer learning instead.",
+          "correct": true,
+          "explanation": "Exactly. The model is getting better at the exam it's seen and worse at the real world. Past that point, more epochs is how you *memorise* the training data, not how you improve — a named red flag in this module."
+        },
+        {
+          "id": "b",
+          "text": "The plan is sound — validation loss often rises temporarily before the model breaks through to a better optimum.",
+          "correct": false,
+          "explanation": "Training loss falling while validation loss rises is the canonical detection signal for overfitting, caught exactly by the held-out-set discipline. Betting on a \"breakthrough\" is wishful thinking that burns GPU hours while making generalisation worse."
+        },
+        {
+          "id": "c",
+          "text": "The model is underfitting — add more layers and weights so it can capture the pattern.",
+          "correct": false,
+          "explanation": "Backwards. Underfitting would show *both* losses stuck high. Deep nets overfit acutely precisely because they have so many weights they can memorise noise outright — adding capacity feeds the disease."
+        },
+        {
+          "id": "d",
+          "text": "The validation set must be broken; if training loss improves, the model is improving.",
+          "correct": false,
+          "explanation": "The validation set is doing its job: revealing that training-set improvement is no longer generalising. Discarding the messenger is how teams ship a model that aces its own training data and fails in production."
+        }
+      ],
+      "takeaway": "Training loss down while validation loss rises = memorisation; the fixes are more/augmented data, dropout, early stopping, and above all transfer learning — never \"more epochs.\"",
+      "difficulty": "core"
+    },
+    {
+      "id": "q6",
+      "conceptRef": "transfer-learning--fine-tuning--the-most-important-lesson",
+      "prompt": "A manufacturer has ~800 labelled photos (good vs scratched parts) and wants a defect classifier. What is the right technical plan?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Start from a vision model pretrained on millions of general images, freeze it, and train only a new classification head on the 800 photos — fine-tuning the top layers gently only if accuracy falls short.",
+          "correct": true,
+          "explanation": "This is the worked example of the module. The pretrained model already knows edges, textures, and surfaces — exactly what \"scratch vs smooth\" leans on. Feature extraction often suffices on hundreds of examples; fine-tuning is the escalation, not the start."
+        },
+        {
+          "id": "b",
+          "text": "Train a vision network from scratch with an architecture sized down to match the small dataset.",
+          "correct": false,
+          "explanation": "From-scratch on 800 images overfits instantly and fails, however you size the network — vision models need hundreds of thousands to millions of examples to learn general features from zero. The module rules this off the table in step one."
+        },
+        {
+          "id": "c",
+          "text": "Tell the client it's infeasible until they collect at least 100,000 labelled photos.",
+          "correct": false,
+          "explanation": "That figure is the *from-scratch* requirement. Transfer learning is precisely the move that turns \"impossible, we don't have the data\" into \"feasible\" — strong results from hundreds to a few thousand examples, because only the specifics need learning."
+        },
+        {
+          "id": "d",
+          "text": "Fine-tune all layers of a pretrained model aggressively at a high learning rate to specialise it fast.",
+          "correct": false,
+          "explanation": "Unfreezing everything and training hard on 800 photos throws away the pretrained generalisation you came for — it's a fast route back to overfitting. Fine-tuning is done *gently*, at a low learning rate, on the top layers, and only if the frozen baseline isn't enough."
+        }
+      ],
+      "takeaway": "You don't train deep models from scratch: start from a pretrained model, train a small head first, fine-tune gently only if needed — that's what makes a deep-learning mission sellable.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q7",
+      "conceptRef": "embeddings--the-reusable-by-product",
+      "prompt": "A colleague asks what an \"embedding\" is and why everyone keeps calling it reusable infrastructure. Which answer is right?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A vector of numbers from a deep model's intermediate layer that captures an input's meaning — similar inputs land nearby — letting you search, cluster, deduplicate, and feed retrieval, often without training anything yourself.",
+          "correct": true,
+          "explanation": "Right. Embeddings turn fuzzy things (sentences, images, products, users) into coordinates you can compute with. They quietly power semantic search, recommendations, dedup, and RAG — and you typically just call a pretrained model to get them."
+        },
+        {
+          "id": "b",
+          "text": "A compressed copy of the model's weights, packaged so it can be deployed on smaller hardware.",
+          "correct": false,
+          "explanation": "Embeddings represent the *input's* meaning, not the model. Weight compression for deployment is a different topic (quantisation/distillation). An embedding is the numeric fingerprint a model produces *of your data*."
+        },
+        {
+          "id": "c",
+          "text": "A human-readable feature list where each dimension has a defined meaning, making the model explainable.",
+          "correct": false,
+          "explanation": "The opposite: no human reads \"dimension 412.\" The individual values are uninterpretable — what matters is the *distances between vectors*. Embeddings buy similarity geometry, not explainability."
+        },
+        {
+          "id": "d",
+          "text": "A representation you can only obtain by training your own deep model end-to-end on your data first.",
+          "correct": false,
+          "explanation": "The commercial point is exactly the reverse: you often train *nothing*. Pretrained embedding models are a rentable commodity — you call one to turn your corpus into vectors and build the workflow on top."
+        }
+      ],
+      "takeaway": "An embedding is a numeric fingerprint of meaning — close = similar — and it's reusable infrastructure you usually rent from a pretrained model rather than build.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q8",
+      "conceptRef": "the-talent-data--compute-reality",
+      "prompt": "A CFO reviewing your quote asks why the deep-learning mission costs notably more than last year's classical-ML project. Which explanation is accurate?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Deep learning sits in a heavier weight class on every input — GPU time billed by the hour with training as the cost centre, scarcer and pricier specialists, and slower iteration — and transfer learning is precisely what keeps this bill from being far worse.",
+          "correct": true,
+          "explanation": "Right. Classical ML trains on a laptop CPU for ~€0 in minutes; deep learning means hourly GPU billing, DL specialists, and experiments that take hours or days. The honest quote names compute and talent — and credits transfer learning for collapsing the rest."
+        },
+        {
+          "id": "b",
+          "text": "The main cost is licensing the deep-learning frameworks and the pretrained model.",
+          "correct": false,
+          "explanation": "PyTorch, TensorFlow, and most pretrained models are open source — increasingly free or rented cheaply. The recurring bill is GPU time and the specialists who run it; the model itself is a commodity, not a cost line."
+        },
+        {
+          "id": "c",
+          "text": "Deep models are expensive to run per prediction, so the bill is dominated by inference once deployed.",
+          "correct": false,
+          "explanation": "Inverted: the cost lives in *training*, not in using the model. Once trained, inference is comparatively cheap. That's exactly why transfer learning — skipping most of the training — reshapes the estimate."
+        },
+        {
+          "id": "d",
+          "text": "It shouldn't cost more — deep learning automates feature engineering, so it saves money overall versus classical ML.",
+          "correct": false,
+          "explanation": "Automatic feature learning is real, but it's bought with data, GPUs, scarcer talent, and slower iteration. On problems where classical ML suffices, deep learning is strictly the more expensive route — that's the whole routing decision of this module."
+        }
+      ],
+      "takeaway": "Budget GPU hours and scarce specialists — not the algorithm — and remember the cost lives in training, which is exactly what transfer learning lets you skip.",
+      "difficulty": "stretch"
+    }
+  ],
+  "exercises": [
+    {
+      "id": "ex1",
+      "title": "Route a CDO's roadmap: deep learning, classical ML, or neither",
+      "estimatedMinutes": 25,
+      "scenario": "A retail group's CDO hands you four candidate AI initiatives and asks which ones justify deep learning. The board has heard \"deep learning is more powerful\" and is leaning toward using it everywhere.\n\n1. **Churn prediction** from the CRM — 80,000 customer rows, mixed numeric/categorical columns.\n2. **Scratch detection** on warehouse goods from existing cameras — ~1,000 labelled photos available (good/damaged).\n3. **Invoice digitisation** — a hosted OCR/document API already does this for ~€300/month.\n4. **Credit-limit decisions** for B2B customers — tabular data, and the risk team must be able to explain every decision to auditors.",
+      "givens": [
+        "Board pressure to \"use deep learning everywhere — it's more powerful\"",
+        "In-house team: two data scientists comfortable with classical ML, no DL specialist",
+        "Cloud GPUs available at a few €/hour if needed",
+        "No initiative has more than a few thousand labelled examples"
+      ],
+      "tasks": [
+        "Route each of the four initiatives to a default approach (boosted trees / transfer learning / buy the API / transparent model) with a one-line justification grounded in data type and scale.",
+        "For the one initiative where deep learning *is* right, state why from-scratch training is off the table and what the transfer-learning plan looks like in 3-4 steps.",
+        "Write the two-sentence answer you'd give the board to the claim \"deep learning is more powerful, use it everywhere.\""
+      ],
+      "solution": "**Step 1 — route by the data, not the buzzword.**\n\n1. **Churn → gradient-boosted trees.** Tabular rows and columns: the features already exist as columns, so deep learning's feature-learning superpower is wasted. Trees are cheaper, faster, explainable, and usually *more* accurate here — no GPU, and the existing team can ship it.\n2. **Scratch detection → deep learning via transfer learning.** Raw pixels are unstructured — classical ML can't see. This is the *only* initiative whose data type demands a deep model, and 1,000 photos is enough *only* because a pretrained model does the heavy lifting.\n3. **Invoice digitisation → buy the API.** A €300/month API already clears the bar. Building or fine-tuning anything here is burning budget on a solved commodity — a named red flag in the module.\n4. **Credit limits → transparent classical model.** Tabular data *and* a hard explainability requirement: a black-box deep net is a liability in front of auditors. Favour an interpretable model; route the explainability constraint into the design from day one.\n\n**Step 2 — the transfer-learning plan for scratch detection.** From-scratch is off the table because a vision network trained from zero on ~1,000 images would overfit instantly — from-scratch needs hundreds of thousands to millions of labels. The plan: (1) start from a vision model pretrained on millions of general images (it already knows edges, textures, surfaces); (2) replace the final layer with a good/damaged head and train *only that head* on the 1,000 photos — feature extraction, minutes on one GPU; (3) augment (flip, rotate, brightness) to fight overfitting on a small set; (4) only if accuracy falls short, gently unfreeze the top layers and fine-tune at a low learning rate — a few GPU-hours. Evaluate on a held-out test set judged once, with the alert threshold set from the business cost of a missed defect vs a false alarm. Deliverable: a defect-scoring service wired into the warehouse camera feed — not \"a neural network.\"\n\n**Step 3 — the board answer.** *\"Deep learning is essential for perception and language and overkill for a spreadsheet — power you don't need is just cost. Of these four, only the camera problem has data a human perceives rather than tabulates, so that's the one that gets a deep model — pretrained and adapted in weeks, not trained from scratch.\"*",
+      "rubric": {
+        "keyPoints": [
+          "All four initiatives routed correctly: trees for churn, transfer learning for vision, buy for OCR, transparent model for credit — each justified by data type/scale or an explicit constraint",
+          "From-scratch ruled out for the vision task on data-volume grounds, with a feature-extraction-first, fine-tune-if-needed plan",
+          "Augmentation and an honest held-out evaluation with a business-set threshold appear in the vision plan",
+          "The board answer routes by data, names the cheaper thing that clears the bar, and avoids technology-led framing"
+        ],
+        "pitfalls": [
+          "Recommending deep learning for the tabular problems because the board wants it — routing by buzzword instead of by data",
+          "Proposing to fine-tune or rebuild OCR when a €300/month API already does the job",
+          "Ignoring the auditor-explainability constraint and proposing a black box for credit decisions",
+          "Planning from-scratch training, or aggressive full-network fine-tuning, on ~1,000 images"
+        ],
+        "takeaways": [
+          "The deep-learning decision is mostly settled by the shape of the data: unstructured → deep learning (via transfer), tabular → classical ML",
+          "Prove the cheaper thing fails before reaching for the GPU — and when deep learning is right, prove transfer learning is insufficient before training from scratch"
+        ],
+        "transfer": "This routing discipline — match the tool's cost to the problem's actual shape, and make every escalation justify itself — is the same move as choosing build-vs-buy in software (don't write a custom queue when a managed one exists), choosing infrastructure (don't deploy Kubernetes for one cron job), or staffing (don't hire a specialist for a generalist's task). Wherever a more powerful option carries a structurally higher cost, the senior skill is naming the cheapest option that clears the bar and demanding evidence before each step up."
+      }
+    },
+    {
+      "id": "ex2",
+      "title": "Feasibility verdict: a defect classifier on a shoestring",
+      "estimatedMinutes": 30,
+      "scenario": "A mid-size manufacturer asks for a fixed-price **feasibility study**: can AI flag scratched parts from their line cameras? They have **800 labelled photos** (400 good / 400 scratched) and a sceptical CFO who was once burned by an \"AI research project\" that consumed a six-figure budget and shipped nothing. Cloud GPUs cost **€2.50/hour**. You have two weeks to produce a go / scope-down / no-go verdict with a defensible cost picture.",
+      "givens": [
+        "800 labelled photos (balanced good/scratched); more can be collected slowly from the line",
+        "Cloud GPU: €2.50/hour; from-scratch vision training is known to take thousands of GPU-hours",
+        "Feature extraction on a frozen pretrained model: minutes to ~1 GPU-hour per experiment; gentle fine-tuning: a few GPU-hours per run",
+        "CFO requirement: no open-ended research spend; a clear order-of-magnitude compute estimate in the report"
+      ],
+      "tasks": [
+        "State why the from-scratch option fails both technically and commercially, with the order-of-magnitude compute cost that kills it.",
+        "Lay out the staged technical plan (feature extraction → fine-tune → augmentation → honest eval) and estimate the total GPU bill for, say, ~20 experiments.",
+        "List what the feasibility report must contain for the CFO, and the three things you will explicitly *not* promise.",
+        "Draft the one-paragraph verdict you expect to write if the baseline reaches promising-but-imperfect accuracy."
+      ],
+      "solution": "**Step 1 — kill from-scratch with arithmetic.** Training a vision model from zero needs hundreds of thousands to millions of labelled images — the client has 800, so it would overfit instantly and fail. Even with the data, thousands of GPU-hours at €2.50/hour is **five figures in compute alone** (e.g. 4,000 GPU-h ≈ €10,000) plus research-grade talent for months. Technically doomed *and* exactly the open-ended spend the CFO fears. Off the table in one paragraph of the report.\n\n**Step 2 — the transfer-learning plan and its bill.** (1) **Feature extraction:** freeze a vision model pretrained on millions of general images, train only a good/scratched head on the 800 photos — \"scratch vs smooth surface\" leans on exactly the texture features the model already learned. ~1 GPU-hour per experiment. (2) **Augmentation:** flips, rotations, brightness shifts to manufacture variety from 800 shots — the cheap overfitting defence. (3) **Gentle fine-tuning** of the top layers at a low learning rate *only if* the frozen baseline falls short — a few GPU-hours per run. (4) **Honest eval:** a held-out test set judged once; threshold chosen from the business cost of a missed defect vs a false line stop. Budget: ~20 experiments averaging ~2 GPU-hours = **~40 GPU-hours ≈ €100 of compute**. The real costs are the consultant-days and any extra labelling — which is the honest message: *in transfer learning, compute is a rounding error; people and data are the budget.*\n\n**Step 3 — what the report contains, and the non-promises.** Contents: a data-sufficiency assessment (is 800 enough, per class, per defect type?), the measured transfer-learning baseline on the client's actual photos, an accuracy-vs-target verdict, a compute/cost projection for the production phase, and a go / scope-down / no-go recommendation. The three explicit non-promises: **(a)** no specific accuracy number before transfer learning is tested on their real data; **(b)** no human-level reliability without a human-in-the-loop on low-confidence cases; **(c)** no full explainability of a black-box vision model — if a regulator or customer needs \"why,\" that constraint is flagged now, not at delivery.\n\n**Step 4 — the verdict paragraph.** *\"The transfer-learning baseline reached promising accuracy on your photos for roughly €100 of compute, which confirms feasibility without research-scale spend. We recommend a scoped go: a 2-4 week PoC to harden the model with targeted additional photos of the under-represented defect types, followed by production integration as a defect-scoring service on the existing camera feed, with a human-review path for low-confidence parts. The budget is dominated by integration and labelling effort, not GPUs, and the decision threshold will be set with your quality team from the cost of a missed defect versus a false alarm.\"*",
+      "rubric": {
+        "keyPoints": [
+          "From-scratch rejected on *both* grounds: 800 images guarantees overfitting, and thousands of GPU-hours ≈ five-figure compute is disproportionate",
+          "Staged plan in the right order: frozen feature extraction first, augmentation throughout, gentle fine-tuning only as escalation, held-out eval with a business-set threshold",
+          "Compute estimated at order-of-magnitude ~tens of GPU-hours / ~€100, with the insight that people and labelling dominate the real budget",
+          "Non-promises stated explicitly: no accuracy number before testing on real data, no human-free reliability, no black-box explainability"
+        ],
+        "pitfalls": [
+          "Promising a specific accuracy figure in the proposal before the baseline exists — a named red flag of the module",
+          "Quoting the mission as if compute were the main cost line, when transfer learning makes it a rounding error next to labelling and integration",
+          "Skipping straight to full fine-tuning (or unfreezing everything) instead of trying the frozen baseline first",
+          "Delivering \"a neural network\" instead of a scoring service wired into the line with a threshold and a human path"
+        ],
+        "takeaways": [
+          "Transfer learning collapses a deep-learning mission from research-budget to ~€100 of compute — the bill moves to data work and integration",
+          "A feasibility study sells judgement plus a real baseline on the client's data; the verdict format (go / scope-down / no-go) is repeatable, fixed-price IP"
+        ],
+        "transfer": "The feasibility-study pattern — spend 2% of the budget to de-risk the other 98% with a real baseline before committing — is the same move as an architectural spike in software engineering, a pilot plant in chemical manufacturing, or a market test before a product launch. Wherever a stakeholder wants a big bet and the evidence is cheap to gather, the high-trust play is a fixed-price, measured verdict that earns the right to the larger mission — or saves the client from it."
+      }
+    }
+  ]
+}

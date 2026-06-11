@@ -1,0 +1,540 @@
+{
+ "id": "17",
+ "title": "Building the AI & Data Offer & Leading the Pole",
+ "weeks": [
+  32,
+  33
+ ],
+ "part": "VI — Leadership & Commercial Offer",
+ "partIndex": 6,
+ "addon": false,
+ "pitchHtml": "<p>This is the capstone — where the whole path pays off. Every prior module ended with \"Client Mission Patterns\"; this one assembles them into a coherent <strong>commercial offer</strong> and the <strong>pole that delivers it</strong>. The job changes here: not \"should we use ML for this problem?\" (module 01) but \"what do we sell, to whom, at what price, with what team, and how do we run it at a margin?\" You stop thinking like a builder and start thinking like the owner of a small business inside (or alongside) a larger one — with a catalogue, a P&#x26;L, a hiring plan, a security posture, and a roadmap. The leadership foundation (team roles, complexity budget, stakeholder translation) lives in <span class=\"vault-ref\" title=\"In the Obsidian vault: 24 - ML Systems Engineering &#x26; Technical Leadership\">ML Systems Engineering &#x26; Technical Leadership</span> (AI Scientist Path); this module extends it into the <em>commercial and operating</em> dimension that path doesn't cover.</p>",
+ "prev": "16",
+ "next": null,
+ "sectionCount": 8,
+ "quizCount": 8,
+ "exerciseCount": 2,
+ "sections": [
+  {
+   "id": "learning-objectives",
+   "kind": "objectives",
+   "title": "Learning Objectives",
+   "blocks": [
+    {
+     "type": "checklist",
+     "checklistId": "17/learning-objectives/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Turn the mission archetypes scattered across modules 01-16 into a <strong>structured service catalogue</strong> with an offer ladder"
+      },
+      {
+       "id": "1",
+       "html": "Choose a <strong>pricing model</strong> (T&#x26;M, fixed-price, value-based, retainer) per service, and explain the economics of reuse"
+      },
+      {
+       "id": "2",
+       "html": "<strong>Position</strong> the offer — niche vs generalist, what to build vs buy, what proof you need to win"
+      },
+      {
+       "id": "3",
+       "html": "Decide an <strong>operating model</strong> for the pole (centralised CoE, embedded, or hybrid) against your context"
+      },
+      {
+       "id": "4",
+       "html": "Define the pole's <strong>security posture</strong> — what you secure, and what you sell as a security capability"
+      },
+      {
+       "id": "5",
+       "html": "Set the pole's <strong>roadmap and KPIs</strong> (utilisation, margin, delivery success, satisfaction) and run demand intake"
+      },
+      {
+       "id": "6",
+       "html": "Communicate the offer and the pole's health to an <strong>executive audience</strong> in their terms"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "key-concepts",
+   "kind": "concepts",
+   "title": "Key Concepts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "from-capabilities-to-an-offer",
+     "number": 1,
+     "title": "From Capabilities to an Offer",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>A capability is \"we can build a RAG system.\" An <strong>offer</strong> is \"here is a named service, with a deliverable, a price, a duration, and a buyer — and here's how it connects to the next thing we'll sell you.\" The leap from one to the other is the entire job of this module.</p>\n<p>The raw material is already written. Every module 01-16 closed with <strong>Client Mission Patterns</strong> — problem → named deliverable → scope → who buys it. Collected, they <em>are</em> your service catalogue draft. Your work is to (1) <strong>group</strong> them into a small number of named services, (2) decide which are <strong>productised</strong> vs <strong>bespoke</strong>, and (3) arrange them on an <strong>offer ladder</strong> so each rung funds the next.</p>\n<p><strong>Productised vs bespoke</strong> — the single most important distinction for your margin:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\"></th><th align=\"left\">Productised service</th><th align=\"left\">Bespoke engagement</th></tr></thead><tbody><tr><td align=\"left\"><strong>Definition</strong></td><td align=\"left\">Fixed scope, repeatable deliverable, reusable assets</td><td align=\"left\">Tailored to one client's problem</td></tr><tr><td align=\"left\"><strong>Examples (from this path)</strong></td><td align=\"left\">Readiness assessment (01), data-quality audit (03), RGPD gap assessment (14), EU AI Act readiness (15)</td><td align=\"left\">A demand-forecasting service (04), a permissioned RAG system (10), a data-platform migration (12)</td></tr><tr><td align=\"left\"><strong>Pricing</strong></td><td align=\"left\">Fixed price, near-constant cost</td><td align=\"left\">Fixed or capped, sized per case</td></tr><tr><td align=\"left\"><strong>Margin</strong></td><td align=\"left\">High and rising (you reuse the IP)</td><td align=\"left\">Moderate; depends on reuse discipline</td></tr><tr><td align=\"left\"><strong>Sales motion</strong></td><td align=\"left\">Catalogue item, fast yes</td><td align=\"left\">Discovery → proposal → negotiation</td></tr><tr><td align=\"left\"><strong>Role in the offer</strong></td><td align=\"left\">Land cheaply, prove value, qualify</td><td align=\"left\">Expand into the real money</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Think of the offer as a <strong>funnel, not a price list</strong>. A cheap, productised, low-risk entry sale (an assessment, an audit, a PoC) exists to <em>earn the right</em> to the expensive bespoke build behind it — and the build earns the right to the recurring run. This is \"land and expand\": you rarely win the £400k platform on day one; you win the £25k assessment that proves you, then the build, then the retainer. Each rung de-risks the next <em>for both sides</em> — the client buys a small bet before a big one, and you qualify them before committing delivery capacity.</p>"
+      }
+     ]
+    },
+    {
+     "id": "the-offer-ladder",
+     "number": 2,
+     "title": "The Offer Ladder",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Arrange the catalogue into four rungs. Most clients enter low and climb; your commercial design is making each rung naturally produce the evidence and trust for the next.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Rung</th><th align=\"left\">What it is</th><th align=\"left\">Typical price band</th><th align=\"left\">Funds the next by…</th></tr></thead><tbody><tr><td align=\"left\"><strong>1. Assess</strong></td><td align=\"left\">Readiness, audit, gap analysis, second opinion</td><td align=\"left\">Low, fixed (loss-leader OK)</td><td align=\"left\">Producing the evidence and the prioritised backlog that <em>scopes</em> the build</td></tr><tr><td align=\"left\"><strong>2. Discover / PoC</strong></td><td align=\"left\">Feasibility study, scoped prototype, eval-and-harden of an existing PoC</td><td align=\"left\">Low-medium, fixed</td><td align=\"left\">Proving the value number on <em>their</em> data so the build is a small step, not a leap of faith</td></tr><tr><td align=\"left\"><strong>3. Build</strong></td><td align=\"left\">The production system (model, pipeline, RAG, platform)</td><td align=\"left\">Medium-high, fixed or capped</td><td align=\"left\">Creating something that must be <em>run</em> — which only you know how to run</td></tr><tr><td align=\"left\"><strong>4. Run / Managed service</strong></td><td align=\"left\">Monitoring, retraining, on-call, cost tuning, evolution</td><td align=\"left\"><strong>Recurring</strong> (retainer/subscription)</td><td align=\"left\">Recurring margin + the relationship that surfaces the <em>next</em> assessment</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The strategic point: <strong>rung 4 is where a consultancy becomes a business</strong>. Project revenue is lumpy and re-sold every quarter; a book of managed-service retainers is predictable, compounds, and is what a P&#x26;L (or an acquirer) values most. Design every build in rung 3 to <em>hand off into a run contract</em>, not to end.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "worked-example",
+       "title": "climbing the ladder with one client",
+       "html": "<p>A mid-market insurer:</p>\n<ol>\n<li><strong>Assess</strong> (3 wks, £18k fixed): AI &#x26; Data Readiness Assessment (<a class=\"wikilink\" data-module=\"01\" href=\"#/module/01\">AI &#x26; Data Landscape &#x26; Tech-Lead Mindset</a>). Finding: data is siloed, no governance, but a strong claims-triage use case. → produces the backlog.</li>\n<li><strong>Discover</strong> (4 wks, £30k fixed): RAG Evaluation on their existing chatbot PoC (<a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a>) + a claims-triage feasibility study (<a class=\"wikilink\" data-module=\"06\" href=\"#/module/06\">Deep Learning Essentials</a>). → proves the triage number on real claims.</li>\n<li><strong>Build</strong> (14 wks, £180k capped): permissioned RAG over policy documents with access control (<a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a>, <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>) + the triage classifier wired into their workflow. → a live system someone must operate.</li>\n<li><strong>Run</strong> (£9k/month retainer): monitoring, retraining, eval re-runs, cost tuning (<a class=\"wikilink\" data-module=\"13\" href=\"#/module/13\">MLOps &#x26; Productionization</a>). → recurring revenue, and the trusted seat that surfaces the <em>next</em> assessment (fraud, pricing).</li>\n</ol>\n<p>One £18k door-opener became £228k of project work plus £108k/year recurring — and a reference for the next insurer. That is the offer working as designed.</p>\n<p>This is why you must value an entry sale by the <strong>relationship it opens</strong>, not its own fee. A first-order <strong>lifetime value (LTV)</strong> of a client is:</p>\n<p><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mtext>LTV</mtext><mo>≈</mo><mtext>annual contract value</mtext><mo>×</mo><mtext>expected years</mtext></mrow><annotation encoding=\"application/x-tex\">\\text{LTV} \\approx \\text{annual contract value} \\times \\text{expected years}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord text\"><span class=\"mord\">LTV</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">≈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.7778em;vertical-align:-0.0833em;\"></span><span class=\"mord text\"><span class=\"mord\">annual contract value</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">×</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\">expected years</span></span></span></span></span></p>\n<p>where <em>annual contract value</em> (ACV) is the recurring + amortised yearly revenue from the account and <em>expected years</em> is how long the relationship realistically lasts. (A fuller LTV would discount future years and net out delivery cost — see the gross-margin treatment in §4 — but this back-of-envelope form is enough to size the bet.) The insurer above, on the run retainer alone, is roughly £108k × 4 ≈ £430k of LTV — before any further builds.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>The cheap assessment looks like a money-loser on its own line, and judged in isolation it often is. But it is not a product you sell for its fee; it is the <strong>option to a multi-year relationship</strong> worth many times that fee. Compare the £18k assessment's near-zero standalone margin to the ~£430k+ LTV it unlocks: the assessment's real return is the <em>probability</em> it converts the rest of the ladder, not its own P&#x26;L. This is the maths under \"land cheap, expand\": price the door-opener to maximise conversion into the relationship, not to make money on the door.</p>"
+      }
+     ]
+    },
+    {
+     "id": "the-mission-archetype-library-the-service-catalogue",
+     "number": 3,
+     "title": "The Mission-Archetype Library (the Service Catalogue)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>This is the synthesis the whole path was building toward: every sellable mission, grouped, cross-referenced to the module that teaches it, and slotted onto the ladder. Use it as your actual catalogue.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Service</th><th align=\"center\">Rung</th><th align=\"left\">Source module</th><th align=\"left\">Named deliverable</th><th align=\"left\">Typical scope</th></tr></thead><tbody><tr><td align=\"left\">AI &#x26; Data Readiness Assessment</td><td align=\"center\">1</td><td align=\"left\"><a class=\"wikilink\" data-module=\"01\" href=\"#/module/01\">AI &#x26; Data Landscape &#x26; Tech-Lead Mindset</a></td><td align=\"left\">Scored maturity assessment + gap list</td><td align=\"left\">2-4 wks</td></tr><tr><td align=\"left\">AI Literacy Workshop / Model-Claim Due Diligence</td><td align=\"center\">1</td><td align=\"left\"><a class=\"wikilink\" data-module=\"02\" href=\"#/module/02\">Math &#x26; Stats Intuition for Leaders</a></td><td align=\"left\">Leadership workshop / second-opinion review</td><td align=\"left\">1-2 wks</td></tr><tr><td align=\"left\">Data Quality Audit &#x26; Remediation Plan</td><td align=\"center\">1</td><td align=\"left\"><a class=\"wikilink\" data-module=\"03\" href=\"#/module/03\">Working with Data: Sources, Quality &#x26; Feature Engineering</a></td><td align=\"left\">Scored data report + remediation backlog</td><td align=\"left\">2-4 wks</td></tr><tr><td align=\"left\">Model Audit / Independent Validation</td><td align=\"center\">1</td><td align=\"left\"><a class=\"wikilink\" data-module=\"05\" href=\"#/module/05\">Model Evaluation, Validation &#x26; Experimentation</a></td><td align=\"left\">Audit report + go/fix/no-go verdict</td><td align=\"left\">1-3 wks</td></tr><tr><td align=\"left\">Deep-Learning / RAG Feasibility Study</td><td align=\"center\">2</td><td align=\"left\"><a class=\"wikilink\" data-module=\"06\" href=\"#/module/06\">Deep Learning Essentials</a> · <a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a></td><td align=\"left\">Feasibility report + real baseline on their data</td><td align=\"left\">2-4 wks</td></tr><tr><td align=\"left\">Build-vs-Buy Copilot Advisory</td><td align=\"center\">2</td><td align=\"left\"><a class=\"wikilink\" data-module=\"09\" href=\"#/module/09\">Large Language Models in Practice</a></td><td align=\"left\">Scored recommendation + phased plan</td><td align=\"left\">2-3 wks</td></tr><tr><td align=\"left\">RGPD/GDPR Gap Assessment</td><td align=\"center\">1</td><td align=\"left\"><a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a></td><td align=\"left\">Gap analysis + costed remediation plan</td><td align=\"left\">3-6 wks</td></tr><tr><td align=\"left\">EU AI Act Readiness Assessment</td><td align=\"center\">1</td><td align=\"left\"><a class=\"wikilink\" data-module=\"15\" href=\"#/module/15\">Responsible AI: Interpretability, Fairness, Safety &#x26; the EU AI Act</a></td><td align=\"left\">System inventory by risk tier + roadmap</td><td align=\"left\">3-6 wks</td></tr><tr><td align=\"left\">Churn / Propensity / Lead-Scoring Model</td><td align=\"center\">3</td><td align=\"left\"><a class=\"wikilink\" data-module=\"04\" href=\"#/module/04\">Classical ML &#x26; Forecasting in Practice</a></td><td align=\"left\">Scored ranked list in their CRM/BI</td><td align=\"left\">6-10 wks</td></tr><tr><td align=\"left\">Demand / Sales Forecasting Service</td><td align=\"center\">3</td><td align=\"left\"><a class=\"wikilink\" data-module=\"04\" href=\"#/module/04\">Classical ML &#x26; Forecasting in Practice</a></td><td align=\"left\">Weekly forecasts with uncertainty + dashboard</td><td align=\"left\">8-12 wks</td></tr><tr><td align=\"left\">Document / Invoice Processing Pipeline</td><td align=\"center\">3</td><td align=\"left\"><a class=\"wikilink\" data-module=\"07\" href=\"#/module/07\">Computer Vision &#x26; Multimodal in Practice</a></td><td align=\"left\">OCR+extraction with confidence + review queue</td><td align=\"left\">6-10 wks</td></tr><tr><td align=\"left\">Visual Quality Inspection</td><td align=\"center\">3</td><td align=\"left\"><a class=\"wikilink\" data-module=\"07\" href=\"#/module/07\">Computer Vision &#x26; Multimodal in Practice</a></td><td align=\"left\">Camera-fed defect flagging + dashboard</td><td align=\"left\">8-14 wks</td></tr><tr><td align=\"left\">Semantic Search / Feedback Analysis</td><td align=\"center\">3</td><td align=\"left\"><a class=\"wikilink\" data-module=\"08\" href=\"#/module/08\">NLP &#x26; Embeddings in Practice</a></td><td align=\"left\">Search service / themes-and-sentiment study</td><td align=\"left\">2-6 wks</td></tr><tr><td align=\"left\">LLM Drafting / Triage Assistant</td><td align=\"center\">3</td><td align=\"left\"><a class=\"wikilink\" data-module=\"09\" href=\"#/module/09\">Large Language Models in Practice</a></td><td align=\"left\">Human-reviewed draft/classifier in their tool</td><td align=\"left\">3-6 wks</td></tr><tr><td align=\"left\">Internal Knowledge Assistant / Support Copilot</td><td align=\"center\">3</td><td align=\"left\"><a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a></td><td align=\"left\">Grounded chat assistant with citations</td><td align=\"left\">6-12 wks</td></tr><tr><td align=\"left\">Permissioned RAG (regulated corpus)</td><td align=\"center\">3</td><td align=\"left\"><a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a></td><td align=\"left\">Access-filtered RAG + audit logging</td><td align=\"left\">10-16 wks</td></tr><tr><td align=\"left\">Scoped Workflow-Automation Agent</td><td align=\"center\">3</td><td align=\"left\"><a class=\"wikilink\" data-module=\"11\" href=\"#/module/11\">Agentic Architectures &#x26; LLM App Patterns</a></td><td align=\"left\">Bounded workflow + human-approval gate</td><td align=\"left\">4-8 wks</td></tr><tr><td align=\"left\">Modern Data Platform Setup / Migration</td><td align=\"center\">3</td><td align=\"left\"><a class=\"wikilink\" data-module=\"12\" href=\"#/module/12\">Data Engineering &#x26; Platforms</a></td><td align=\"left\">Deployed four-layer platform / cut-over</td><td align=\"left\">8-16 wks</td></tr><tr><td align=\"left\">Productionise a PoC (deploy + monitor)</td><td align=\"center\">3</td><td align=\"left\"><a class=\"wikilink\" data-module=\"13\" href=\"#/module/13\">MLOps &#x26; Productionization</a></td><td align=\"left\">Served, monitored model + runbook</td><td align=\"left\">4-8 wks</td></tr><tr><td align=\"left\">Bias &#x26; Fairness Audit / Explainability Layer</td><td align=\"center\">3</td><td align=\"left\"><a class=\"wikilink\" data-module=\"15\" href=\"#/module/15\">Responsible AI: Interpretability, Fairness, Safety &#x26; the EU AI Act</a></td><td align=\"left\">Fairness audit / per-decision explanations</td><td align=\"left\">3-9 wks</td></tr><tr><td align=\"left\">Monitoring &#x26; Retraining / Managed Platform</td><td align=\"center\">4</td><td align=\"left\"><a class=\"wikilink\" data-module=\"13\" href=\"#/module/13\">MLOps &#x26; Productionization</a> · <a class=\"wikilink\" data-module=\"12\" href=\"#/module/12\">Data Engineering &#x26; Platforms</a></td><td align=\"left\">Drift+outcome monitoring, run contract</td><td align=\"left\">Retainer</td></tr><tr><td align=\"left\">Governance / Responsible-AI Framework</td><td align=\"center\">1-4</td><td align=\"left\"><a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a> · <a class=\"wikilink\" data-module=\"15\" href=\"#/module/15\">Responsible AI: Interpretability, Fairness, Safety &#x26; the EU AI Act</a></td><td align=\"left\">Operating model, policies, model-card templates</td><td align=\"left\">4-12 wks + retainer</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>You will not sell all of this, and you should not try to. Pick a <strong>spine</strong> — three or four services you do better than anyone and that ladder into each other — and let the rest be \"yes, we can also do that\" once a client trusts you.</p>"
+      }
+     ]
+    },
+    {
+     "id": "pricing-models",
+     "number": 4,
+     "title": "Pricing Models",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The same deliverable can be priced four ways. The model you choose shifts risk between you and the client and sets your margin ceiling. Choose per service, not once for the whole offer.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Model</th><th align=\"left\">How it works</th><th align=\"left\">Use it when</th><th align=\"left\">Risk sits with</th><th align=\"left\">Margin profile</th></tr></thead><tbody><tr><td align=\"left\"><strong>Time &#x26; materials (T&#x26;M)</strong></td><td align=\"left\">Bill days × rate</td><td align=\"left\">Scope is genuinely unknowable; discovery; staff-aug</td><td align=\"left\">Client (pays for overruns)</td><td align=\"left\">Flat; no upside from speed</td></tr><tr><td align=\"left\"><strong>Fixed price</strong></td><td align=\"left\">Agreed deliverable for a fixed fee</td><td align=\"left\">Productised services; well-scoped builds</td><td align=\"left\">You (eat overruns)</td><td align=\"left\"><strong>Rises with reuse</strong> — you keep efficiency gains</td></tr><tr><td align=\"left\"><strong>Value / outcome-based</strong></td><td align=\"left\">Fee tied to a result (€ saved, uplift %)</td><td align=\"left\">The value is large, measurable, and <em>attributable to you</em></td><td align=\"left\">Shared</td><td align=\"left\">Highest <em>and</em> riskiest</td></tr><tr><td align=\"left\"><strong>Retainer / managed service</strong></td><td align=\"left\">Recurring monthly fee for run/evolution</td><td align=\"left\">Anything that must be operated (rung 4)</td><td align=\"left\">Shared</td><td align=\"left\">Predictable, compounding</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>The economics of reuse — why fixed-price is your friend.</strong> On a T&#x26;M day you sell an hour once. On a <em>fixed-price productised</em> service, your cost falls every time you deliver it (you've built the assessment template, the eval harness, the data-quality checks once) while the price holds — so margin climbs with volume. This is why the productised rung-1 services and the reusable <strong>eval harness</strong> (from <a class=\"wikilink\" data-module=\"05\" href=\"#/module/05\">Model Evaluation, Validation &#x26; Experimentation</a> and <a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a>) are commercially precious: they are <strong>assets/IP</strong> that turn delivery hours into product. Treat anything you build twice as a candidate for productisation.</p>\n<p>The number that captures this is <strong>gross margin</strong> — the share of each engagement's revenue left after the cost of delivering it:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\text{Gross margin} = \\frac{\\text{revenue} - \\text{delivery cost}}{\\text{revenue}}",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mtext>Gross margin</mtext><mo>=</mo><mfrac><mrow><mtext>revenue</mtext><mo>−</mo><mtext>delivery cost</mtext></mrow><mtext>revenue</mtext></mfrac></mrow><annotation encoding=\"application/x-tex\">\\text{Gross margin} = \\frac{\\text{revenue} - \\text{delivery cost}}{\\text{revenue}}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8778em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\">Gross margin</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.0574em;vertical-align:-0.686em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3714em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">revenue</span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">revenue</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord text\"><span class=\"mord\">delivery cost</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>where <em>revenue</em> is what the client pays for the service and <em>delivery cost</em> is the loaded cost of the people and compute that produce it (salaries, contractors, tokens, infra — not your overheads or sales cost). A £40k engagement delivered for £24k of effort runs a 40% gross margin.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Delivery cost is the lever you actually control, and reusable IP is how you pull it. A bespoke build re-pays for the same discovery, scaffolding, and eval setup on every client, so delivery cost tracks revenue and margin stays flat. A productised service amortises that work across many sales: the template, the eval harness, and the checks are built once, so each repeat sale carries a <em>lower</em> delivery cost while the price holds — and margin rises with volume. That is the whole commercial case for \"productised over bespoke\": you are converting one-off delivery hours into a reusable asset that keeps more of every future fee.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Value-based pricing is seductive and dangerous. You can only claim a share of an outcome you can <em>attribute</em> to your work — which needs a clean baseline and a measurement method (exactly the experimentation rigour in <a class=\"wikilink\" data-module=\"05\" href=\"#/module/05\">Model Evaluation, Validation &#x26; Experimentation</a>). If the client's revenue moved for ten other reasons, you will fight over the counterfactual and lose. Use value-based pricing only where the metric is isolated and instrumented; otherwise sell the fixed-price <em>system that produces</em> the value and let them keep the upside. Never bet your margin on a number you can't defend.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Pricing the assessment as a loss-leader.</strong> Rung-1 services are deliberately priced at or near cost — sometimes below. The assessment is not where you make money; it's where you <em>earn the build</em>. A £15k assessment that reliably converts to £150k+ of downstream work has a return that has nothing to do with its own margin. Price it to be an easy \"yes,\" make the deliverable genuinely useful even if they never buy more (that's what builds trust and referrals), and design it to surface the backlog that scopes rungs 2-4.</p>\n<p><strong>What NOT to do on price:</strong> quote a fixed price before discovery on a bespoke build (you're pricing blind); offer T&#x26;M on a productised service (you give away your reuse margin); promise a flat monthly run cost when the underlying compute/token spend scales with adoption — commit to <em>visibility and a cap</em>, not a fixed number (see <a class=\"wikilink\" data-module=\"12\" href=\"#/module/12\">Data Engineering &#x26; Platforms</a>, <a class=\"wikilink\" data-module=\"09\" href=\"#/module/09\">Large Language Models in Practice</a>).</p>"
+      }
+     ]
+    },
+    {
+     "id": "positioning--differentiation",
+     "number": 5,
+     "title": "Positioning & Differentiation",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>In 2026 the commodity layer is enormous and shared by everyone: foundation models, vector stores, managed pipelines, cloud AI suites. Anyone can rent them. So <strong>your differentiation cannot be the technology</strong> — it must be the thing the commodity can't supply.</p>\n<p><strong>Niche vs generalist.</strong> A generalist offer (\"we do all things AI &#x26; Data\") is easy to assemble and hard to sell — you compete on price against everyone. A <strong>niche</strong> offer (\"we do claims automation for insurers,\" \"we do RAG over regulated corpora for legal teams\") is harder to assemble and far easier to sell: you arrive already understanding the domain, the data, the regulator, and the buyer's pain. The catalogue in §3 is your <em>capability</em>; the niche is your <em>go-to-market</em>. Lead with the niche, deliver from the catalogue.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Differentiation axis</th><th align=\"left\">Generalist</th><th align=\"left\">Niche / vertical</th></tr></thead><tbody><tr><td align=\"left\">Sales conversation</td><td align=\"left\">\"We can build anything\" (slow trust)</td><td align=\"left\">\"We've done this for three firms like you\" (fast trust)</td></tr><tr><td align=\"left\">Reuse / margin</td><td align=\"left\">Low — every job is new</td><td align=\"left\">High — same archetype, same assets</td></tr><tr><td align=\"left\">Pricing power</td><td align=\"left\">Competes on rate</td><td align=\"left\">Commands a premium for domain proof</td></tr><tr><td align=\"left\">Risk</td><td align=\"left\">Spread thin, shallow expertise</td><td align=\"left\">Concentration risk if the vertical contracts</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>\"Buy the commodity, build the differentiator\" — applied to YOUR offer.</strong> The path's motto is usually about a single mission; here you apply it to the <em>business</em>. Buy: models, infra, frameworks, monitoring, catalog/lineage tools (every \"Tools &#x26; Vendor Landscape\" table across the path lists the rentable commodities). Build: your <strong>domain workflow templates</strong>, your <strong>reusable eval harnesses</strong>, your <strong>methodology and decision frameworks</strong> (the \"Practical Artifacts\" from every module are the raw material), your <strong>proprietary accelerators</strong>, and the <strong>trust</strong> that comes from references. Spend your build budget only where it creates defensible value you keep across clients.</p>\n<p><strong>Proof is the currency.</strong> Buyers de-risk by buying proof, not promises. Build, deliberately: anonymised <strong>case studies</strong> (problem → what you did → measured result), <strong>reference clients</strong> willing to take a call, and <strong>named accelerators</strong> (\"our RAG-hardening kit,\" \"our governance framework\") that signal you've done it before. The fixed-price assessment (§4) doubles as a proof-manufacturing machine — every one is a potential case study.</p>\n<p><strong>Partnerships.</strong> Cloud and model vendors (the names in the Tools tables) run partner programmes: co-selling, certifications, marketplace listings, and funded PoCs. A partner badge is cheap proof and a lead source; a marketplace listing can shortcut procurement. The caveat is the same as ever — a partnership that locks your <em>offer</em> to one vendor inherits that vendor's lock-in and pricing risk. Partner for reach and proof; keep your architecture portable.</p>"
+      }
+     ]
+    },
+    {
+     "id": "building--leading-the-pole",
+     "number": 6,
+     "title": "Building & Leading the Pole",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The <strong>roles</strong> in an AI &#x26; Data pole and what each owns are already mapped — see the table in <a class=\"wikilink\" data-module=\"01\" href=\"#/module/01\">AI &#x26; Data Landscape &#x26; Tech-Lead Mindset</a> (Data Engineer, Analytics Engineer, Data Scientist, ML Engineer, MLOps/Platform, AI Engineer, Data Architect, Tech Lead) and the failure modes and culture notes in <span class=\"vault-ref\" title=\"In the Obsidian vault: 24 - ML Systems Engineering &#x26; Technical Leadership\">ML Systems Engineering &#x26; Technical Leadership</span>. The leadership job here is not re-learning the roles; it's <strong>coverage, sourcing, structure, and demand</strong>.</p>\n<p><strong>Coverage, not headcount.</strong> Staff a <em>capability map</em>, not an org chart. For your chosen spine of services (§3), which roles must be covered? A pole delivering RAG and data platforms must cover data engineering, AI engineering, and MLOps; it can buy in fairness auditing rather than hire it. The early-pole failure mode (from module 01) is hiring four narrow specialists for a job that needed two strong generalists.</p>\n<p><strong>Hire vs upskill.</strong> A decision table:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Situation</th><th align=\"left\">Lean hire</th><th align=\"left\">Lean upskill</th></tr></thead><tbody><tr><td align=\"left\">Capability is core to your spine and recurring</td><td align=\"left\">✓ Hire — you need depth you own</td><td align=\"left\"></td></tr><tr><td align=\"left\">Capability is occasional / peripheral</td><td align=\"left\"></td><td align=\"left\">✓ Upskill or subcontract</td></tr><tr><td align=\"left\">You have strong adjacent talent and time</td><td align=\"left\"></td><td align=\"left\">✓ Upskill — cheaper, retains people, builds culture</td></tr><tr><td align=\"left\">The market is hot and the need is urgent</td><td align=\"left\">✓ Hire (or contract) — upskilling is too slow</td><td align=\"left\"></td></tr><tr><td align=\"left\">The skill is a commodity you'll buy anyway</td><td align=\"left\"></td><td align=\"left\">✓ Don't hire — rent the tool, train light usage</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>Upskilling is usually under-used: this path itself is an upskilling syllabus. Hiring buys speed and depth; upskilling buys loyalty, culture, and lower cost — and a pole that <em>grows its own</em> people scales more cheaply than one that buys every skill.</p>\n<p><strong>Operating model — the central structural decision.</strong> How does the pole's expertise reach the business? Three patterns:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Model</th><th align=\"left\">What it is</th><th align=\"left\">Best when</th><th align=\"left\">Watch out for</th></tr></thead><tbody><tr><td align=\"left\"><strong>Centralised CoE</strong></td><td align=\"left\">One central team owns all AI/data work; business units request it</td><td align=\"left\">Early maturity; scarce talent; need for standards &#x26; governance</td><td align=\"left\">Becomes a bottleneck and an \"ivory tower\" detached from the business</td></tr><tr><td align=\"left\"><strong>Embedded / federated</strong></td><td align=\"left\">Data/AI people sit <em>inside</em> business units</td><td align=\"left\">High maturity; domain depth matters; many parallel use cases</td><td align=\"left\">Re-invents the wheel; inconsistent standards; duplicated infra; silos</td></tr><tr><td align=\"left\"><strong>Hybrid (hub-and-spoke)</strong></td><td align=\"left\"><strong>Central platform + standards + scarce skills; embedded delivery squads in the business</strong></td><td align=\"left\">Most scaling poles — the common end state</td><td align=\"left\">Needs clear ownership split (who owns the platform vs the use case)</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>The hybrid model is where most successful poles land, and it maps cleanly onto the offer ladder. The <strong>hub</strong> owns the commodity-plus-differentiator platform, the standards, the governance hooks, and the scarce specialists (it builds rung-4 capabilities once, for everyone). The <strong>spokes</strong> own delivery against real business problems (rungs 2-3, close to the buyer who feels the pain). The hub stops every squad re-buying the same vector store; the spokes stop the hub building things nobody asked for. The split you must make explicit: <em>the hub owns the platform and the run; the spoke owns the use case and the outcome.</em></p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Career paths &#x26; culture.</strong> Define at least a <strong>dual ladder</strong> — an individual-contributor track (Senior → Staff → Principal Engineer/Scientist) parallel to a management track — so your best builders don't have to become managers to progress. The culture you reward is set in <span class=\"vault-ref\" title=\"In the Obsidian vault: 24 - ML Systems Engineering &#x26; Technical Leadership\">ML Systems Engineering &#x26; Technical Leadership</span>: <em>reward impact, not complexity</em>; celebrate the engineer who replaced a model with a SQL rule. In a commercial pole, add one value: <strong>sell the truth</strong> — the most senior thing anyone can say to a client is \"you don't need AI for this\" (module 01). A pole that over-sells burns its references; a pole that tells the truth compounds them.</p>\n<p><strong>Demand intake &#x26; prioritisation.</strong> A pole without an intake process drowns in side-requests and HiPPO-driven pet projects. Run a lightweight <strong>intake gate</strong>: a one-page request (problem, owner, value, data availability), scored on <strong>value × feasibility</strong> (the 2×2 from module 01's use-case discovery), triaged into the backlog, and reviewed on a cadence. This is also a <strong>governance hook</strong> — the intake gate is where you classify risk tier (<a class=\"wikilink\" data-module=\"15\" href=\"#/module/15\">Responsible AI: Interpretability, Fairness, Safety &#x26; the EU AI Act</a>) and check lawful basis (<a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>) <em>before</em> work starts, not after.</p>"
+      }
+     ]
+    },
+    {
+     "id": "ai--data-security",
+     "number": 7,
+     "title": "AI & Data Security",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Security is both something the pole <strong>must do</strong> (or it will eventually cause a breach) and something it can <strong>sell</strong> (a posture clients increasingly demand and pay for). The app-level guardrails — prompt injection at the agent boundary, least privilege, sandboxing, PII redaction — are owned by <a class=\"wikilink\" data-module=\"11\" href=\"#/module/11\">Agentic Architectures &#x26; LLM App Patterns</a> and <a class=\"wikilink\" data-module=\"13\" href=\"#/module/13\">MLOps &#x26; Productionization</a>; this section zooms out to the <strong>security posture a pole adopts across the whole offer</strong>.</p>\n<p>The threat surface of an AI &#x26; Data pole is wider than classic software because it spans <em>data</em>, <em>models</em>, and <em>prompts</em>:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Threat</th><th align=\"left\">What it looks like</th><th align=\"left\">Control (pole-level)</th></tr></thead><tbody><tr><td align=\"left\"><strong>Prompt injection</strong></td><td align=\"left\">Untrusted content (a doc, an email, a web page) carries instructions the model obeys</td><td align=\"left\">App-level defences (<a class=\"wikilink\" data-module=\"11\" href=\"#/module/11\">Agentic Architectures &#x26; LLM App Patterns</a>): treat retrieved/tool content as untrusted, separate instructions from data, never let injected text widen permissions</td></tr><tr><td align=\"left\"><strong>Data exfiltration</strong></td><td align=\"left\">Sensitive data leaves via a model output, a tool call, a log, or a third-party API</td><td align=\"left\">Egress allow-lists; output filtering; <strong>don't send raw PII to external LLMs</strong> — pseudonymise first (<a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>); read the vendor's data-retention terms</td></tr><tr><td align=\"left\"><strong>Model &#x26; supply-chain security</strong></td><td align=\"left\">A poisoned dataset, a backdoored pretrained model, a malicious package or model weight from a public hub</td><td align=\"left\">Vet model/data provenance; pin and scan dependencies; prefer trusted registries; treat a downloaded model like untrusted code</td></tr><tr><td align=\"left\"><strong>Secrets &#x26; keys</strong></td><td align=\"left\">API keys, DB credentials, model keys hard-coded or leaked in notebooks/logs/repos</td><td align=\"left\">A <strong>secrets manager/vault</strong>; no secrets in code or notebooks; rotation; scoped per-service keys; scan repos for leaks</td></tr><tr><td align=\"left\"><strong>Access control</strong></td><td align=\"left\">Over-broad access to data, models, and prompts; no audit trail</td><td align=\"left\"><strong>Least privilege + RBAC</strong> across data <em>and</em> models; per-user retrieval filtering in RAG (<a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a>); audit logging</td></tr><tr><td align=\"left\"><strong>Privacy / training-data leakage</strong></td><td align=\"left\">Models memorise and regurgitate training data; PII surfaces in outputs</td><td align=\"left\">Minimise PII in training; pseudonymise (<a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>); output PII filters; never assume \"anonymised\" without an assessment</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>The mental shift for AI security is that <strong>your data and your model are now part of the attack surface, not just your code</strong>. A classic app is attacked through its inputs and infrastructure; an AI system is <em>additionally</em> attacked through its training data (poisoning), its model supply chain (backdoored weights), and its prompts (injection). And the blast radius is asymmetric: one over-permissioned tool, one raw-PII call to an external API, or one leaked key can become a reportable breach (with RGPD consequences — <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>). Default to <strong>least privilege everywhere and treat every external model and dataset as untrusted code</strong>.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>The posture a pole adopts (and sells).</strong> As a standing capability, a mature pole: keeps an <strong>inventory of AI systems, data flows, and the models/keys each uses</strong> (this doubles as the EU AI Act inventory, <a class=\"wikilink\" data-module=\"15\" href=\"#/module/15\">Responsible AI: Interpretability, Fairness, Safety &#x26; the EU AI Act</a>); enforces secrets management and scoped access by default; reviews vendor data terms before any client data touches an external API; bakes a <strong>security &#x26; privacy review into the intake gate</strong> (§6); and can produce the artefacts an enterprise buyer's security team will demand (data-flow diagrams, access model, sub-processor list). That last point is commercial: <strong>a credible security posture is increasingly a precondition to selling to enterprise and regulated buyers</strong> — and a \"secure-AI assessment\" is itself a sellable rung-1 service, pairing with the governance and AI Act work.</p>"
+      }
+     ]
+    },
+    {
+     "id": "the-poles-operating-model--roadmap",
+     "number": 8,
+     "title": "The Pole's Operating Model & Roadmap",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The pole is itself a product that must be run and improved — so it needs its own architecture, roadmap, and KPIs, not just its clients'.</p>\n<p><strong>Platform/CoE team vs delivery squads — the build/run split.</strong> Concretely, in the hybrid model (§6):</p>\n<ul>\n<li>The <strong>platform/CoE team</strong> builds and runs the shared substrate: the data platform (<a class=\"wikilink\" data-module=\"12\" href=\"#/module/12\">Data Engineering &#x26; Platforms</a>), the MLOps/LLMOps tooling (<a class=\"wikilink\" data-module=\"13\" href=\"#/module/13\">MLOps &#x26; Productionization</a>), the reusable eval harnesses, the governance hooks (<a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>, <a class=\"wikilink\" data-module=\"15\" href=\"#/module/15\">Responsible AI: Interpretability, Fairness, Safety &#x26; the EU AI Act</a>), and the security posture (§7). It owns <strong>run</strong>.</li>\n<li>The <strong>delivery squads</strong> build the use cases on top — the rung-2/3 missions, close to the business buyer. They own <strong>build</strong> and the <strong>outcome</strong>.</li>\n</ul>\n<p>The governance hooks are not bolt-ons: the intake gate (§6) is where risk-tiering and lawful-basis checks fire; the platform is where access control, audit logging, and model-card templates (<a class=\"wikilink\" data-module=\"15\" href=\"#/module/15\">Responsible AI: Interpretability, Fairness, Safety &#x26; the EU AI Act</a>) are enforced for <em>everyone</em>, so a squad can't ship an ungoverned system by accident.</p>\n<p><strong>A maturity model for the pole</strong> — know which rung you're on and what the next one needs:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Rung</th><th align=\"left\">Looks like</th><th align=\"left\">Next move</th></tr></thead><tbody><tr><td align=\"left\"><strong>1. Ad-hoc</strong></td><td align=\"left\">Heroic individuals; every project bespoke; no shared tooling</td><td align=\"left\">Build the first shared platform + intake gate</td></tr><tr><td align=\"left\"><strong>2. Repeatable</strong></td><td align=\"left\">Productised assessments; reusable eval harness; standards exist</td><td align=\"left\">Stand up the CoE/platform team; start a managed-service book</td></tr><tr><td align=\"left\"><strong>3. Scaled</strong></td><td align=\"left\">Hybrid hub-and-spoke; governance enforced; retainers growing</td><td align=\"left\">Optimise margin, deepen the niche, formalise career ladders</td></tr><tr><td align=\"left\"><strong>4. Optimised</strong></td><td align=\"left\">Predictable delivery; healthy margin; references compound</td><td align=\"left\">Productise further; consider new verticals</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>The pole's own KPIs.</strong> Run the pole on a small, honest dashboard — these are the executive-facing numbers (and they map directly to the commercial model):</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">KPI</th><th align=\"left\">What it tells you</th><th align=\"left\">Healthy direction</th></tr></thead><tbody><tr><td align=\"left\"><strong>Utilisation</strong></td><td align=\"left\">% of billable capacity actually sold/delivered</td><td align=\"left\">High but not 100% (leave slack for proof-building, upskilling, pre-sales)</td></tr><tr><td align=\"left\"><strong>Margin</strong></td><td align=\"left\">Revenue minus delivery + run cost, per service</td><td align=\"left\">Rising as productised services and reuse grow</td></tr><tr><td align=\"left\"><strong>Delivery success rate</strong></td><td align=\"left\">% of missions hitting scope/time/value</td><td align=\"left\">High; falling rate signals over-selling or under-scoping</td></tr><tr><td align=\"left\"><strong>Client satisfaction / NPS</strong></td><td align=\"left\">Will they refer you and buy again?</td><td align=\"left\">High — it's the engine of the land-and-expand model</td></tr><tr><td align=\"left\"><strong>Recurring revenue (run book)</strong></td><td align=\"left\">Predictable retainer income</td><td align=\"left\">Growing share of total — the durable-business signal</td></tr><tr><td align=\"left\"><strong>Pipeline conversion</strong></td><td align=\"left\">Assessment → build → run conversion rates</td><td align=\"left\">Stable/rising — validates the offer ladder</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Utilisation</strong> is the metric that most directly drives a services pole's margin, so it earns a formula — the share of each person's available time that is actually billable:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\text{Utilisation rate} = \\frac{\\text{billable hours}}{\\text{available hours}}",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mtext>Utilisation rate</mtext><mo>=</mo><mfrac><mtext>billable hours</mtext><mtext>available hours</mtext></mfrac></mrow><annotation encoding=\"application/x-tex\">\\text{Utilisation rate} = \\frac{\\text{billable hours}}{\\text{available hours}}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord text\"><span class=\"mord\">Utilisation rate</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.0574em;vertical-align:-0.686em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3714em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">available hours</span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">billable hours</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>where <em>billable hours</em> are hours booked to a client engagement and <em>available hours</em> are the working hours a person is on the clock (not the calendar's hours — strip holidays and leave). A consultant billing 130 hours of a 160-hour month runs ~81% utilisation.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Utilisation is the engine of margin because fixed people-cost is paid whether or not it is sold: every billable hour earns revenue against a salary you owe regardless, so margin rises with the billable share — and idle hours are pure cost. But the goal is <em>high, not maximal</em>. 100% utilisation is a <strong>red flag</strong>, not a trophy: it means zero slack for the unbilled work the offer depends on — pre-sales and proposals (the pipeline), proof-building and case studies (§5), upskilling (the dual ladder, §6), and simple recovery. A pole pinned at 100% is mortgaging next quarter's pipeline and its people's resilience to flatter this quarter's number; healthy poles target a band (often ~70-85%) that funds billing <em>and</em> the work that creates future billing.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>The pole's roadmap</strong> is then obvious: which services to productise next (raise margin), which capability gaps to hire/upskill (cover the spine), which platform investments to make (lower delivery cost), and which vertical to deepen (raise pricing power). It is a <em>business</em> roadmap, expressed in the KPIs above — not a list of models.</p>"
+      }
+     ]
+    },
+    {
+     "id": "executive-communication-at-the-pole-level",
+     "number": 9,
+     "title": "Executive Communication at the Pole Level",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The 3-level explanation and the \"so what?\" test for a <em>single technical decision</em> live in <span class=\"vault-ref\" title=\"In the Obsidian vault: 24 - ML Systems Engineering &#x26; Technical Leadership\">ML Systems Engineering &#x26; Technical Leadership</span>. This extends it to the level a pole lead actually operates at: <strong>communicating the health and strategy of the whole pole</strong> to a sponsor, a COMEX, or a board.</p>\n<p>The shift is from \"this model catches 15% more fraud\" to a <strong>portfolio and P&#x26;L narrative</strong>. An executive sponsor wants four things, in their language:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">They ask</th><th align=\"left\">You answer with</th></tr></thead><tbody><tr><td align=\"left\">\"Is it working?\"</td><td align=\"left\">KPIs (§8): utilisation, margin, delivery success, recurring revenue — <em>trend</em>, not snapshot</td></tr><tr><td align=\"left\">\"Where's the value?\"</td><td align=\"left\">A small portfolio view: missions as bets, each with the outcome and the proof it landed</td></tr><tr><td align=\"left\">\"What's the risk?\"</td><td align=\"left\">The honest register: delivery risks, key-person risk, the governance/security posture (§7), what you've declined and why</td></tr><tr><td align=\"left\">\"What's next, and what does it cost?\"</td><td align=\"left\">The pole roadmap (§8) as a small set of funded bets, in € and quarters</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>The portfolio framing from module 01 — <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>E</mi><mi>V</mi><mo>≈</mo><mi>P</mi><mo stretchy=\"false\">(</mo><mtext>success</mtext><mo stretchy=\"false\">)</mo><mo>×</mo><mtext>value</mtext><mo>−</mo><mtext>cost</mtext></mrow><annotation encoding=\"application/x-tex\">EV \\approx P(\\text{success}) \\times \\text{value} - \\text{cost}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0576em;\">E</span><span class=\"mord mathnormal\" style=\"margin-right:0.2222em;\">V</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">≈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mopen\">(</span><span class=\"mord text\"><span class=\"mord\">success</span></span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">×</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.7778em;vertical-align:-0.0833em;\"></span><span class=\"mord text\"><span class=\"mord\">value</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6151em;\"></span><span class=\"mord text\"><span class=\"mord\">cost</span></span></span></span></span> — is also your executive script. You are not reporting on models; you are reporting on a <strong>portfolio of bets</strong> weighted toward high-probability \"boring wins\" that fund a few ambitious ones. Lead with the trend in recurring revenue and delivery success (the business is healthy), then the portfolio (here's where the value is and what we passed on), then the funded roadmap (here's the next bet and its cost). Numbers exist to answer \"so what for the business?\" — the same test as a single decision, scaled to a pole.</p>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "client-mission-patterns--commercial-angle",
+   "kind": "missions",
+   "title": "Client Mission Patterns / Commercial Angle",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>This module is <strong>meta</strong> — the product <em>is</em> the offer and the pole itself. These archetypes sell the strategy and operating-model work, and they are the highest-leverage (and highest-trust) engagements in the whole catalogue.</p>\n<ul>\n<li><strong>AI &#x26; Data Strategy + Operating-Model Engagement</strong> — <em>Problem:</em> a client has scattered experiments, no direction, and no idea how to organise the function. <em>Deliverable:</em> a target <strong>operating model</strong> (centralised/embedded/hybrid recommendation with the org split), a build-vs-buy stance, a prioritised use-case roadmap on the value×feasibility 2×2, a budget envelope, and the intake/governance gate design. <em>Scope:</em> 4-8 weeks, fixed price. <em>Who buys:</em> executive sponsor, CDO/CTO, COMEX. <em>This is the assembled, premium version of the strategy missions seeded in <a class=\"wikilink\" data-module=\"01\" href=\"#/module/01\">AI &#x26; Data Landscape &#x26; Tech-Lead Mindset</a>.</em></li>\n<li><strong>Center-of-Excellence (CoE) Setup</strong> — <em>Problem:</em> a scaling organisation needs to stop re-inventing the wheel in every business unit and stand up a shared capability. <em>Deliverable:</em> a <strong>CoE blueprint and stand-up plan</strong> — the hub-and-spoke structure, the platform/build/run split (§8), a hiring-vs-upskilling plan, career ladders, the demand-intake process, the governance and security hooks, and a maturity-model baseline with a 6-12 month roadmap. <em>Scope:</em> 6-12 weeks, often a delivery retainer afterwards. <em>Who buys:</em> CDO/CTO building the function, a transformation lead. <em>High repeatable-IP content.</em></li>\n<li><strong>Managed AI/Data Service (Run / Retainer)</strong> — <em>Problem:</em> the client has live systems (theirs or ones you built) that are rotting blind, overspending, or operated heroically. <em>Deliverable:</em> a <strong>managed-service contract</strong> — monitoring, drift/eval re-runs, retraining, cost tuning, security upkeep, and a named owner and SLA, wrapping the operate-loop from <a class=\"wikilink\" data-module=\"13\" href=\"#/module/13\">MLOps &#x26; Productionization</a> and <a class=\"wikilink\" data-module=\"12\" href=\"#/module/12\">Data Engineering &#x26; Platforms</a>. <em>Scope:</em> recurring (monthly/quarterly), the rung-4 anchor of the offer. <em>Who buys:</em> the owner of a live system; the natural follow-on to any build. <em>This is the recurring-revenue engine — sell it on every build.</em></li>\n</ul>\n<p><strong>Buy-vs-build for the client at this level:</strong> sell <strong>judgment, structure, and operating discipline</strong> — the things they cannot rent. Buy the platform substrate (every Tools table in the path); build the <em>operating model, the governance, the security posture, and the team</em>. <strong>What to charge for:</strong> the strategy and CoE work as fixed-price, high-trust, repeatable-IP engagements; the managed service as recurring revenue. <strong>What NOT to promise:</strong> a specific ROI or headcount number before the strategy work is done; that a CoE will succeed without executive air-cover and a demand pipeline (org change, not a deliverable); an SLA you have not staffed; \"transformation\" as a slide deck — sell the operating model <em>plus the first delivery</em> that proves it, or it gathers dust.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "tools--vendor-landscape",
+   "kind": "tools",
+   "title": "Tools & Vendor Landscape",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p><em>As of 2026 — treat names/prices as perishable; re-check before quoting.</em></p>"
+    },
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Tool / Category</th><th align=\"left\">Use here</th><th align=\"left\">OSS / Paid</th><th align=\"left\">Note</th></tr></thead><tbody><tr><td align=\"left\">Cloud partner programmes (AWS / Azure / GCP)</td><td align=\"left\">Co-sell, funded PoCs, marketplace listings</td><td align=\"left\">Programme (free to join)</td><td align=\"left\">Cheap proof + leads; don't lock your offer to one</td></tr><tr><td align=\"left\">Model-vendor partner tiers (Anthropic, OpenAI, Mistral, Google)</td><td align=\"left\">Certification, co-marketing, early access</td><td align=\"left\">Programme</td><td align=\"left\">A badge is proof; keep architecture portable</td></tr><tr><td align=\"left\">Secrets managers (Vault, cloud KMS/Secrets Manager)</td><td align=\"left\">Pole-level secrets/keys (§7)</td><td align=\"left\">Paid / OSS</td><td align=\"left\">Non-negotiable; no secrets in code/notebooks</td></tr><tr><td align=\"left\">Dependency/model scanning (SCA tools, model-provenance checks)</td><td align=\"left\">Supply-chain security (§7)</td><td align=\"left\">Mixed</td><td align=\"left\">Treat downloaded models/packages as untrusted</td></tr><tr><td align=\"left\">Data catalog &#x26; lineage (governance tooling)</td><td align=\"left\">Inventory, intake, access model</td><td align=\"left\">Paid / OSS</td><td align=\"left\">Doubles as the AI Act / RGPD inventory</td></tr><tr><td align=\"left\">CRM + proposal/CPQ tooling</td><td align=\"left\">Run the pipeline, quote services</td><td align=\"left\">Paid</td><td align=\"left\">The \"tool\" of the offer is the pipeline itself</td></tr><tr><td align=\"left\">PSA / professional-services automation</td><td align=\"left\">Track utilisation, margin, delivery</td><td align=\"left\">Paid</td><td align=\"left\">Source of the pole KPI dashboard (§8)</td></tr><tr><td align=\"left\">Whiteboard / Miro / FigJam</td><td align=\"left\">Operating-model &#x26; roadmap workshops</td><td align=\"left\">Freemium</td><td align=\"left\">Like module 01, the real tool is a workshop</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The heavy tooling of <em>this</em> module is commercial and organisational (pipeline, PSA, secrets, governance) — the AI/data tooling itself was covered, and quarantined, in the Tools tables of modules 03-15.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "when-is-this-overkill",
+   "kind": "overkill",
+   "title": "When Is This Overkill?",
+   "blocks": [
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Situation</th><th align=\"left\">A full offer/pole is overkill — do this instead</th></tr></thead><tbody><tr><td align=\"left\">One use case, one team, no plan to scale</td><td align=\"left\">Just deliver the mission; skip the catalogue and the CoE</td></tr><tr><td align=\"left\">Two engineers, first three projects</td><td align=\"left\">Run as a single generalist squad; productise <em>after</em> you've delivered the same thing twice, not before</td></tr><tr><td align=\"left\">No executive sponsor or demand pipeline</td><td align=\"left\">Don't stand up a CoE — it will become an ivory tower; embed in the one team that has the pain</td></tr><tr><td align=\"left\">You've never delivered service X</td><td align=\"left\">Don't put it in the catalogue yet — sell it once bespoke, learn the real cost, <em>then</em> productise</td></tr><tr><td align=\"left\">Client wants \"an AI strategy\" but has no data and no budget</td><td align=\"left\">Sell a readiness assessment (<a class=\"wikilink\" data-module=\"01\" href=\"#/module/01\">AI &#x26; Data Landscape &#x26; Tech-Lead Mindset</a>), not a strategy engagement</td></tr><tr><td align=\"left\">Tiny internal pole, low-risk internal tools</td><td align=\"left\">Lightweight intake + the security basics (secrets, access); skip the full operating-model apparatus</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The meta-principle of the whole path applies to the offer too: <strong>don't build the elaborate thing before the simple thing has proven the demand.</strong> A catalogue with one productised service you sell repeatedly beats a glossy ten-service deck you've never delivered.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "resources",
+   "kind": "resources",
+   "title": "Resources",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "books",
+     "number": null,
+     "title": "Books",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Ries — <em>The Lean Startup</em> — productise and validate demand before you build the elaborate offer.</li>\n<li>Weinberg &#x26; Mares — <em>Traction</em> — go-to-market channels for a young offer; relevant to positioning and pipeline.</li>\n<li>Larson — <em>An Elegant Puzzle: Systems of Engineering Management</em> — structuring and scaling engineering teams (operating models, ladders).</li>\n<li>Fournier — <em>The Manager's Path</em> — career ladders and the IC-vs-management track.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "articles--reports-free",
+     "number": null,
+     "title": "Articles & Reports (Free)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Cloud and model vendors' <strong>partner-programme</strong> pages — co-sell, marketplace, certification mechanics (date everything).</li>\n<li><strong>OWASP</strong> LLM/AI security risk lists — the pole-level security vocabulary (§7), feeding <a class=\"wikilink\" data-module=\"11\" href=\"#/module/11\">Agentic Architectures &#x26; LLM App Patterns</a>.</li>\n<li>Annual state-of-AI / model-pricing reports — for positioning against the commodity layer.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "go-deeper",
+     "number": null,
+     "title": "Go Deeper",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Leadership foundation — team roles, the complexity budget, build-vs-buy, stakeholder translation → <span class=\"vault-ref\" title=\"In the Obsidian vault: 24 - ML Systems Engineering &#x26; Technical Leadership\">ML Systems Engineering &#x26; Technical Leadership</span> (AI Scientist Path).</li>\n<li>System-design framework behind the build-rung deliverables → <span class=\"vault-ref\" title=\"In the Obsidian vault: 09 - ML System Design\">ML System Design</span> (ML Engineer Path).</li>\n<li>Adjacent leader modules this assembles: scoping &#x26; estimating a single mission → <a class=\"wikilink\" data-module=\"16\" href=\"#/module/16\">Scoping, Estimating &#x26; Delivering AI &#x26; Data Missions</a>; the run-loop you sell as a retainer → <a class=\"wikilink\" data-module=\"13\" href=\"#/module/13\">MLOps &#x26; Productionization</a>; the governance and security hooks → <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a> and <a class=\"wikilink\" data-module=\"15\" href=\"#/module/15\">Responsible AI: Interpretability, Fairness, Safety &#x26; the EU AI Act</a>.</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "practical-artifacts",
+   "kind": "artifacts",
+   "title": "Practical Artifacts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "decision-checklist--is-this-offerpole-ready",
+     "number": null,
+     "title": "Decision Checklist — \"Is this offer/pole ready?\"",
+     "blocks": [
+      {
+       "type": "checklist",
+       "checklistId": "17/practical-artifacts/1",
+       "items": [
+        {
+         "id": "0",
+         "html": "Is there a named <strong>spine</strong> of 3-4 services we do better than anyone — not a generalist everything-list?"
+        },
+        {
+         "id": "1",
+         "html": "Does every service sit on the <strong>ladder</strong> with a deliverable, a price, a duration, and a buyer?"
+        },
+        {
+         "id": "2",
+         "html": "Does each build rung-3 service have a designed <strong>hand-off into a run/retainer</strong> (rung 4)?"
+        },
+        {
+         "id": "3",
+         "html": "Have we picked a <strong>pricing model per service</strong>, and protected reuse margin (fixed-price on productised work)?"
+        },
+        {
+         "id": "4",
+         "html": "Is the <strong>operating model</strong> explicit (who owns the platform/run vs the use case/outcome)?"
+        },
+        {
+         "id": "5",
+         "html": "Is there a <strong>demand-intake gate</strong> that fires risk-tiering, lawful-basis, and security review <em>before</em> work starts?"
+        },
+        {
+         "id": "6",
+         "html": "Is the <strong>security posture</strong> in place (secrets, least-privilege access, supply-chain vetting, an AI-systems inventory)?"
+        },
+        {
+         "id": "7",
+         "html": "Do we track the pole's <strong>KPIs</strong> (utilisation, margin, delivery success, satisfaction, recurring revenue)?"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "red-flags",
+     "number": null,
+     "title": "Red Flags",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>A ten-service catalogue where you've delivered most services zero times.</li>\n<li>Selling the build with no plan for who runs it (you've sold a system that will rot).</li>\n<li>Value-based pricing on an outcome you can't attribute or measure.</li>\n<li>A CoE stood up with no executive sponsor and no demand pipeline (ivory tower incoming).</li>\n<li>Hiring four narrow specialists for a job two generalists could cover.</li>\n<li>Raw client PII flowing to an external LLM API without pseudonymisation or a read of the vendor's terms.</li>\n<li>Secrets in notebooks/repos; over-broad \"run any SQL\" tools; no AI-systems inventory.</li>\n<li>A pole reported to the board as a list of models instead of a portfolio with a P&#x26;L.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "scoping-prompts-ask-yourself-and-the-client",
+     "number": null,
+     "title": "Scoping Prompts (ask yourself and the client)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"Of everything we <em>can</em> do, what three things will we be <em>known</em> for?\"</li>\n<li>\"What's the cheapest, lowest-risk thing this client can buy that proves us and scopes the next step?\"</li>\n<li>\"For each service: who runs it after we deliver, and is that recurring revenue?\"</li>\n<li>\"Where does our build budget create value we <em>keep</em> across clients — and where are we just renting a commodity?\"</li>\n<li>\"Which operating model fits <em>their</em> maturity — and who owns the platform vs the outcome?\"</li>\n<li>\"Before any data moves: what's the lawful basis, the risk tier, and where do the secrets and keys live?\"</li>\n<li>\"If the sponsor asked 'is the pole healthy?' tomorrow, which four numbers would I show?\"</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "self-assessment",
+   "kind": "self-assessment",
+   "title": "Self-Assessment",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>You've reached the end of the Tech Lead AI &#x26; Data Path. You should now be able to:</p>"
+    },
+    {
+     "type": "checklist",
+     "checklistId": "17/self-assessment/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Assemble the mission archetypes from modules 01-16 into a <strong>structured catalogue</strong> on an offer ladder"
+      },
+      {
+       "id": "1",
+       "html": "Choose and defend a <strong>pricing model</strong> per service, and explain why reuse and the run-rung drive margin"
+      },
+      {
+       "id": "2",
+       "html": "<strong>Position</strong> an offer (niche vs generalist) and name what you build vs buy and the proof you need"
+      },
+      {
+       "id": "3",
+       "html": "Recommend an <strong>operating model</strong> (centralised / embedded / hybrid) for a given client maturity"
+      },
+      {
+       "id": "4",
+       "html": "Specify the <strong>security posture</strong> a pole must adopt — and pitch it as a capability"
+      },
+      {
+       "id": "5",
+       "html": "Run a pole on its <strong>KPIs and roadmap</strong>, and communicate its health to an executive in their terms"
+      }
+     ]
+    },
+    {
+     "type": "callout",
+     "kind": "note",
+     "title": "The path as the toolkit for the offer",
+     "html": "<p>Every module was a piece of this. Modules 01-02 gave the framing and the literacy; 03-13 gave the capabilities — each with a \"Client Mission Patterns\" section that is a service in this catalogue; 14-15 gave the governance and responsible-AI hooks that de-risk and differentiate; 16 gave the discipline to scope and deliver one mission. This module assembled them into a <strong>business</strong>: a catalogue, a ladder, a pricing model, an operating model, a security posture, and a P&#x26;L. The deeper maths is one link away in the AI Scientist Path; the deeper code is one link away in the ML Engineer Path. But the leader's job was never to derive the algorithm or write the production loop — it was to know <strong>what exists, when to use it, what it costs, and how to scope, sell, secure, and lead it.</strong> That is the offer. Now go build the pole.</p>"
+    }
+   ],
+   "subsections": []
+  }
+ ]
+}

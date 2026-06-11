@@ -1,0 +1,347 @@
+{
+ "moduleId": "17",
+ "quiz": [
+  {
+   "id": "q1",
+   "conceptRef": "from-capabilities-to-an-offer",
+   "prompt": "<p>Your pole's £18k readiness assessment barely breaks even, and a partner suggests either raising its price to a 'proper' margin or dropping it from the catalogue. What is the right way to evaluate this service?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Judge it by what it converts into — it is the cheap, low-risk entry rung of a funnel, priced to maximise an easy \"yes\" into the build and the run, and its real return is the LTV of the relationship it opens.",
+     "correct": true,
+     "explanation": "Exactly. The offer is a funnel, not a price list. A £18k door-opener that reliably converts into £200k+ of project work plus a recurring retainer has a return that has nothing to do with its own line in the P&#x26;L. Price it for conversion, not for margin."
+    },
+    {
+     "id": "b",
+     "text": "Raise the price until it hits the same margin target as every other service — a pole should not run loss-making lines.",
+     "correct": false,
+     "explanation": "A uniform margin target misreads the ladder. Rung-1 services are deliberately priced at or near cost — sometimes below — because they exist to <em>earn the build</em>, qualify the client, and produce the backlog that scopes rungs 2-4. Pricing them 'properly' kills the easy yes."
+    },
+    {
+     "id": "c",
+     "text": "Drop it and lead with the production build, where the real revenue is.",
+     "correct": false,
+     "explanation": "You rarely win the £400k platform on day one. The cheap assessment de-risks the big bet <em>for both sides</em>: the client buys a small bet before a big one, and you qualify them before committing delivery capacity. Removing the entry rung removes the way in."
+    },
+    {
+     "id": "d",
+     "text": "Keep it but strip the deliverable down until the delivery cost makes it profitable on its own.",
+     "correct": false,
+     "explanation": "The module is explicit: make the assessment genuinely useful <em>even if they never buy more</em> — that's what builds trust and referrals, and every assessment doubles as a potential case study. A thin deliverable saves cost and destroys the conversion the service exists for."
+    }
+   ],
+   "takeaway": "Value an entry sale by the relationship it opens (LTV ≈ annual contract value × expected years), not by its own fee — the assessment is an option on a multi-year relationship.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q2",
+   "conceptRef": "the-offer-ladder",
+   "prompt": "<p>Why does the module call rung 4 (run / managed service) \"where a consultancy becomes a business\"?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Recurring retainer revenue is predictable and compounds, unlike project revenue which is lumpy and must be re-sold every quarter — and the run seat is the trusted position that surfaces the next assessment.",
+     "correct": true,
+     "explanation": "Right on both halves. A book of managed-service retainers is what a P&#x26;L (or an acquirer) values most, and the operating relationship is the engine of land-and-expand: the team running the system sees the next opportunity (fraud, pricing) before anyone else."
+    },
+    {
+     "id": "b",
+     "text": "Run contracts command the highest day rates in the catalogue, so they maximise revenue per consultant.",
+     "correct": false,
+     "explanation": "It isn't about rates — retainers are usually modest per month (£9k/month in the insurer example, against a £180k build). The value is predictability, compounding, and the relationship, not the unit price."
+    },
+    {
+     "id": "c",
+     "text": "Operating work needs the least skill, so rung 4 can be staffed cheaply with juniors and subcontractors.",
+     "correct": false,
+     "explanation": "Monitoring, retraining, eval re-runs and cost tuning are real MLOps capability — and the run seat is where trust (and the next sale) lives. Staffing it as an afterthought burns exactly the relationship the rung exists to compound."
+    },
+    {
+     "id": "d",
+     "text": "Clients are not capable of operating the systems you build, so a run contract follows automatically from every build.",
+     "correct": false,
+     "explanation": "Nothing follows automatically — the module says to <em>design</em> every rung-3 build to hand off into a run contract. Selling a build with no plan for who runs it is a named red flag: you've sold a system that will rot."
+    }
+   ],
+   "takeaway": "Design every build to hand off into a run contract — recurring revenue is the durable-business signal, and project revenue alone is re-sold every quarter.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q3",
+   "conceptRef": "pricing-models",
+   "prompt": "<p>Which of these pricing decisions <em>protects</em> your margin rather than giving it away?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Fixed price on a productised service — your delivery cost falls every repeat (templates, eval harness, checks built once) while the price holds, so margin rises with volume.",
+     "correct": true,
+     "explanation": "This is the economics of reuse. On T&#x26;M you sell an hour once; on fixed-price productised work you keep every efficiency gain. It's why the reusable assets — templates, eval harnesses — are commercially precious: they turn delivery hours into product."
+    },
+    {
+     "id": "b",
+     "text": "T&#x26;M on a productised assessment, so the client only pays for the days actually used.",
+     "correct": false,
+     "explanation": "Named explicitly as what NOT to do: T&#x26;M on a productised service gives away your reuse margin. You did the hard work of building the template once — billing by the day hands that efficiency gain to the client instead of keeping it."
+    },
+    {
+     "id": "c",
+     "text": "A fixed price quoted before discovery on a bespoke build, to win the deal with certainty.",
+     "correct": false,
+     "explanation": "Pricing blind — another named anti-pattern. On a bespoke engagement the risk of a fixed price sits with you (you eat overruns), so committing before discovery means committing before you know the cost. Fixed or capped <em>after</em> discovery is the pattern."
+    },
+    {
+     "id": "d",
+     "text": "A flat monthly run fee on a managed service, so the client gets cost certainty regardless of adoption.",
+     "correct": false,
+     "explanation": "Compute and token spend scale with adoption — a flat fee means you absorb the growth. The module's guidance: commit to <em>visibility and a cap</em>, not a fixed number. Cost certainty for the client at your expense is margin leaking by design."
+    }
+   ],
+   "takeaway": "Choose the pricing model per service, not once for the offer — and protect reuse: fixed price on productised work is how delivery hours become product margin.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q4",
+   "conceptRef": "pricing-models",
+   "prompt": "<p>A client offers you 10% of measured fraud savings instead of a fixed fee for a fraud-detection build. Under what condition should you accept value-based pricing?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Only if the outcome is isolated, instrumented and attributable to your work — a clean baseline and an agreed measurement method — otherwise sell the fixed-price system and let them keep the upside.",
+     "correct": true,
+     "explanation": "Value-based pricing is the highest-margin model <em>and</em> the riskiest. You can only claim a share of an outcome you can attribute — which needs exactly the experimentation rigour of module 05. If the metric moved for ten other reasons, you'll fight over the counterfactual and lose."
+    },
+    {
+     "id": "b",
+     "text": "Always — it has the highest margin profile of the four models, so it should be your default.",
+     "correct": false,
+     "explanation": "Highest <em>and riskiest</em>. Defaulting to it means routinely betting your margin on numbers you may not be able to defend. The module's rule: never bet your margin on a number you can't defend."
+    },
+    {
+     "id": "c",
+     "text": "Accept whenever the projected total exceeds the fixed fee you would have quoted.",
+     "correct": false,
+     "explanation": "Projected value is paper value. The question isn't whether the number <em>could</em> be bigger — it's whether you can <em>prove</em> your share of it when the client's revenue has moved for many reasons at once. Without attribution, the bigger number never gets paid."
+    },
+    {
+     "id": "d",
+     "text": "Never — outcome-based pricing is a gimmick that serious consultancies avoid.",
+     "correct": false,
+     "explanation": "It's a legitimate model with a legitimate niche: value that is large, measurable, and attributable to you. The error isn't using it — it's using it where the counterfactual is contested."
+    }
+   ],
+   "takeaway": "Use value-based pricing only where the metric is isolated and instrumented; otherwise sell the fixed-price system that produces the value and let the client keep the upside.",
+   "difficulty": "stretch"
+  },
+  {
+   "id": "q5",
+   "conceptRef": "positioning--differentiation",
+   "prompt": "<p>Your pole's new pitch deck leads with the tech stack: frontier models, a vector database, managed pipelines, a cloud AI suite. What's wrong with this positioning?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "That entire layer is a commodity anyone can rent — differentiation must come from what the commodity can't supply: domain workflow templates, reusable eval harnesses, methodology, named accelerators, and proof.",
+     "correct": true,
+     "explanation": "In 2026 the commodity layer is enormous and shared by everyone. Leading with it positions you as interchangeable. \"Buy the commodity, build the differentiator\" applies to your own offer: spend your build budget only where it creates defensible value you keep across clients."
+    },
+    {
+     "id": "b",
+     "text": "Nothing — buyers want to see proven technology, and a strong stack builds trust fastest.",
+     "correct": false,
+     "explanation": "Buyers de-risk by buying <em>proof</em>, not technology lists: case studies with measured results, reference clients, named accelerators. \"We've done this for three firms like you\" builds trust fast; a stack slide says nothing your competitors' decks don't."
+    },
+    {
+     "id": "c",
+     "text": "The deck should list <em>more</em> technologies, to position the pole as a full-spectrum generalist.",
+     "correct": false,
+     "explanation": "A generalist offer is easy to assemble and hard to sell — you compete on price against everyone. The niche offer wins: harder to assemble, far easier to sell, with reuse driving margin and domain proof commanding a premium."
+    },
+    {
+     "id": "d",
+     "text": "Only the vendor names are the problem — they'll be stale within a year and make the deck look dated.",
+     "correct": false,
+     "explanation": "Perishable names are a cosmetic issue. The structural problem is leading with the rentable layer at all: the catalogue is your <em>capability</em>, the niche is your <em>go-to-market</em>. Lead with the niche, deliver from the catalogue."
+    }
+   ],
+   "takeaway": "Your differentiation cannot be the technology — lead with the niche and the proof, and spend your build budget only on assets you keep across clients.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q6",
+   "conceptRef": "building--leading-the-pole",
+   "prompt": "<p>A scaling organisation's centralised AI CoE has become a bottleneck — business units complain it's an ivory tower detached from their problems, while use-case demand keeps growing. What do you recommend?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Move to a hybrid hub-and-spoke: a central team owns the platform, standards, scarce skills and the run; embedded delivery squads in the business own the use case and the outcome — with that ownership split made explicit.",
+     "correct": true,
+     "explanation": "This is where most successful poles land. The hub stops every squad re-buying the same vector store; the spokes stop the hub building things nobody asked for. The split that must be explicit: hub owns platform and run, spoke owns use case and outcome."
+    },
+    {
+     "id": "b",
+     "text": "Fully embed: dissolve the central team and place every data/AI person inside a business unit.",
+     "correct": false,
+     "explanation": "Pure embedding has its own documented failure modes: re-invented wheels, inconsistent standards, duplicated infra, silos. You'd trade the ivory tower for ten teams each buying their own platform and shipping ungoverned systems."
+    },
+    {
+     "id": "c",
+     "text": "Keep the CoE centralised but add headcount until the bottleneck clears.",
+     "correct": false,
+     "explanation": "The bottleneck is structural, not capacity. A bigger central queue is still a queue, and it does nothing for the detachment problem — the CoE still lacks the domain proximity that embedded squads provide."
+    },
+    {
+     "id": "d",
+     "text": "Declare embedded the target end state, since high maturity always means full federation.",
+     "correct": false,
+     "explanation": "The module names <em>hybrid</em> as the common end state for scaling poles, not full federation. Embedded-only fits when domain depth dominates and you accept duplication — most organisations need the hub for standards, governance and shared platform."
+    }
+   ],
+   "takeaway": "Hybrid hub-and-spoke is the common end state — the hub owns the platform and the run, the spokes own the use case and the outcome, and that split must be explicit.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q7",
+   "conceptRef": "ai--data-security",
+   "prompt": "<p>Why does the module insist that an AI &#x26; Data pole's security posture must go beyond classic application security?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Because the data, the models and the prompts are now part of the attack surface — poisoned datasets, backdoored weights, prompt injection — and the blast radius is asymmetric: one raw-PII call to an external API or one leaked key can be a reportable breach.",
+     "correct": true,
+     "explanation": "That's the mental shift. A classic app is attacked through its inputs and infrastructure; an AI system is <em>additionally</em> attacked through training data, model supply chain, and prompts. Default: least privilege everywhere, and treat every external model and dataset as untrusted code."
+    },
+    {
+     "id": "b",
+     "text": "Because AI systems run on more infrastructure, so there are simply more servers to patch.",
+     "correct": false,
+     "explanation": "Surface <em>area</em> isn't the point — surface <em>kind</em> is. The new vectors (data poisoning, model supply chain, injection) are categorically different from infrastructure patching, and classic controls don't see them at all."
+    },
+    {
+     "id": "c",
+     "text": "Because LLM vendors are inherently insecure, so anything touching their APIs is compromised by default.",
+     "correct": false,
+     "explanation": "The discipline isn't vendor paranoia — it's process: read the vendor's data-retention terms before client data touches the API, and pseudonymise PII first. The named red flag is <em>your</em> pipeline sending raw PII out, not the vendor's existence."
+    },
+    {
+     "id": "d",
+     "text": "It doesn't need to — a firewall, pen tests and standard appsec cover an AI system like any other software.",
+     "correct": false,
+     "explanation": "Standard appsec misses every AI-specific threat in the module's table: injection via retrieved content, training-data leakage, poisoned models from public hubs, over-broad RAG access. The pole needs an AI-systems inventory and controls those tools never check."
+    }
+   ],
+   "takeaway": "Your data and your model are part of the attack surface, not just your code — least privilege everywhere, and treat every external model and dataset as untrusted.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q8",
+   "conceptRef": "the-poles-operating-model--roadmap",
+   "prompt": "<p>Your pole hits 100% utilisation for the second consecutive quarter, and the sponsor congratulates you on the efficiency. What's the correct read?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "It's a red flag, not a trophy: zero slack means no pre-sales, no proof-building, no upskilling and no recovery — you're mortgaging next quarter's pipeline to flatter this quarter's number. Healthy poles target a band around 70-85%.",
+     "correct": true,
+     "explanation": "Exactly the module's warning. Utilisation drives margin because people-cost is fixed — but the unbilled work (proposals, case studies, the dual-ladder upskilling) is what <em>creates future billing</em>. A pole pinned at 100% is eating its own pipeline."
+    },
+    {
+     "id": "b",
+     "text": "It's the goal — every unbilled hour is pure cost against a salary you owe regardless, so 100% is the margin-optimal state.",
+     "correct": false,
+     "explanation": "The premise is true (idle hours are pure cost) but the conclusion is wrong. Maximal utilisation maximises <em>this quarter's</em> margin by starving the activities that generate the next one. High, not maximal."
+    },
+    {
+     "id": "c",
+     "text": "It's only a problem because of burnout risk — if the team is happy, 100% is fine to sustain.",
+     "correct": false,
+     "explanation": "Resilience is one cost, but the documented mechanism is commercial: pre-sales, proof-building and upskilling are unbilled and essential. Even a tireless team at 100% produces no proposals, no case studies, and no pipeline."
+    },
+    {
+     "id": "d",
+     "text": "It means your rates are too low — raise prices until demand falls back to capacity.",
+     "correct": false,
+     "explanation": "Pricing power comes from positioning and proof, not from a utilisation reading. The KPI is telling you about <em>slack design</em>, not price elasticity — and raising rates without protecting unbilled time still leaves no room for the work that compounds."
+    }
+   ],
+   "takeaway": "Utilisation should be high but not maximal — the ~70-85% band funds billing <em>and</em> the unbilled work (pre-sales, proof, upskilling) that creates future billing.",
+   "difficulty": "stretch"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "title": "From capability list to offer ladder",
+   "estimatedMinutes": 30,
+   "scenario": "<p>You've just been named tech lead of a new six-person AI &#x26; Data pole inside a mid-size consultancy. The partners hand you two things: a list of everything the team \"can do\" (RAG assistants, churn models, data-quality work, GDPR gap reviews, demand forecasting, MLOps) and a glossy deck of <strong>ten named services</strong> — most of which the team has delivered zero times. Your first anchor prospect is a regional bank whose COO asked, vaguely, \"can you help us with AI?\"</p>\n<p>The partners want a commercial design, not a tech plan.</p>",
+   "givens": [
+    "Team capabilities: RAG/knowledge systems, classical ML (churn, forecasting), data quality, GDPR/governance, MLOps — strongest track record in RAG and data-quality work",
+    "The bank: regulated, data siloed, no AI governance, an executive sponsor who is curious but unburned",
+    "Reference price points from your market: assessments €15-25k, discovery/PoC €25-40k, builds €120-200k, run retainers €6-10k/month",
+    "A productised assessment costs you ~€16k of effort to deliver the first time; the reusable template cuts that to ~€8k by the third delivery; you charge €20k fixed"
+   ],
+   "tasks": [
+    "Pick a <strong>spine</strong> of 3-4 services and place them on the four-rung offer ladder, with a pricing model per rung and a one-line justification for each pricing choice.",
+    "Design the bank's land-and-expand journey rung by rung with realistic prices, then compute the first-order <strong>LTV</strong> if the journey ends in an €8k/month run retainer expected to last 4 years.",
+    "Compute the <strong>gross margin</strong> on the productised assessment at first delivery and at third delivery, and state in one sentence what this says about productised vs bespoke.",
+    "Name two red flags in the partners' ten-service deck and what you'd do instead."
+   ],
+   "solution": "<p><strong>Step 1 — the spine.</strong> Pick what the team does best <em>and</em> what ladders: (1) <strong>AI &#x26; Data Readiness Assessment</strong> (rung 1, fixed price — productised, repeatable, near-constant cost, so fixed price keeps the reuse margin); (2) <strong>Data Quality Audit / GDPR Gap Assessment</strong> (rung 1, fixed price — same logic, and it's the natural entry for a regulated bank); (3) <strong>Permissioned RAG build</strong> (rung 3, fixed-or-capped <em>after</em> discovery — bespoke, so never quote fixed before you've scoped); (4) <strong>Monitoring &#x26; retraining managed service</strong> (rung 4, retainer — anything that must be operated is recurring by nature). Rung 2 (a RAG feasibility/eval engagement) bridges 1→3, also fixed price. Everything else on the partners' list becomes \"yes, we can also do that\" once trust exists — not a headline.</p>\n<p><strong>Step 2 — the bank's journey and LTV.</strong> Assess (3 wks, €20k fixed): readiness + data-quality scoring; output is the prioritised backlog — say it surfaces a strong \"policy &#x26; procedure assistant\" use case. Discover (4 wks, €30k fixed): RAG feasibility on their real documents, proving the answer-quality number on <em>their</em> data. Build (12-14 wks, €160k capped): permissioned RAG with access control and audit logging — the regulated-corpus version, because the bank's constraint is the differentiator. Run (€8k/month): monitoring, eval re-runs, retraining, cost tuning.</p>\n<p>LTV on the retainer alone: €8k × 12 = <strong>€96k/year</strong>; over 4 expected years ≈ <strong>€384k</strong> — before any further builds. Total relationship: €210k of project work + ~€384k run ≈ <strong>€594k unlocked by a €20k door-opener</strong>. That is why the assessment is priced for conversion, not for its own margin.</p>\n<p><strong>Step 3 — gross margin on the assessment.</strong> First delivery: (20 − 16) / 20 = <strong>20%</strong>. Third delivery: (20 − 8) / 20 = <strong>60%</strong>. Same price, same deliverable — the template, checklist and report skeleton were built once and reused. One sentence: <em>productised fixed-price work converts delivery hours into an asset, so margin rises with volume, while bespoke work re-pays the same setup cost on every client and margin stays flat.</em></p>\n<p><strong>Step 4 — red flags in the deck.</strong> (1) <em>Ten services, mostly never delivered</em> — a named red flag. Sell a service once bespoke, learn its real cost, <strong>then</strong> productise; a catalogue with one productised service you sell repeatedly beats a glossy ten-service deck. (2) <em>No designed hand-off into run</em> — if every service ends at delivery, there is no recurring revenue and every quarter starts at zero. Fix: every rung-3 service gets a run-contract clause in the proposal by default. (Also acceptable: generalist positioning with no niche; no pricing model per service.)</p>",
+   "rubric": {
+    "keyPoints": [
+     "Spine of 3-4 services that <em>ladder into each other</em>, not a list of capabilities — with a pricing model per rung (fixed for productised, capped-after-discovery for bespoke, retainer for run) and justifications",
+     "LTV computed correctly (€8k × 12 × 4 ≈ €384k recurring) and used to argue the assessment is priced for conversion, not standalone margin",
+     "Gross margin computed at both points (20% → 60%) with the reuse mechanism named: cost falls while price holds",
+     "Red flags identified from the note: undelivered catalogue services, and builds with no run hand-off (or generalist positioning / single pricing model for everything)"
+    ],
+    "pitfalls": [
+     "Pricing the assessment for its own profitability — the door-opener exists to convert, and a thin deliverable kills trust and referrals",
+     "Quoting the build fixed-price <em>before</em> discovery — on bespoke work the overrun risk sits with you; cap it after scoping",
+     "Putting all ten services in the offer because the team 'can' do them — sell bespoke once, learn the cost, then productise",
+     "Designing rung 3 to end at delivery — no run contract means no recurring revenue and a system that rots"
+    ],
+    "takeaways": [
+     "The offer is a funnel: each rung produces the evidence, trust and backlog that sells the next, and rung 4 is where the consultancy becomes a business",
+     "Reuse is the margin engine — fixed-price productised services turn delivery hours into IP whose cost falls with every sale"
+    ],
+    "transfer": "This land-and-expand structure is the standard commercial pattern far beyond AI consulting: SaaS freemium tiers (free plan → paid seat → enterprise contract), law and audit firms (cheap compliance review → litigation/advisory retainer), and even internal platform teams pitching a CFO (small pilot → funded platform → permanent budget line). Wherever trust must be built before a large commitment, design a cheap, genuinely useful first transaction whose real return is the conversion rate into the relationship — and judge it on that, never on its own margin."
+   }
+  },
+  {
+   "id": "ex2",
+   "title": "Pole health review: turn a KPI dashboard into an executive narrative",
+   "estimatedMinutes": 30,
+   "scenario": "<p>Eighteen months in, your pole has grown to twelve people. The sponsor wants a board update next week. The outgoing lead drafted slides that list the nine models currently in production, with accuracy figures for each.</p>\n<p>The PSA tool shows this quarter's KPIs:</p>\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n<table><thead><tr><th align=\"left\">KPI</th><th align=\"left\">This quarter</th><th align=\"left\">Two quarters ago</th></tr></thead><tbody><tr><td align=\"left\">Utilisation</td><td align=\"left\">97%</td><td align=\"left\">82%</td></tr><tr><td align=\"left\">Gross margin</td><td align=\"left\">28%</td><td align=\"left\">29%</td></tr><tr><td align=\"left\">Recurring revenue share</td><td align=\"left\">6%</td><td align=\"left\">5%</td></tr><tr><td align=\"left\">Delivery success rate</td><td align=\"left\">70%</td><td align=\"left\">85%</td></tr><tr><td align=\"left\">Assessment → build conversion</td><td align=\"left\">1 in 6</td><td align=\"left\">1 in 3</td></tr><tr><td align=\"left\">NPS</td><td align=\"left\">falling</td><td align=\"left\">stable</td></tr></tbody></table>\n<p>The partners' instinct is to celebrate utilisation and hire two more people.</p>",
+   "givens": [
+    "Twelve billable people; a typical consultant this quarter booked 155 billable hours of 160 available",
+    "Almost all revenue is project work; only one small run retainer exists",
+    "No demand-intake gate: requests arrive via partners' relationships and are accepted ad hoc",
+    "The board wants: is it working, where's the value, what's the risk, what's next and what does it cost"
+   ],
+   "tasks": [
+    "Diagnose the KPI pattern: explain the causal story that links utilisation, conversion, delivery success and margin — not six separate observations.",
+    "Verify the utilisation figure for the typical consultant and state the band you'd target instead, with the reason.",
+    "Propose three roadmap moves, each tied to the KPI it should repair.",
+    "Rewrite the board update as the four executive questions — and say what's wrong with the models-list draft."
+   ],
+   "solution": "<p><strong>Step 1 — the causal diagnosis.</strong> This is one story, not six numbers. Utilisation at 97% means zero slack — so nobody is doing pre-sales, proof-building or proper scoping. That shows up downstream twice: <strong>assessment→build conversion halved</strong> (no time to nurture the funnel, no case studies being produced) and <strong>delivery success fell 85%→70%</strong> (over-committed people, under-scoped missions — the module flags a falling success rate as over-selling or under-scoping). NPS follows delivery success down, which threatens referrals — the engine of land-and-expand. Meanwhile <strong>margin is flat at ~28%</strong> despite frantic billing because nearly everything is bespoke project work: no productisation (no slack to build templates) and almost no run book (recurring share stuck at 6%). The pole is sprinting on a treadmill: this quarter's billing is consuming the assets that produce next quarter's.</p>\n<p><strong>Step 2 — utilisation arithmetic.</strong> 155 / 160 ≈ <strong>97%</strong> — consistent with the dashboard. Target band: <strong>~70-85%</strong>. The reason is structural, not soft: people-cost is fixed, so billable hours drive margin, <em>but</em> the unbilled hours fund the pipeline (proposals), the proof (case studies from every assessment), the upskilling (the dual ladder), and recovery. 100% utilisation is a red flag that mortgages next quarter — exactly what the conversion and success numbers are already showing.</p>\n<p><strong>Step 3 — three roadmap moves, tied to KPIs.</strong></p>\n<ol>\n<li><strong>Stand up the run book</strong>: add a managed-service clause to every live build and revisit recent deliveries to sell monitoring/retraining retainers. → Targets <em>recurring revenue share</em> (the durable-business signal) and stabilises <em>margin</em>.</li>\n<li><strong>Productise the two services delivered most often</strong> (build the assessment template and eval harness once). → Targets <em>gross margin</em> (cost falls while price holds) and frees capacity.</li>\n<li><strong>Install the demand-intake gate</strong> (one-page request, value × feasibility scoring, risk-tier and lawful-basis checks before work starts) and drop the utilisation target to ~80%. → Targets <em>delivery success</em> (no more ad-hoc over-commitment) and <em>conversion</em> (protected pre-sales and proof-building time). Note hiring two more people is <em>not</em> on the list: pouring capacity into an unmanaged intake just scales the problem.</li>\n</ol>\n<p><strong>Step 4 — the board narrative.</strong> Lead with trend, in their terms:</p>\n<ul>\n<li><strong>Is it working?</strong> \"Demand is strong and billing is full — but three health indicators (delivery success, conversion, NPS) turned down this quarter because we're running at 97% utilisation with no slack. We're correcting before it compounds.\"</li>\n<li><strong>Where's the value?</strong> A small portfolio view: missions as bets with outcomes and proof — e.g. \"the claims-triage build is live and measured at X; two assessments converted to builds worth €Y.\" Not nine models with accuracy figures.</li>\n<li><strong>What's the risk?</strong> The honest register: over-utilisation eroding delivery quality, key-person risk at 97% load, near-zero recurring revenue making every quarter a cold start — plus what we declined and why.</li>\n<li><strong>What's next and what does it cost?</strong> The three funded moves above, in € and quarters: productisation investment, run-book push with a recurring-revenue target, intake gate + utilisation band.</li>\n</ul>\n<p><strong>What's wrong with the models list:</strong> the board can't act on accuracy figures — a named red flag is \"a pole reported to the board as a list of models instead of a portfolio with a P&#x26;L.\" Executives need trend, portfolio, risk and the next funded bet; models are how the work gets done, not what the business is.</p>",
+   "rubric": {
+    "keyPoints": [
+     "A <em>causal</em> diagnosis linking 97% utilisation → no pre-sales/proof → falling conversion, and over-commitment → falling delivery success and NPS — not six disconnected observations",
+     "Utilisation verified (155/160 ≈ 97%) with the ~70-85% target band justified by what unbilled time funds",
+     "Roadmap moves each tied to a KPI: run book → recurring revenue, productisation → margin, intake gate + utilisation band → delivery success and conversion",
+     "Board narrative structured as the four executive questions, led by trend, with the models-list draft rejected for the documented reason"
+    ],
+    "pitfalls": [
+     "Celebrating 100%-ish utilisation as efficiency — it's the red flag driving the other declines",
+     "Answering the falling numbers with 'hire more people' — without an intake gate and slack design, added capacity scales the dysfunction",
+     "Reporting models and accuracy to a board instead of a portfolio-and-P&#x26;L narrative",
+     "Proposing fixes with no KPI linkage — the roadmap is a business roadmap expressed in the pole's KPIs, not a list of initiatives"
+    ],
+    "takeaways": [
+     "The pole is itself a product: run it on a small honest dashboard, and read the KPIs as one causal system, not a scorecard",
+     "Executive communication at pole level is portfolio and P&#x26;L — trend first, then value, then risk, then the next funded bet"
+    ],
+    "transfer": "Reading a KPI dashboard as a causal story rather than a scorecard is the universal operating-review skill: a factory running at 100% machine utilisation with rising defect rates, a hospital at 100% bed occupancy with growing readmissions, an engineering team at 100% sprint capacity with rising incident counts. In every case the same pathology — no slack → quality and pipeline erosion — and the same fix: target a utilisation band, protect the non-billable work that compounds, and report the <em>system</em> to leadership, not the inventory of outputs."
+   }
+  }
+ ]
+}

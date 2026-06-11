@@ -1,0 +1,350 @@
+{
+ "id": "01",
+ "title": "AI & Data Landscape & Tech-Lead Mindset",
+ "weeks": [
+  1,
+  2
+ ],
+ "part": "I — Foundations & Framing",
+ "partIndex": 1,
+ "addon": false,
+ "pitchHtml": "<p>Before you can build a pole or sell an offer, you need a map of the territory and a way of thinking that keeps you out of trouble. This module gives both: what \"AI &#x26; Data\" actually contains, who does what, and the single decision you'll make more than any other — <em>should we even use ML/AI here, and if so, the cheap version or the expensive one?</em> The recurring question of this whole path starts here: <strong>does the value justify the complexity?</strong></p>",
+ "prev": null,
+ "next": "02",
+ "sectionCount": 8,
+ "quizCount": 8,
+ "exerciseCount": 2,
+ "sections": [
+  {
+   "id": "learning-objectives",
+   "kind": "objectives",
+   "title": "Learning Objectives",
+   "blocks": [
+    {
+     "type": "checklist",
+     "checklistId": "01/learning-objectives/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Draw the AI &#x26; Data landscape from raw data to agents, and place any client request on it"
+      },
+      {
+       "id": "1",
+       "html": "Name the roles in an AI &#x26; Data pole and what each is (and isn't) accountable for"
+      },
+      {
+       "id": "2",
+       "html": "Decide between <strong>rules, classical ML, deep learning, a hosted LLM API, or \"don't build it\"</strong> for a given problem"
+      },
+      {
+       "id": "3",
+       "html": "Separate 2026 reality from hype when a stakeholder asks \"can't AI just do this?\""
+      },
+      {
+       "id": "4",
+       "html": "Apply the value/complexity budget to qualify or kill an opportunity in one conversation"
+      },
+      {
+       "id": "5",
+       "html": "Explain why \"no usable data\" is a stop condition, and what to sell instead"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "key-concepts",
+   "kind": "concepts",
+   "title": "Key Concepts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "the-landscape-one-picture",
+     "number": 1,
+     "title": "The Landscape: One Picture",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>\"AI &#x26; Data\" is a stack, not a single thing. Most client confusion (and most mis-scoped missions) comes from collapsing these layers.</p>"
+      },
+      {
+       "type": "diagram",
+       "text": "                      ┌─────────────────────────────────────────┐\n   VALUE / DELIVERY   │ Decisions · Products · Automations        │\n                      └─────────────────────────────────────────┘\n                                       ▲\n   AI METHODS         Agents → LLM apps → Generative AI → Deep Learning → Classical ML\n                                       ▲\n   ANALYTICS          BI · dashboards · metrics · experimentation\n                                       ▲\n   DATA PLATFORM      Pipelines · warehouse/lakehouse · governance · quality\n                                       ▲\n   SOURCES            Apps · logs · events · documents · 3rd-party APIs"
+      },
+      {
+       "type": "html",
+       "html": "<p>Two rules of thumb that will save you repeatedly:</p>\n<ul>\n<li><strong>Value flows top-down, but capability is built bottom-up.</strong> Clients ask for the top box (\"an AI assistant\"). Delivery almost always blocks on the bottom two (no clean data, no platform). Most \"AI projects\" are 70% data work.</li>\n<li><strong>Higher in the AI-methods row ≠ better.</strong> A regex or a SQL rule that solves the problem beats a fine-tuned model that solves it slightly better at 50× the cost and risk.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "the-roles-in-a-pole",
+     "number": 2,
+     "title": "The Roles in a Pole",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>You don't need all of these on day one, but you need to know which hat a task wants — and to resist the common trap of asking one person to wear all of them.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Role</th><th align=\"left\">Owns</th><th align=\"left\">Typical deliverable</th><th align=\"left\">Don't confuse with</th></tr></thead><tbody><tr><td align=\"left\"><strong>Data Engineer</strong></td><td align=\"left\">Pipelines, ingestion, transformation</td><td align=\"left\">Reliable tables in the warehouse</td><td align=\"left\">Data Scientist</td></tr><tr><td align=\"left\"><strong>Analytics Engineer</strong></td><td align=\"left\">Modelled, documented data (e.g. dbt)</td><td align=\"left\">Trusted metrics layer</td><td align=\"left\">Data Engineer</td></tr><tr><td align=\"left\"><strong>Data Analyst / BI</strong></td><td align=\"left\">Questions answered from data</td><td align=\"left\">Dashboards, analyses</td><td align=\"left\">Data Scientist</td></tr><tr><td align=\"left\"><strong>Data Scientist</strong></td><td align=\"left\">Modelling, experimentation, inference</td><td align=\"left\">A validated model + insight</td><td align=\"left\">ML Engineer</td></tr><tr><td align=\"left\"><strong>ML Engineer</strong></td><td align=\"left\">Productionising &#x26; serving models</td><td align=\"left\">A monitored model behind an API</td><td align=\"left\">Data Scientist</td></tr><tr><td align=\"left\"><strong>MLOps / Platform</strong></td><td align=\"left\">The infra ML runs on</td><td align=\"left\">CI/CD, registry, monitoring</td><td align=\"left\">DevOps</td></tr><tr><td align=\"left\"><strong>AI Engineer</strong></td><td align=\"left\">LLM/agent applications</td><td align=\"left\">A shipped GenAI feature</td><td align=\"left\">Data Scientist</td></tr><tr><td align=\"left\"><strong>Data Architect</strong></td><td align=\"left\">Platform &#x26; governance design</td><td align=\"left\">Target architecture, standards</td><td align=\"left\">Data Engineer</td></tr><tr><td align=\"left\"><strong>Tech Lead (you)</strong></td><td align=\"left\">Outcomes, scoping, judgment, the offer</td><td align=\"left\">The right thing built, sold, and led</td><td align=\"left\">Any single role above</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Staffing a mission is a coverage problem, not a headcount problem. A two-person team where one covers data+platform and the other covers modelling+app can deliver most early missions; the failure mode is hiring four narrow specialists for a job that needed two generalists, or one generalist for a job that needed a real data engineer.</p>"
+      }
+     ]
+    },
+    {
+     "id": "the-decision-youll-make-most-rules-vs-ml-vs-dl-vs-llm-vs-buy-vs-dont",
+     "number": 3,
+     "title": "The Decision You'll Make Most: Rules vs ML vs DL vs LLM vs Buy vs Don't",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>This is the heart of the tech-lead mindset. Walk it top to bottom and stop at the first row that clears the bar.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Option</th><th align=\"left\">Reach for it when</th><th align=\"left\">Cost &#x26; risk</th><th align=\"left\">Watch out for</th></tr></thead><tbody><tr><td align=\"left\"><strong>Don't build</strong></td><td align=\"left\">The problem is rare, low-value, or solvable by a process change</td><td align=\"left\">Lowest</td><td align=\"left\">The hardest sell internally; often the right call</td></tr><tr><td align=\"left\"><strong>Rules / heuristics / SQL</strong></td><td align=\"left\">Logic is known, stable, explainable; few edge cases</td><td align=\"left\">Very low</td><td align=\"left\">Rule sprawl when logic actually <em>is</em> fuzzy</td></tr><tr><td align=\"left\"><strong>Buy an API / SaaS</strong></td><td align=\"left\">Capability is a commodity (OCR, transcription, generic chat, translation)</td><td align=\"left\">Low build, recurring run cost</td><td align=\"left\">Lock-in, data residency, per-call cost at scale</td></tr><tr><td align=\"left\"><strong>Classical ML</strong></td><td align=\"left\">You have tabular/structured data + labels; need explainability &#x26; cheap inference</td><td align=\"left\">Low-medium</td><td align=\"left\">\"No labels\" quietly kills it</td></tr><tr><td align=\"left\"><strong>Deep learning</strong></td><td align=\"left\">Unstructured data (images, audio, raw text) and enough of it</td><td align=\"left\">Medium-high (data, compute, talent)</td><td align=\"left\">Over-engineering tabular problems</td></tr><tr><td align=\"left\"><strong>Hosted LLM</strong></td><td align=\"left\">Language understanding/generation, low-medium volume, fuzzy tasks</td><td align=\"left\">Low build, variable run cost</td><td align=\"left\">Hallucination, latency, per-token cost, privacy</td></tr><tr><td align=\"left\"><strong>Fine-tune / self-host LLM</strong></td><td align=\"left\">High volume, strict privacy, or a durable specialised need</td><td align=\"left\">High</td><td align=\"left\">Rarely justified early — see <a class=\"wikilink\" data-module=\"09\" href=\"#/module/09\">Large Language Models in Practice</a></td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The default escalation: <strong>rule → buy → classical ML → deep learning / LLM</strong>. Make stakeholders justify each step up, not each step down.</p>"
+      }
+     ]
+    },
+    {
+     "id": "hype-vs-reality-as-of-2026",
+     "number": 4,
+     "title": "Hype vs Reality (as of 2026)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>What to tell a stakeholder who says \"AI can surely just do this\":</p>\n<ul>\n<li><strong>Genuinely strong now:</strong> language tasks (drafting, summarising, extraction, classification), code assistance, retrieval over your documents (RAG), perception (vision/speech), and well-posed tabular prediction. These ship.</li>\n<li><strong>Real but fragile:</strong> multi-step <strong>agents</strong> that take actions — powerful demos, harder production reliability; scope tightly and add guardrails (see <a class=\"wikilink\" data-module=\"11\" href=\"#/module/11\">Agentic Architectures &#x26; LLM App Patterns</a>).</li>\n<li><strong>Oversold:</strong> \"autonomous\" anything with no human in the loop; \"we'll just fine-tune it\" as a first move; AI that compensates for absent or terrible data; instant ROI with no change management.</li>\n<li><strong>The quiet truth:</strong> most realised value still comes from <em>boring</em> wins — a clean metric, an automated report, a good classifier, a search that works — not from the frontier. Sell the boring wins; they fund the ambitious ones.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "data-strategy-up-front",
+     "number": 5,
+     "title": "Data Strategy Up Front",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>AI is a function of data. Before any modelling promise, you must be able to answer: <em>does the data exist, can we access it lawfully, is it usable, and is there enough of it?</em></p>\n<ul>\n<li><strong>No data → no AI.</strong> If the signal isn't recorded anywhere, the first mission is instrumentation/collection, not modelling. That's a legitimate (and sellable) data-engineering engagement, not a failure.</li>\n<li><strong>\"Garbage in, garbage out\" is a budget line.</strong> Assume the majority of a first mission is data acquisition, cleaning, and access — price and plan for it (see <a class=\"wikilink\" data-module=\"03\" href=\"#/module/03\">Working with Data: Sources, Quality &#x26; Feature Engineering</a> and <a class=\"wikilink\" data-module=\"12\" href=\"#/module/12\">Data Engineering &#x26; Platforms</a>).</li>\n<li><strong>Lawful basis is a gate, not a footnote.</strong> If the data is personal, governance is a prerequisite, not a final-week checkbox (see <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>).</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Think of an opportunity portfolio in expected-value terms: <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>E</mi><mi>V</mi><mo>≈</mo><mi>P</mi><mo stretchy=\"false\">(</mo><mtext>success</mtext><mo stretchy=\"false\">)</mo><mo>×</mo><mtext>value</mtext><mo>−</mo><mtext>cost</mtext></mrow><annotation encoding=\"application/x-tex\">EV \\approx P(\\text{success}) \\times \\text{value} - \\text{cost}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0576em;\">E</span><span class=\"mord mathnormal\" style=\"margin-right:0.2222em;\">V</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">≈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mopen\">(</span><span class=\"mord text\"><span class=\"mord\">success</span></span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">×</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.7778em;vertical-align:-0.0833em;\"></span><span class=\"mord text\"><span class=\"mord\">value</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6151em;\"></span><span class=\"mord text\"><span class=\"mord\">cost</span></span></span></span></span>. Frontier projects have huge value but low <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>P</mi><mo stretchy=\"false\">(</mo><mtext>success</mtext><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">P(\\text{success})</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mopen\">(</span><span class=\"mord text\"><span class=\"mord\">success</span></span><span class=\"mclose\">)</span></span></span></span> and high cost; \"boring\" data/automation wins have modest value but high <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>P</mi><mo stretchy=\"false\">(</mo><mtext>success</mtext><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">P(\\text{success})</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mopen\">(</span><span class=\"mord text\"><span class=\"mord\">success</span></span><span class=\"mclose\">)</span></span></span></span> and low cost. A healthy pole runs a portfolio weighted toward the latter, funding a few of the former. No derivation needed — the point is to <em>make the three terms explicit</em> before committing.</p>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "client-mission-patterns--commercial-angle",
+   "kind": "missions",
+   "title": "Client Mission Patterns / Commercial Angle",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>The landscape module sells the <em>entry-point</em> missions — the ones that qualify a client and open the door to everything else.</p>\n<ul>\n<li><strong>AI &#x26; Data Readiness Assessment</strong> — <em>Problem:</em> client wants AI but doesn't know if they can. <em>Deliverable:</em> a scored assessment of data, platform, skills, and governance maturity + a prioritised gap list. <em>Scope:</em> 2-4 weeks, fixed price. <em>Who buys:</em> CTO/CDO, COMEX wanting a reality check.</li>\n<li><strong>Use-Case Discovery &#x26; Prioritisation</strong> — <em>Problem:</em> \"we should do something with AI.\" <em>Deliverable:</em> a backlog of use cases scored on value × feasibility (a 2×2), with 2-3 recommended starters. <em>Scope:</em> 2-3 weeks. <em>Who buys:</em> business unit leaders, innovation/digital teams.</li>\n<li><strong>AI Strategy &#x26; Roadmap</strong> — <em>Problem:</em> scattered experiments, no direction. <em>Deliverable:</em> target operating model, build-vs-buy stance, 6-12 month roadmap, budget envelope. <em>Scope:</em> 4-6 weeks. <em>Who buys:</em> executive sponsor. <em>(Assembled in <a class=\"wikilink\" data-module=\"17\" href=\"#/module/17\">Building the AI &#x26; Data Offer &#x26; Leading the Pole</a>.)</em></li>\n</ul>\n<p><strong>Buy-vs-build for the client at this stage:</strong> sell <em>judgment and direction</em>, not technology. The deliverable is a decision, de-risked. <strong>What to charge for:</strong> the assessment/roadmap as a fixed-price package — it's repeatable IP. <strong>What not to promise:</strong> specific accuracy numbers or ROI before you've seen the data; commit only to a <em>method</em> for finding them.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "tools--vendor-landscape",
+   "kind": "tools",
+   "title": "Tools & Vendor Landscape",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p><em>As of 2026 — treat names/prices as perishable; re-check before quoting.</em></p>"
+    },
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Tool / Category</th><th align=\"left\">Use here</th><th align=\"left\">OSS / Paid</th><th align=\"left\">Note</th></tr></thead><tbody><tr><td align=\"left\">Cloud AI suites (AWS / Azure / GCP)</td><td align=\"left\">One-stop platform for a pole</td><td align=\"left\">Paid (consumption)</td><td align=\"left\">Convenient; watch lock-in &#x26; egress</td></tr><tr><td align=\"left\">Hosted LLM APIs (Anthropic Claude, OpenAI, Google, Mistral)</td><td align=\"left\">Commodity language capability</td><td align=\"left\">Paid (per-token)</td><td align=\"left\">Compare on price, latency, data terms</td></tr><tr><td align=\"left\">Maturity/landscape frameworks (Gartner, internal scorecards)</td><td align=\"left\">Readiness assessments</td><td align=\"left\">Mixed</td><td align=\"left\">Use as a checklist, not gospel</td></tr><tr><td align=\"left\">Whiteboard / Miro / FigJam</td><td align=\"left\">Use-case mapping workshops</td><td align=\"left\">Freemium</td><td align=\"left\">The actual tool of this module is a workshop</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The deliverables of <em>this</em> module are mostly conversations and documents — the heavy tooling starts in Part II onward.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "when-is-this-overkill",
+   "kind": "overkill",
+   "title": "When Is This Overkill?",
+   "blocks": [
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Situation</th><th align=\"left\">AI/ML is overkill — do this instead</th></tr></thead><tbody><tr><td align=\"left\">Logic is known and stable</td><td align=\"left\">Write the rules; ship in days</td></tr><tr><td align=\"left\">The decision happens 10×/month</td><td align=\"left\">Let a human do it; automate the data prep around them</td></tr><tr><td align=\"left\">No labelled data and no way to get it</td><td align=\"left\">Sell a data-collection/instrumentation mission first</td></tr><tr><td align=\"left\">A €30/month SaaS already does it</td><td align=\"left\">Buy it; integrate; move on</td></tr><tr><td align=\"left\">The real problem is a broken process</td><td align=\"left\">Fix the process; AI won't paper over it</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The most senior thing you can say in a sales meeting is \"you don't need AI for this.\" It builds the trust that wins the missions where they <em>do</em>.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "resources",
+   "kind": "resources",
+   "title": "Resources",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "books",
+     "number": null,
+     "title": "Books",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Agrawal, Gans &#x26; Goldfarb — <em>Prediction Machines</em> — the economics of AI, in business terms.</li>\n<li>Chip Huyen — <em>AI Engineering</em> — pragmatic framing of the modern stack. <em>(Paid)</em></li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "articles--reports-free",
+     "number": null,
+     "title": "Articles & Reports (Free)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Annual state-of-AI / model-pricing pages (a16z, vendor pricing) — for the current cost landscape. <em>Date everything.</em></li>\n<li>CNIL and EU resources on AI — for the European reality (ties into <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>).</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "go-deeper",
+     "number": null,
+     "title": "Go Deeper",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Maths behind any method mentioned here → <span class=\"vault-ref\" title=\"In the Obsidian vault: 00 - Index AIS\">Index AIS</span>.</li>\n<li>Production/engineering reality of shipping one model → <span class=\"vault-ref\" title=\"In the Obsidian vault: 00 - Index MLE\">Index MLE</span>.</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "practical-artifacts",
+   "kind": "artifacts",
+   "title": "Practical Artifacts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "decision-checklist--should-we-use-ai-here",
+     "number": null,
+     "title": "Decision Checklist — \"Should we use AI here?\"",
+     "blocks": [
+      {
+       "type": "checklist",
+       "checklistId": "01/practical-artifacts/1",
+       "items": [
+        {
+         "id": "0",
+         "html": "Is there a clear business outcome with a number attached?"
+        },
+        {
+         "id": "1",
+         "html": "Does the data exist, and can we access it lawfully?"
+        },
+        {
+         "id": "2",
+         "html": "Would a rule or an off-the-shelf API clear the bar more cheaply?"
+        },
+        {
+         "id": "3",
+         "html": "Can we tolerate the failure mode (wrong prediction / hallucination)?"
+        },
+        {
+         "id": "4",
+         "html": "Is there a human-in-the-loop path if confidence is low?"
+        },
+        {
+         "id": "5",
+         "html": "Do we know how we'll prove it worked?"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "red-flags",
+     "number": null,
+     "title": "Red Flags",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"We'll figure out the data later.\" (You won't; it's the project.)</li>\n<li>\"We just need to fine-tune a model.\" (As a first move — almost never.)</li>\n<li>\"It worked in the demo.\" (Demos hide the long tail.)</li>\n<li>A use case with no owner who feels the pain.</li>\n<li>Success defined as \"use AI\", not as an outcome.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "scoping-prompts-ask-the-client",
+     "number": null,
+     "title": "Scoping Prompts (ask the client)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"If this worked perfectly, what decision or action changes, and what is that worth?\"</li>\n<li>\"Where does the data live today, who owns it, and what's in it?\"</li>\n<li>\"What do you do today without AI, and what's wrong with that?\"</li>\n<li>\"Who is accountable for acting on the output?\"</li>\n<li>\"What happens when the system is wrong?\"</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "self-assessment",
+   "kind": "self-assessment",
+   "title": "Self-Assessment",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Before moving on, you should be able to:</p>"
+    },
+    {
+     "type": "checklist",
+     "checklistId": "01/self-assessment/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Sketch the AI &#x26; Data stack and locate any incoming request on it"
+      },
+      {
+       "id": "1",
+       "html": "Route a problem to rules / buy / classical ML / DL / LLM / don't-build with a one-line justification"
+      },
+      {
+       "id": "2",
+       "html": "Defuse an inflated AI expectation with a concrete 2026 reality check"
+      },
+      {
+       "id": "3",
+       "html": "Run a value/complexity conversation that ends in qualify, downscope, or kill"
+      },
+      {
+       "id": "4",
+       "html": "Recognise a \"no usable data\" situation and pivot it into a data mission"
+      },
+      {
+       "id": "5",
+       "html": "Pitch a readiness assessment or use-case discovery as a fixed-price entry mission"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  }
+ ]
+}

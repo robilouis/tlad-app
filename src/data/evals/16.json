@@ -1,0 +1,348 @@
+{
+ "moduleId": "16",
+ "quiz": [
+  {
+   "id": "q1",
+   "conceptRef": "discovery--qualification-real-opportunity-vs-ai-theatre",
+   "prompt": "<p>A COMEX sponsor opens the first meeting with: \"We want an AI agent — our competitors all have one.\" What's your first move?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Reverse the solution back into a problem: what decision or action changes if this works, how often, what's it worth in euros or hours, who owns the pain and will act on the output, and does usable data exist lawfully — before any proposal.",
+     "correct": true,
+     "explanation": "Most AI requests arrive as a solution, not a problem; the qualification questions are how you separate signal from AI theatre. No downstream action means no value, however clever the model — and \"innovation\" is not a number. The use-case canvas is the one-pager you fill in <em>with</em> the client."
+    },
+    {
+     "id": "b",
+     "text": "Propose a quick PoC of an agent — momentum matters, and the details can be qualified once something is demo-able.",
+     "correct": false,
+     "explanation": "A PoC of an unqualified use case answers \"can we build it?\" before anyone asked \"is it worth building?\". That's how demos with no owner and no downstream action die after the applause — the canvas comes before the proposal, let alone the build."
+    },
+    {
+     "id": "c",
+     "text": "Match the competitors: research what agents they deployed and quote a comparable build.",
+     "correct": false,
+     "explanation": "\"Competitors have one\" is the theatre smell, not a requirement. Their use case, data, and economics aren't this client's — qualification is expected-value triage on <em>this</em> client's decisions, data, and numbers."
+    },
+    {
+     "id": "d",
+     "text": "Decline — requests that arrive as solutions are theatre by definition and not worth pursuing.",
+     "correct": false,
+     "explanation": "The arrival shape is normal, not disqualifying — nearly every request arrives as a solution. Your job is to reverse it; behind \"we want an agent\" there is sometimes a genuine quick win or strategic bet, and sometimes a process fix or a 30-euros-a-month SaaS. You find out by asking, not by refusing."
+    }
+   ],
+   "takeaway": "Requests arrive as solutions; qualification reverses them into problems — what decision changes, what's it worth, who owns it, does the data exist — before anything is proposed.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q2",
+   "conceptRef": "scoping-a-mission-outcome-stages-definition-of-done",
+   "prompt": "<p>A qualified use case is ready to scope, and the sponsor wants to \"skip the PoC and go straight to production — LLMs are proven technology now.\" Why do you keep the stages?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Because the staging <em>is</em> the risk management: each gate (discovery → PoC → pilot → production) answers a different question for a different audience, and gives the client a real go/no-go where they can stop having spent little.",
+     "correct": true,
+     "explanation": "The technology being \"proven\" in general says nothing about whether it hits the metric on <em>this client's</em> data, works for real users safely, and runs affordably — the three different questions PoC, pilot, and production exist to answer. Collapsing the stages transfers all of that risk into one large, unpriceable bet."
+    },
+    {
+     "id": "b",
+     "text": "Agree — staging is a habit from the pre-LLM era, and skipping it shows confidence.",
+     "correct": false,
+     "explanation": "The uncertainty hasn't moved: data quality, the long tail of real inputs, user adoption, and run cost are all unknown until the stage that tests them. Confidence without gates is just risk the client hasn't priced."
+    },
+    {
+     "id": "c",
+     "text": "Keep a PoC, but let its code roll forward into production to save rebuild time.",
+     "correct": false,
+     "explanation": "The \"PoC that never productionises\" trap has an evil twin: PoC code that <em>silently becomes</em> production. The gate between them must be explicit, with productionisation budgeted as real work — the demo is roughly 20% of the work."
+    },
+    {
+     "id": "d",
+     "text": "Keep the stages but define success at the end as \"the assistant is live and uses AI.\"",
+     "correct": false,
+     "explanation": "\"Use AI\" as a success criterion is a named red flag. Each deliverable needs a definition of done in observable terms — metric hit, monitoring live, runbook written, owner trained — agreed in writing before the build."
+    }
+   ],
+   "takeaway": "PoC → pilot → production staging is the risk management itself: each gate answers a distinct question and lets the client stop cheaply — never collapse it because the technology feels proven.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q3",
+   "conceptRef": "estimation-under-uncertainty",
+   "prompt": "<p>A colleague's proposal for an ML mission estimates: \"modelling: 37.5 days; data preparation: 2 weeks (TBC).\" The client hasn't yet granted data access. What's wrong with this estimate?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Its error is dominated by the least-known workstream: a precise modelling figure next to a hand-waved data line gives false confidence, since data work routinely dominates and is invisible until you open the data — sell a paid discovery to convert the unknown, then estimate in ranges tied to assumptions.",
+     "correct": true,
+     "explanation": "Exactly the module's intuition: the unknown swamps the precise terms. The honest pattern is T-shirt sizes with an explicit basis, the data work as its own line with client-owned gates, and a range like \"6–10 weeks if the data is as described, re-baselined after discovery\" — a point estimate you don't believe is a liability you'll be held to."
+    },
+    {
+     "id": "b",
+     "text": "Nothing major — 37.5 days shows rigorous planning; just firm up the data line to the same precision.",
+     "correct": false,
+     "explanation": "You <em>can't</em> firm up the data line to that precision before opening the data — that's the whole problem. And \"37.5 days\" for research-flavoured work is fake precision: you're estimating whether an approach will hit a metric, which is genuinely open until tested."
+    },
+    {
+     "id": "c",
+     "text": "Just add 30% contingency padding across the board and submit.",
+     "correct": false,
+     "explanation": "The cure isn't more padding — uniform padding misprices everything (over-pricing the known work, still under-pricing the truly unknown data work). The cure is converting the biggest unknown into a known via a cheap discovery spike <em>before</em> committing to a number."
+    },
+    {
+     "id": "d",
+     "text": "The modelling estimate is the problem — data preparation is usually the small, predictable part.",
+     "correct": false,
+     "explanation": "Inverted: acquisition, access, cleaning, and labelling routinely dominate AI/data missions (the ~70% figure), and a slipped data gate is the #1 cause of blown timelines. If you remember one number from estimation, it's that the modelling is often the small part."
+    }
+   ],
+   "takeaway": "An estimate's error is dominated by its least-known workstream — size the data work explicitly, retire the biggest unknown with a paid discovery, and communicate ranges tied to assumptions, never false precision.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q4",
+   "conceptRef": "build-vs-buy-for-this-mission",
+   "prompt": "<p>A client pays a vendor 0.10 euros per processed document and says: \"At our volume the API line is 6,000 euros a month — building our own would obviously be cheaper.\" Build would cost ~96,000 euros up front with a marginal cost of ~0.04 euros/document (including maintenance). What does the crossover analysis say?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Crossover volume <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msup><mi>n</mi><mo lspace=\"0em\" rspace=\"0em\">∗</mo></msup><mo>=</mo><mn>96,000</mn><mi mathvariant=\"normal\">/</mi><mo stretchy=\"false\">(</mo><mn>0.10</mn><mo>−</mo><mn>0.04</mn><mo stretchy=\"false\">)</mo><mo>=</mo><mn>1.6</mn></mrow><annotation encoding=\"application/x-tex\">n^{*} = 96{,}000 / (0.10 - 0.04) = 1.6</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6887em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">n</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6887em;\"><span style=\"top:-3.063em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">∗</span></span></span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">96</span><span class=\"mord\"><span class=\"mpunct\">,</span></span><span class=\"mord\">000/</span><span class=\"mopen\">(</span><span class=\"mord\">0.10</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">0.04</span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">1.6</span></span></span></span> million documents; at 60,000 docs/month that's ~27 months of cumulative volume to break even — so the decision rides on <em>projected</em> volume and requirement stability, not on the visible API line.",
+     "correct": true,
+     "explanation": "The build's fixed cost is a bet repaid at the gap between vendor price and your marginal cost: each in-house document saves 0.06 euros, so 1.6M documents repay the 96k. Stable requirements and growing volume can justify it; flat volume means more than two years before build wins — and the 0.04 must genuinely include maintenance, the line teams forget."
+    },
+    {
+     "id": "b",
+     "text": "Build — 96,000 euros is only 16 months of the API bill, so it pays back in 16 months.",
+     "correct": false,
+     "explanation": "This compares the build cost against the <em>gross</em> vendor bill, ignoring that the built system also costs money to run (0.04/doc — 2,400 euros/month at current volume). Payback comes from the <em>saving per unit</em> (0.06), not the whole vendor price — that error halves the apparent payback time."
+    },
+    {
+     "id": "c",
+     "text": "Buy forever — a vendor's economies of scale mean in-house marginal cost can never beat a vendor's price.",
+     "correct": false,
+     "explanation": "Sometimes true, and when build-marginal ≥ buy-price there is indeed no crossover and you buy. But here the marginal gap is real (0.04 vs 0.10); the question is whether cumulative volume crosses <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msup><mi>n</mi><mo lspace=\"0em\" rspace=\"0em\">∗</mo></msup></mrow><annotation encoding=\"application/x-tex\">n^{*}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6887em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">n</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6887em;\"><span style=\"top:-3.063em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">∗</span></span></span></span></span></span></span></span></span></span></span></span> within a horizon you trust. That's a calculation, not a slogan."
+    },
+    {
+     "id": "d",
+     "text": "Build — engineers are already on payroll, so the build cost is effectively free.",
+     "correct": false,
+     "explanation": "The named trap: \"build\" feels cheaper because the recurring API line is visible while engineers' fully-loaded cost and the maintenance tail are not. Payroll spent here is payroll not spent on the differentiator — fixed cost is real whoever signs the timesheet."
+    }
+   ],
+   "takeaway": "Crossover volume = fixed build cost ÷ (vendor price − your marginal cost): decide on projected volume and requirement stability, and make sure marginal cost includes the maintenance everyone forgets.",
+   "difficulty": "stretch"
+  },
+  {
+   "id": "q5",
+   "conceptRef": "vendor--tool-selection",
+   "prompt": "<p>Your team must pick an LLM provider for a document-extraction feature. One engineer champions the benchmark leaderboard winner; procurement likes the cheapest list price. How do you decide?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Run a bake-off: a small fixed eval set from the client's real documents, 2–3 candidates head-to-head, scored on quality <em>and</em> cost-per-unit at your expected volume — checking data terms and exit cost, and putting an abstraction layer in so swapping models stays a config change.",
+     "correct": true,
+     "explanation": "Vendor benchmarks are marketing, and list price isn't your price — what matters is performance on <em>your</em> data and cost at <em>your</em> volume. A weekend bake-off beats a quarter of regret, and deliberate lock-in management (abstraction layer, portable prompts/evals) keeps the decision reversible."
+    },
+    {
+     "id": "b",
+     "text": "Take the leaderboard winner — public benchmarks are exactly what objective comparison looks like.",
+     "correct": false,
+     "explanation": "Benchmarks measure benchmark tasks. Your client's documents, formats, and edge cases are not in the benchmark — picking on a demo or a leaderboard and discovering the gaps (and the lock-in) later is the documented failure mode."
+    },
+    {
+     "id": "c",
+     "text": "Take the cheapest list price — extraction is a commodity task, so cost should decide.",
+     "correct": false,
+     "explanation": "Price at <em>your</em> expected volume, not list price — tiering, context length, and retry rates change the real cost-per-unit. And a cheap model that fails the eval set isn't cheap; it's rework plus a migration."
+    },
+    {
+     "id": "d",
+     "text": "Avoid choosing: integrate all three providers permanently so the team is never locked in.",
+     "correct": false,
+     "explanation": "Triple integration is lock-in avoidance gold-plated into a cost centre — three sets of quirks, evals, and bills. The module's stance: avoid lock-in <em>deliberately</em> via an abstraction layer and portable assets, then commit knowingly with an estimated switching cost."
+    }
+   ],
+   "takeaway": "Choose vendors by bake-off on your own data, priced at your own volume, with lock-in entered knowingly behind an abstraction layer — never by leaderboard or list price.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q6",
+   "conceptRef": "finops--cost-of-ai",
+   "prompt": "<p>A GenAI pilot cost 40 euros/month in tokens, so the team skipped cost modelling. At full rollout the monthly bill hits 23,000 euros and the CFO pauses the project. What discipline would have prevented this — and when?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Computing cost-per-transaction at expected production volume <em>during the PoC</em>, making token cost an explicit acceptance criterion, and wiring budgets, per-feature tagging, and alerts before rollout — cost as a first-class engineering signal, not a quarterly surprise.",
+     "correct": true,
+     "explanation": "This is the GenAI bill-shock failure mode verbatim: demos cost cents, so nobody models per-call economics, then long contexts, chatty agents, no caching, and the biggest model for every call arrive at production volume together. The unit economics — cost per request/ticket — must be estimated up front and tracked next to the quality dashboard."
+    },
+    {
+     "id": "b",
+     "text": "Nothing — token costs are inherently unpredictable, so bill shock is a cost of doing GenAI business.",
+     "correct": false,
+     "explanation": "Token spend is among the most modellable costs in software: tokens per call × calls × price. The shock comes from not doing the multiplication at expected volume, not from any inherent unpredictability."
+    },
+    {
+     "id": "c",
+     "text": "Negotiating a flat-rate enterprise contract so usage can't affect the bill.",
+     "correct": false,
+     "explanation": "A flat rate big enough to absorb uncontrolled usage is priced like uncontrolled usage — and without unit-economics discipline you can't even tell if the flat rate is a good deal. The fix is engineering the cost (routing, caching, context caps), not hiding it in procurement."
+    },
+    {
+     "id": "d",
+     "text": "Quietly throttling user requests after launch until the bill fits the budget.",
+     "correct": false,
+     "explanation": "Throttling a successful feature punishes adoption — the value the project exists to create — to compensate for skipped engineering. The levers that preserve value are routing easy calls to smaller models, prompt caching, capping context, and trimming retrieved chunks."
+    }
+   ],
+   "takeaway": "Prevent bill shock during the PoC, not after launch: compute cost-per-transaction at expected volume, make it an acceptance criterion, and run budgets, tagging, and alerts from day one.",
+   "difficulty": "stretch"
+  },
+  {
+   "id": "q7",
+   "conceptRef": "risk-management",
+   "prompt": "<p>Reviewing an AI mission plan, you find: a brilliant demo planned for week 6, no productionisation budget, no maintenance line, and the phrase \"the model will then be finished.\" Which risk pattern is this, and what's the fix?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "The \"PoC that never productionises\" trap plus the two systematically under-priced lines (productionisation and maintenance) — fix it with an explicit PoC→production gate, productionisation budgeted as real work, and a monitoring/retraining/maintenance line, because a live model is never \"finished.\"",
+     "correct": true,
+     "explanation": "The demo is roughly 20% of the work, and a model in production is a liability with a monthly invoice for as long as it lives. A plan whose success state is a demo, with no path or budget beyond it, is a plan to disappoint — and these are exactly the two lines the module says you'll under-price by default."
+    },
+    {
+     "id": "b",
+     "text": "Healthy lean scoping — deferring production concerns keeps the plan focused on proving value first.",
+     "correct": false,
+     "explanation": "Proving value first is right — that's what the PoC stage is <em>for</em>. But \"defer\" must mean \"explicitly gated and budgeted later,\" not \"absent from the plan.\" A PoC with no production path or budget is how throwaway code quietly ships, or how a great demo dies on a laptop."
+    },
+    {
+     "id": "c",
+     "text": "Vendor-dependency risk — the main missing item is a fallback model provider.",
+     "correct": false,
+     "explanation": "A fallback and an abstraction layer matter, but they're not what this plan is missing. The structural hole is the absent path from demo to operated system — a different (and more common) way to lose the mission."
+    },
+    {
+     "id": "d",
+     "text": "Scope-creep risk — the fix is a stricter change-request process.",
+     "correct": false,
+     "explanation": "Change-request discipline protects the scope you wrote down; the problem here is what was never written down at all — productionisation and maintenance. Process rigour around an incomplete scope just delivers the wrong thing more reliably."
+    }
+   ],
+   "takeaway": "The demo is ~20% of the work and a live model is never finished: gate PoC→production explicitly, and budget productionisation and maintenance — the two lines everyone under-prices by default.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q8",
+   "conceptRef": "engagement-models--staffing",
+   "prompt": "<p>A client demands a fixed price, up front, for an end-to-end ML build on data nobody has examined. How do you structure the engagement?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Fixed-price the discovery (1–3 weeks), then phase the build with go/no-go gates, each phase scoped and priced from the previous one's findings — sharing the risk that no estimate can fully remove.",
+     "correct": true,
+     "explanation": "The pragmatic default for AI/data work. Fixed price on un-scoped ML is deadly — you'd own all the risk of unknowns nobody has measured; pure T&#x26;M makes the client own it all. The phased structure aligns incentives, and the paid discovery converts the biggest unknowns into a real estimate."
+    },
+    {
+     "id": "b",
+     "text": "Accept the fixed price with a healthy margin — winning the deal matters more than the contract shape.",
+     "correct": false,
+     "explanation": "Fixed-pricing the unknown is how ML missions lose their shirt: the data-quality and research risk you haven't measured doesn't shrink because the margin grew. The estimate's error is dominated by what nobody has looked at yet."
+    },
+    {
+     "id": "c",
+     "text": "Counter with uncapped time &#x26; materials — uncertainty means the client should simply pay for whatever it takes.",
+     "correct": false,
+     "explanation": "T&#x26;M fits high-uncertainty work but needs trust, transparency, and a cap — uncapped, it asks the client to carry unbounded risk on your say-so, which is commercially toxic and usually loses to anyone offering structure."
+    },
+    {
+     "id": "d",
+     "text": "Accept fixed price, but staff the full delivery team from day one so the estimate is consumed efficiently.",
+     "correct": false,
+     "explanation": "Two mistakes: the contract shape still owns un-measured risk, and staffing is a coverage problem over the <em>current phase</em> — discovery needs a tech lead plus a senior generalist, not a full team burning budget before the questions are even known."
+    }
+   ],
+   "takeaway": "Fixed-price the discovery, then phase the build with go/no-go gates: small fixed pieces, each scoped from the last one's findings, staffed to the phase — that's how risk gets shared instead of hidden.",
+   "difficulty": "core"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "title": "Scope and estimate a claims-automation mission",
+   "estimatedMinutes": 35,
+   "scenario": "<p>A mid-size insurer's COO says: <em>\"We want AI to automate claims processing — give us a price for the whole thing by Friday.\"</em> In a 45-minute call you learn: ~9,000 claims/month; each takes a handler ~22 minutes; handlers estimate \"at least a third\" are simple, repetitive cases; claims arrive as emails with PDF attachments; the claims system is a 15-year-old package with no API anyone has used; nobody can say where the historical claim documents are stored or whether they're labelled; the COO's deadline is driven by a board meeting, not by operations.</p>\n<p>You will not give a fixed price for the whole thing by Friday. Decide what you give instead.</p>",
+   "givens": [
+    "Volume: ~9,000 claims/month; handler time ~22 min/claim; handler fully-loaded cost ~38 euros/hour",
+    "Hypothesis: simple cases (~1/3 of volume) could drop from ~22 to ~8 minutes with AI-assisted extraction and triage",
+    "Data unknowns: historical document location, labelling state, and legacy-system access are all unconfirmed",
+    "Personal data is involved (claimants), so lawful basis and governance are in scope"
+   ],
+   "tasks": [
+    "Fill in the use-case canvas: outcome, value (compute the annual euro magnitude from the givens), trigger &#x26; volume, user &#x26; owner, data, success metric, failure tolerance.",
+    "Stage the mission (discovery → PoC → pilot → production) with each stage's question, exit criterion, and rough length — and name the data gates.",
+    "Produce the estimate you <em>can</em> responsibly give Friday, in the module's format (T-shirt sizes, ranges, assumptions, the dominant unknown).",
+    "Propose the engagement model and write the two-sentence answer to \"why won't you just give us one fixed price?\""
+   ],
+   "solution": "<p><strong>Step 1 — the canvas.</strong></p>\n<ul>\n<li><strong>Outcome:</strong> simple claims are triaged and pre-extracted automatically so handlers finalise them instead of processing from scratch; complex claims route to humans untouched.</li>\n<li><strong>Value:</strong> 9,000 × 1/3 = 3,000 simple claims/month; time saved ≈ 14 min/claim → 3,000 × 14 / 60 = <strong>700 handler-hours/month</strong> ≈ 700 × 38 ≈ <strong>26,600 euros/month ≈ 320k euros/year</strong> at the hypothesised rates. State it as a hypothesis to validate, not a promise — the \"third\" and the \"8 minutes\" are handler guesses.</li>\n<li><strong>Trigger &#x26; volume:</strong> every inbound claim email, ~9,000/month — comfortably above the \"let a human do it\" floor.</li>\n<li><strong>User &#x26; owner:</strong> claims handlers consume the output; the claims-operations manager owns the pain (confirm the COO will name them — a mission without an owner who <em>feels</em> the problem dies after the demo).</li>\n<li><strong>Data:</strong> claim emails + PDFs; historical documents of unknown location/labelling; legacy system with an unproven API. Lawful basis for processing claimant data to be confirmed with the DPO. <em>This row is the project risk concentrated.</em></li>\n<li><strong>Success metric:</strong> offline — extraction accuracy and correct triage rate on a held-out sample of real claims; online — average handling time on simple claims, plus error/rework rate not degrading.</li>\n<li><strong>Failure tolerance:</strong> a wrong extraction on a paid claim costs real money and trust → human validates before payment in pilot; no full autonomy on payment-affecting fields without earned evidence.</li>\n</ul>\n<p><strong>Step 2 — the stages.</strong></p>\n<ul>\n<li><strong>Discovery (2 weeks, fixed price):</strong> answers \"is this worth doing and how?\" Open the actual data: locate historical claims, sample document quality, test legacy-system access, confirm lawful basis with the DPO, re-score value × feasibility. Exit: scored canvas, data-gate report, ranged build estimate, go/no-go.</li>\n<li><strong>PoC (4–6 weeks):</strong> \"is it feasible at all?\" On ~300 historical claims: extraction accuracy ≥ agreed bar and triage ≥ agreed precision on simple-vs-complex, offline. <strong>Kill criterion stated up front</strong> (e.g. if extraction on real scans plateaus below the bar, stop — the board hears \"we spent little and learned it's not ready,\" which is a valid, valuable result).</li>\n<li><strong>Pilot (2–3 months):</strong> \"does it work for real users, safely?\" Shadow mode then assisted mode on a slice of live claims; handlers validate every AI-prepared field; measure handling time and error rate. Exit: business metric moves, error rate within tolerance, handlers actually use it.</li>\n<li><strong>Production:</strong> monitored rollout, runbook, owner trained, maintenance and retraining budgeted (see module 13's loop).</li>\n<li><strong>Data gates (client-owned, week 1):</strong> access to historical claim documents; legacy-system read access; DPO confirmation of lawful basis. Each is a dependency with a date, not an assumption.</li>\n</ul>\n<p><strong>Step 3 — Friday's estimate.</strong> A range with named assumptions: discovery fixed (e.g. ~15–20k euros, 2 weeks). Build, <em>contingent on discovery findings</em>: data access &#x26; pipeline <strong>M–XL</strong> (the dominant unknown — 15-year-old system, undocumented archives; M = 3–5 person-weeks if the API works, XL if we're scraping exports); extraction &#x26; triage modelling <strong>M</strong> (mature techniques, but the kill criterion protects it); integration &#x26; validation UI <strong>M–L</strong>; productionisation + monitoring <strong>M</strong> (real work, never tacked on). Total: <strong>\"roughly 14–22 weeks and a budget range of X–Y, re-baselined after discovery; the swing is almost entirely the data and legacy-integration work, which is exactly what the discovery de-risks.\"</strong> No point figure for the whole thing — a precise number for the modelling next to a hand-wave on data access would be false precision.</p>\n<p><strong>Step 4 — engagement model and the two sentences.</strong> Fixed-price discovery → phased, capped build with go/no-go gates at PoC and pilot exits. The answer: <em>\"A fixed price today would force me to price the worst case of everything we haven't examined — your archives, your legacy system, your data quality — so it would be both higher and less honest than what I'm proposing. Two weeks of paid discovery converts those unknowns into a real plan, after which every phase has a firm price and a gate where you can stop.\"</em></p>",
+   "rubric": {
+    "keyPoints": [
+     "Canvas complete with a computed value magnitude (~320k euros/year) explicitly flagged as a hypothesis, a named owner, and a failure-tolerance row driving the human-in-the-loop design",
+     "Stages each carry a distinct question, an exit criterion, and a PoC kill criterion; data prerequisites surfaced as client-owned, dated gates",
+     "Friday's deliverable is a fixed-price discovery plus a ranged, assumption-tied build estimate with T-shirt sizes — with data/integration named as the dominant unknown",
+     "Engagement structured as fixed discovery → phased capped build, with a client-facing rationale that frames it as cheaper and more honest than a padded fixed price"
+    ],
+    "pitfalls": [
+     "Producing the demanded all-in fixed price by Friday — fixed price on un-scoped ML is how missions lose money",
+     "Quoting precise modelling effort while hand-waving the legacy-data work that actually dominates the risk",
+     "Promising the 320k value or a specific automation rate before any data has been opened — commit to the method and the range",
+     "Skipping the lawful-basis gate on claimant data, or letting the board-meeting deadline compress the discovery instead of the scope"
+    ],
+    "takeaways": [
+     "The discovery phase is the antidote to estimating the unknown: it converts the biggest risk into knowledge before anyone commits to a number",
+     "Scope outcomes with gates and a definition of done — the value calculation, the kill criterion, and the data gates are what make the mission governable"
+    ],
+    "transfer": "This is the universal playbook for selling work whose hardest parts can't be seen up front: construction firms survey before bidding, M&#x26;A runs due diligence before pricing, surgeons image before operating. Whenever a buyer demands certainty you don't have, the professional move is the same — sell a small, fixed-price investigation that prices the rest honestly, with staged commitments and exits. It converts \"trust me\" into a structure that protects both sides, in any domain where the unknowns dominate the estimate."
+   }
+  },
+  {
+   "id": "ex2",
+   "title": "FinOps for a support assistant: ROI, unit cost, and the chatty-agent stress test",
+   "estimatedMinutes": 30,
+   "scenario": "<p>A telco deployed a GenAI support assistant. The product owner presents: <em>\"It works — deflection is on target. Now the CFO wants the business case formalised, and finance wants to know our exposure if usage patterns change.\"</em></p>\n<p>You have the actuals and must produce: ROI and payback, the cost-per-unit figure to put on the dashboard and in the SLA, and a stress test of what happens if the planned \"agentic\" upgrade multiplies token usage — plus the controls that keep the case intact.</p>",
+   "givens": [
+    "Benefit: the assistant deflects 5,500 tickets/month; a human-handled ticket costs ~6 euros fully loaded → ~33,000 euros/month of avoided cost (~396k euros/year)",
+    "Build cost (one-off): 110,000 euros",
+    "Current run cost: tokens 4,200 euros/month + hosting/observability 1,300 euros/month; maintenance (evals, prompt updates, content refresh, monitoring time): 2,000 euros/month",
+    "Planned upgrade: a multi-step agent flow estimated to multiply token spend by ~5 with no projected change in deflection",
+    "Formulas: annual ROI = (annual benefit − annual run &#x26; maintenance) / build cost; payback = build cost / monthly net benefit; cost per unit = total monthly AI cost / units served"
+   ],
+   "tasks": [
+    "Compute the current business case: annual run &#x26; maintenance, annual ROI, payback in months, and cost per deflected ticket vs the 6-euro human cost.",
+    "Stress-test the agentic upgrade: recompute run cost, ROI, payback-equivalent, and cost per ticket at 5× tokens — and state the verdict on the upgrade as specified.",
+    "Specify the FinOps loop you'd install so this case stays true in production (tracking, accountability, alerts, and where cost shows up contractually).",
+    "Write the three-sentence summary for the CFO."
+   ],
+   "solution": "<p><strong>Step 1 — current case.</strong> Monthly run &#x26; maintenance = 4,200 + 1,300 + 2,000 = <strong>7,500 euros/month = 90,000 euros/year</strong>. Annual net benefit = 396,000 − 90,000 = <strong>306,000 euros</strong>. <strong>Annual ROI = 306,000 / 110,000 ≈ 278%</strong>. Monthly net benefit = 33,000 − 7,500 = 25,500 → <strong>payback = 110,000 / 25,500 ≈ 4.3 months</strong>. <strong>Cost per deflected ticket = 7,500 / 5,500 ≈ 1.36 euros</strong>, against ~6 euros human — a ~4.4× unit-cost advantage. That per-ticket figure, not the total, is the number for the dashboard and the SLA: totals hide trouble, a rate exposes it.</p>\n<p><strong>Step 2 — stress test.</strong> Tokens 4,200 → <strong>21,000 euros/month</strong>; run &#x26; maintenance = 21,000 + 1,300 + 2,000 = <strong>24,300 euros/month = 291,600 euros/year</strong>. Net = 396,000 − 291,600 = <strong>104,400 euros/year</strong> (monthly net 8,700). ROI falls to <strong>≈ 95%</strong>; the same build repaid at the new rate would take <strong>≈ 12.6 months</strong>; <strong>cost per ticket ≈ 4.42 euros</strong> — eating most of the gap to the 6-euro human cost. Verdict: <em>as specified, the upgrade destroys roughly two-thirds of the net benefit for zero projected deflection gain</em> — the engineering decision and the business case are the same decision. The upgrade is only approvable if (a) it credibly raises deflection or resolution quality enough to pay its token bill, measured in the PoC, or (b) the token multiplier is engineered down first — model routing (small models for easy turns), prompt caching, context caps, trimmed retrieval. Make the cost-per-ticket ceiling an explicit acceptance criterion of the upgrade's PoC.</p>\n<p><strong>Step 3 — the FinOps loop.</strong> (1) <strong>Tag spend by feature</strong> so the assistant's tokens, hosting, and people-slice are attributable — no orphan spend. (2) <strong>Cost-per-deflected-ticket on the same dashboard as the quality metric</strong> (deflection, CSAT) — the two move together and must be read together. (3) <strong>Budgets and alerts</strong>: a monthly token budget with alerts at, say, 80% and 120% of forecast, so drift pages an engineer before it surprises finance. (4) <strong>One named engineer accountable for the AI bill</strong>, the way one is accountable for latency. (5) <strong>Monthly review</strong> re-forecasting from the unit rate × projected volume. (6) Contractually: the cost-per-ticket figure (with its assumptions) goes in the SLA/run agreement as a monitored commitment with a re-baselining clause — not as a guaranteed flat bill.</p>\n<p><strong>Step 4 — CFO summary.</strong> <em>\"The assistant currently returns ~278% annually on the 110k build and paid for itself in just over four months; each deflected ticket costs ~1.36 euros against ~6 euros human-handled. The proposed agent upgrade, as currently specified, would multiply token spend five-fold and cut the annual net benefit by roughly two-thirds without improving deflection — so we recommend it proceed only through a PoC with a cost-per-ticket acceptance ceiling. We're installing per-feature cost tracking, budget alerts, and a named owner for the AI bill so the unit economics stay visible next to the quality metrics every month.\"</em></p>",
+   "rubric": {
+    "keyPoints": [
+     "Current case computed correctly: ~90k annual run &#x26; maintenance, ROI ≈ 278%, payback ≈ 4.3 months, ~1.36 euros per deflected ticket vs 6 euros human",
+     "Stress test quantified: ROI collapses to ≈ 95% and unit cost ≈ 4.4 euros at 5× tokens — with the verdict that the upgrade as specified destroys most of the net benefit",
+     "Upgrade gated on a PoC with a cost-per-unit acceptance criterion, with named token levers (routing, caching, context caps, trimmed retrieval) as the alternative",
+     "FinOps loop includes tagging, unit-cost dashboard beside quality, budget alerts, a named owner, and contractual treatment as a monitored rate, not a flat bill"
+    ],
+    "pitfalls": [
+     "Computing ROI on the build alone and forgetting the recurring run &#x26; maintenance — the iceberg below the visible API line",
+     "Reporting total spend instead of cost-per-unit, which hides a per-ticket cost quietly climbing until volume catches up",
+     "Approving the agentic upgrade on capability appeal without pricing its token multiplier at production volume — bill shock by another name",
+     "Promising the CFO a flat AI bill instead of a monitored unit rate with alerts and re-baselining"
+    ],
+    "takeaways": [
+     "The engineering decision and the business case are the same decision: a token multiplier is an ROI decision, and it must be priced before it ships",
+     "Track cost-per-unit next to the quality metric — it's the number you can forecast, benchmark against the human alternative, and responsibly put in an SLA"
+    ],
+    "transfer": "Unit economics as a gate on architectural change is how every consumption-priced system should be governed: cloud migrations (cost per workload), logistics (cost per parcel), manufacturing (cost per unit through a line change), even hiring plans (cost per resolved ticket as a team scales). The pattern — establish the unit rate, stress-test any proposed change against it, and gate the change on a measured ceiling — turns \"can we afford this?\" from a quarterly surprise into a design-time acceptance criterion, whatever the domain."
+   }
+  }
+ ]
+}

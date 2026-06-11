@@ -1,0 +1,501 @@
+{
+ "id": "10",
+ "title": "RAG & Knowledge Systems",
+ "weeks": [
+  20,
+  21
+ ],
+ "part": "III — Deep Learning & Modern AI",
+ "partIndex": 3,
+ "addon": false,
+ "pitchHtml": "<p>A raw LLM is a brilliant generalist with two crippling gaps for enterprise work: it doesn't know your private or current data, and when it doesn't know, it makes something up confidently. <strong>Retrieval-Augmented Generation (RAG)</strong> closes both gaps without retraining anything — you fetch the relevant passages from the client's own documents at question time and hand them to the model as context, then ask it to answer <em>only</em> from those passages and cite them. This is the single most-requested LLM mission type, because almost every client has a pile of knowledge (help docs, contracts, wikis, tickets, regulations) and wants to ask it questions in plain language. This module gives you the leader's view: what RAG is, the pipeline as intuition, the handful of decisions that actually determine quality, how to prove it works, and — at length — how to scope, price, and sell it without over-promising.</p>",
+ "prev": "09",
+ "next": "11",
+ "sectionCount": 8,
+ "quizCount": 8,
+ "exerciseCount": 3,
+ "sections": [
+  {
+   "id": "learning-objectives",
+   "kind": "objectives",
+   "title": "Learning Objectives",
+   "blocks": [
+    {
+     "type": "checklist",
+     "checklistId": "10/learning-objectives/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Explain what problem RAG solves and draw its pipeline from ingest to cited answer"
+      },
+      {
+       "id": "1",
+       "html": "Decide between <strong>RAG, fine-tuning, and long-context</strong> for a given knowledge problem"
+      },
+      {
+       "id": "2",
+       "html": "Decide when a client genuinely needs a <strong>vector database</strong> vs a simpler store (pgvector, existing search)"
+      },
+      {
+       "id": "3",
+       "html": "Explain why <strong>chunking</strong> and <strong>retrieval quality</strong> (hybrid search, reranking) are the quiet determinants of success"
+      },
+      {
+       "id": "4",
+       "html": "Scope and price the four flagship RAG mission archetypes — and state what you will <em>not</em> promise"
+      },
+      {
+       "id": "5",
+       "html": "Estimate the cost and freshness implications of a RAG system (embedding, re-indexing, run cost)"
+      },
+      {
+       "id": "6",
+       "html": "Recognise a RAG system that is <strong>confidently wrong</strong> and name the evaluation that would have caught it"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "key-concepts",
+   "kind": "concepts",
+   "title": "Key Concepts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "the-problem-rag-solves",
+     "number": 1,
+     "title": "The Problem RAG Solves",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>An LLM's knowledge is <strong>parametric</strong> (baked into the weights at training time) and <strong>frozen</strong> (it stops at the training cutoff). Three consequences matter commercially:</p>\n<ul>\n<li><strong>It can't see your private data.</strong> Nothing about the client's contracts, products, or internal policies is in the model — it was trained on the public internet.</li>\n<li><strong>It's stale.</strong> Anything that changed after the cutoff is invisible, and the client's data changes daily.</li>\n<li><strong>It hallucinates.</strong> Asked something it doesn't know, a base model tends to produce a fluent, plausible, <em>wrong</em> answer rather than admit ignorance.</li>\n</ul>\n<p>RAG fixes all three with one move: <strong>retrieve relevant passages from the client's own documents at query time and inject them into the prompt</strong>, then instruct the model to answer only from that context and cite it. The model's job shifts from <em>recall</em> (which it's bad at and can't update) to <em>reading comprehension over supplied text</em> (which it's excellent at). Crucially, <strong>no retraining is involved</strong> — you update knowledge by updating an index, not by touching the model. That is why RAG is the default, cheapest path to \"an AI that knows our stuff.\"</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>A base LLM is a smart graduate who has read the whole public internet but has never seen your company and can't look anything up. RAG is the same graduate with your filing cabinet open on the desk and a strict instruction: <em>\"Answer from these pages, quote the page, and if it's not in there, say you don't know.\"</em> You didn't make them smarter — you grounded them.</p>"
+      }
+     ]
+    },
+    {
+     "id": "the-rag-pipeline-as-intuition",
+     "number": 2,
+     "title": "The RAG Pipeline as Intuition",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>RAG is a pipeline, not a model. Build the mental model of it as two phases — an <strong>offline indexing</strong> phase you run once (and on updates), and an <strong>online query</strong> phase you run per question.</p>"
+      },
+      {
+       "type": "diagram",
+       "text": "  OFFLINE  (build the index, run on ingest + updates)\n\n  Documents ──▶ CHUNK ──▶ EMBED ──▶ STORE\n  (PDFs, wiki,  (split    (text →   (vector DB\n   tickets...)   into      vectors)  / index)\n                 passages)        ▲\n                                  │  embeddings — see [[08 - NLP & Embeddings in Practice]]\n  ─────────────────────────────────────────────────────────────\n\n  ONLINE  (per user question)\n\n  Question ──▶ RETRIEVE ──▶ AUGMENT ──▶ GENERATE ──▶ CITE\n              (find top-K   (stuff      (LLM reads   (link back\n               relevant      passages    context &    to source\n               passages)     into prompt) answers)    passages)"
+      },
+      {
+       "type": "html",
+       "html": "<ul>\n<li><strong>Ingest</strong> — pull the source documents in (often the hardest, dirtiest step: PDFs, scanned files, SharePoint, Confluence, ticket exports).</li>\n<li><strong>Chunk</strong> — split each document into passages small enough to retrieve precisely (Concept 3).</li>\n<li><strong>Embed</strong> — turn each chunk into a vector that captures its meaning, using an embedding model (the workhorse from <a class=\"wikilink\" data-module=\"08\" href=\"#/module/08\">NLP &#x26; Embeddings in Practice</a>).</li>\n<li><strong>Store</strong> — keep the vectors (and the original text + metadata) in a searchable index.</li>\n<li><strong>Retrieve</strong> — embed the user's question the same way, find the most similar chunks (Concept 5).</li>\n<li><strong>Augment</strong> — paste those chunks into the prompt with instructions (\"answer only from this context\").</li>\n<li><strong>Generate</strong> — the LLM writes the answer grounded in the supplied passages.</li>\n<li><strong>Cite</strong> — return links to the source passages so a human can verify. <em>Citation is not a nice-to-have; it is the trust mechanism that makes RAG sellable.</em></li>\n</ul>\n<p>The honest truth a leader must internalise: <strong>retrieval quality is the ceiling on the whole system.</strong> A perfect generator cannot rescue irrelevant retrieved passages — garbage in, fluent garbage out. Most of your quality budget goes into chunking and retrieval, not into picking a cleverer LLM.</p>"
+      }
+     ]
+    },
+    {
+     "id": "chunking--the-quiet-determinant-of-quality",
+     "number": 3,
+     "title": "Chunking — the Quiet Determinant of Quality",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Chunking is how you cut documents into the passages you'll retrieve. It looks trivial and is the most common silent cause of a mediocre RAG system. The tension:</p>\n<ul>\n<li><strong>Chunks too small</strong> (a sentence): you retrieve a precisely relevant snippet but it lacks the surrounding context needed to answer — the model gets a fragment.</li>\n<li><strong>Chunks too large</strong> (a whole page): the passage contains the answer <em>plus</em> three unrelated topics, which dilutes its meaning vector and makes it both harder to retrieve and noisier to read.</li>\n</ul>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Strategy</th><th align=\"left\">What it does</th><th align=\"left\">Reach for it when</th></tr></thead><tbody><tr><td align=\"left\"><strong>Fixed-size + overlap</strong></td><td align=\"left\">Cut every ~300-500 tokens with ~10-20% overlap</td><td align=\"left\">The safe, sensible default; start here</td></tr><tr><td align=\"left\"><strong>Recursive / structural</strong></td><td align=\"left\">Split on the document's own structure (sections → paragraphs → sentences)</td><td align=\"left\">Well-structured docs: manuals, wikis, contracts</td></tr><tr><td align=\"left\"><strong>Sentence-window / parent-document</strong></td><td align=\"left\">Retrieve a small precise chunk, then hand the LLM its larger surrounding passage</td><td align=\"left\">Precision <em>and</em> context both matter</td></tr><tr><td align=\"left\"><strong>Semantic</strong></td><td align=\"left\">Cut where the topic shifts (detected via embeddings)</td><td align=\"left\">Long, flowing prose with no clean structure</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Chunking is deciding the size of the index cards you'll file your knowledge on. Too small and each card is a clue with no context; too big and one card crams four topics, so the filing system can't tell what's on it. There is no universal best size — it depends on your documents and your embedding model, which is exactly why you must <em>evaluate it on the client's own data</em> (Concept 6) rather than copy a number from a blog post.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>Treat <strong>chunk size</strong> and <strong>overlap</strong> as tunable dials, not fixed constants: smaller chunks tend to raise precision but can drop recall (the answer spans a boundary), larger chunks do the reverse, and overlap buys back recall at the boundaries for a little redundancy — sweep them against the retrieval metrics in Concept 6 to find the setting that fits <em>this</em> corpus.</p>"
+      }
+     ]
+    },
+    {
+     "id": "vector-databases--when-you-actually-need-one",
+     "number": 4,
+     "title": "Vector Databases — When You Actually Need One",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>A <strong>vector database</strong> stores embeddings and answers \"find the K most similar vectors to this one\" fast, even over millions of chunks. It's the canonical RAG storage layer — but it is <em>not</em> always required, and recommending one reflexively is a classic over-build.</p>\n<p>The internal mechanics (approximate-nearest-neighbour indexes such as HNSW) are intuition-level here: the database trades a sliver of accuracy for an enormous speed gain, so it can search millions of vectors in milliseconds instead of scanning every one. You do <strong>not</strong> need the derivations to lead the decision — <em>deeper math → <span class=\"vault-ref\" title=\"In the Obsidian vault: 17 - RAG &#x26; Applied LLM Systems\">RAG &#x26; Applied LLM Systems</span></em>.</p>\n<p>The decision that matters:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Your situation</th><th align=\"left\">Use this</th><th align=\"left\">Why</th></tr></thead><tbody><tr><td align=\"left\">Thousands to low-millions of chunks; already on Postgres</td><td align=\"left\"><strong><code>pgvector</code> (extension)</strong></td><td align=\"left\">No new system to run; one database to back up and secure</td></tr><tr><td align=\"left\">Existing search platform (Elastic / OpenSearch) in place</td><td align=\"left\"><strong>Add vectors to it</strong></td><td align=\"left\">Reuse the operational muscle you already have; gives hybrid search for free</td></tr><tr><td align=\"left\">Tens of millions+ chunks, high QPS, low-latency SLA</td><td align=\"left\"><strong>Dedicated vector DB</strong></td><td align=\"left\">Built for scale; specialised indexing and filtering</td></tr><tr><td align=\"left\">A few hundred documents, prototype</td><td align=\"left\"><strong>In-memory / file index</strong></td><td align=\"left\">A vector DB is overkill; embeddings fit in RAM</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Managed vs self-hosted</strong> is the same buy-vs-build call as everywhere in this path. A <em>managed</em> vector DB removes ops burden and scales on demand, at a recurring cost and with data leaving your perimeter. <em>Self-hosting</em> (e.g. pgvector, or an OSS engine you run) keeps data in-house and costs are predictable, but you own the uptime, scaling, and backups. For regulated clients, where the vectors live is a governance question (see <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>), not just an engineering one.</p>"
+      }
+     ]
+    },
+    {
+     "id": "retrieval-quality--keyword-vs-semantic-vs-hybrid-and-reranking",
+     "number": 5,
+     "title": "Retrieval Quality — Keyword vs Semantic vs Hybrid, and Reranking",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>How you find the relevant chunks is where most quality is won or lost. Three retrieval styles, then a cheap accuracy multiplier:</p>\n<ul>\n<li><strong>Keyword (lexical) search</strong> matches on the actual words. Excellent for exact terms — product codes, error numbers, names, acronyms. Blind to synonyms: a query for \"car\" misses a document that only says \"automobile.\"</li>\n<li><strong>Semantic (vector) search</strong> matches on <em>meaning</em> via embeddings. It connects \"how do I fix error 403?\" to a passage titled \"HTTP Forbidden responses.\" Its weakness is the mirror image: it can miss an exact keyword and sometimes returns things that are merely topically near.</li>\n<li><strong>Hybrid search</strong> runs both and merges the result lists. In practice this is the reliable default for enterprise corpora: you get the exact-match precision of keywords <em>and</em> the synonym-tolerance of semantics, and higher recall than either alone.</li>\n</ul>\n<p>Semantic search ranks chunks by <strong>cosine similarity</strong> between the query embedding <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>A</mi></mrow><annotation encoding=\"application/x-tex\">A</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\">A</span></span></span></span> and each chunk embedding <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>B</mi></mrow><annotation encoding=\"application/x-tex\">B</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0502em;\">B</span></span></span></span> — the same meaning-distance score introduced in <a class=\"wikilink\" data-module=\"08\" href=\"#/module/08\">NLP &#x26; Embeddings in Practice</a>:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\cos(\\theta) = \\frac{A \\cdot B}{\\lVert A\\rVert\\,\\lVert B\\rVert}",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mi>cos</mi><mo>⁡</mo><mo stretchy=\"false\">(</mo><mi>θ</mi><mo stretchy=\"false\">)</mo><mo>=</mo><mfrac><mrow><mi>A</mi><mo>⋅</mo><mi>B</mi></mrow><mrow><mo stretchy=\"false\">∥</mo><mi>A</mi><mo stretchy=\"false\">∥</mo><mtext> </mtext><mo stretchy=\"false\">∥</mo><mi>B</mi><mo stretchy=\"false\">∥</mo></mrow></mfrac></mrow><annotation encoding=\"application/x-tex\">\\cos(\\theta) = \\frac{A \\cdot B}{\\lVert A\\rVert\\,\\lVert B\\rVert}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mop\">cos</span><span class=\"mopen\">(</span><span class=\"mord mathnormal\" style=\"margin-right:0.0278em;\">θ</span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.2963em;vertical-align:-0.936em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3603em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mopen\">∥</span><span class=\"mord mathnormal\">A</span><span class=\"mclose\">∥</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mopen\">∥</span><span class=\"mord mathnormal\" style=\"margin-right:0.0502em;\">B</span><span class=\"mclose\">∥</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">A</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">⋅</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0502em;\">B</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.936em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>where <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>A</mi><mo>⋅</mo><mi>B</mi></mrow><annotation encoding=\"application/x-tex\">A \\cdot B</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\">A</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">⋅</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0502em;\">B</span></span></span></span> is the dot product of the two vectors and <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mo stretchy=\"false\">∥</mo><mi>A</mi><mo stretchy=\"false\">∥</mo><mo separator=\"true\">,</mo><mo stretchy=\"false\">∥</mo><mi>B</mi><mo stretchy=\"false\">∥</mo></mrow><annotation encoding=\"application/x-tex\">\\lVert A\\rVert,\\lVert B\\rVert</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mopen\">∥</span><span class=\"mord mathnormal\">A</span><span class=\"mclose\">∥</span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mopen\">∥</span><span class=\"mord mathnormal\" style=\"margin-right:0.0502em;\">B</span><span class=\"mclose\">∥</span></span></span></span> their lengths. The score runs from <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mo>−</mo><mn>1</mn></mrow><annotation encoding=\"application/x-tex\">-1</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.7278em;vertical-align:-0.0833em;\"></span><span class=\"mord\">−</span><span class=\"mord\">1</span></span></span></span> to <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mn>1</mn></mrow><annotation encoding=\"application/x-tex\">1</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">1</span></span></span></span> (in practice <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mn>0</mn></mrow><annotation encoding=\"application/x-tex\">0</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0</span></span></span></span> to <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mn>1</mn></mrow><annotation encoding=\"application/x-tex\">1</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">1</span></span></span></span> for text embeddings); higher means closer in meaning. This single number is the retrieval ranking signal — embed the question, score it against every chunk, return the top-K. (See <a class=\"wikilink\" data-module=\"08\" href=\"#/module/08\">NLP &#x26; Embeddings in Practice</a> for how embeddings are built; here it's just the dial that orders candidates.)</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Cosine similarity measures the <em>angle</em> between two meaning-vectors, not their magnitude — so it compares what a chunk is <em>about</em> regardless of how long it is. Two passages pointing the same direction in embedding space score near <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mn>1</mn></mrow><annotation encoding=\"application/x-tex\">1</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">1</span></span></span></span> even if one is a sentence and the other a paragraph, which is exactly why it survives the messy length differences in a real corpus.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Retrieval style</th><th align=\"left\">Strength</th><th align=\"left\">Weakness</th><th align=\"left\">Default for</th></tr></thead><tbody><tr><td align=\"left\">Keyword / lexical</td><td align=\"left\">Exact terms, codes, names</td><td align=\"left\">No synonyms or paraphrase</td><td align=\"left\">Code/ID-heavy corpora</td></tr><tr><td align=\"left\">Semantic / vector</td><td align=\"left\">Meaning, paraphrase, synonyms</td><td align=\"left\">Can miss exact tokens</td><td align=\"left\">Natural-language Q&#x26;A</td></tr><tr><td align=\"left\"><strong>Hybrid</strong></td><td align=\"left\">Both; highest recall</td><td align=\"left\">Slightly more to operate</td><td align=\"left\"><strong>Most real client systems</strong></td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Reranking</strong> is a second pass that lifts quality cheaply. First, retrieve a generous candidate set (say the top 50) fast. Then a heavier <strong>reranker</strong> model re-scores each candidate against the question and keeps the best 5. Because it only runs on a handful of candidates, it's affordable — and it reliably pushes the genuinely-best passages to the top, which directly fights the \"right topic, wrong passage\" failure.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Retrieval is a hiring funnel. Hybrid search is a wide, cheap CV screen that surfaces ~50 plausible candidates without missing good ones. Reranking is the expensive final interview you can only afford for the shortlist — it reads each candidate carefully against the actual job and ranks the top five. You want a wide net <em>then</em> a sharp filter; doing only one is why mediocre systems retrieve the right area but the wrong answer.</p>"
+      }
+     ]
+    },
+    {
+     "id": "rag-evaluation--catching-a-system-thats-confidently-wrong",
+     "number": 6,
+     "title": "RAG Evaluation — Catching a System That's Confidently Wrong",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The dangerous failure mode of RAG is not a visibly broken answer — it's a <strong>fluent, well-cited, plausible answer that is wrong</strong>. Eyeballing a demo will never catch this. You need to decompose quality into measurable parts. The standard four:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Metric</th><th align=\"left\">Question it answers</th><th align=\"left\">What a low score means</th></tr></thead><tbody><tr><td align=\"left\"><strong>Faithfulness / groundedness</strong></td><td align=\"left\">Is every claim in the answer supported by the retrieved context?</td><td align=\"left\">The <em>generator</em> is hallucinating — fix the prompt/model</td></tr><tr><td align=\"left\"><strong>Answer relevance</strong></td><td align=\"left\">Does the answer actually address the question asked?</td><td align=\"left\">Off-topic or evasive answers</td></tr><tr><td align=\"left\"><strong>Context (retrieval) precision</strong></td><td align=\"left\">Are the retrieved chunks actually relevant?</td><td align=\"left\">The <em>retriever</em> is pulling noise — fix chunking/retrieval</td></tr><tr><td align=\"left\"><strong>Context recall</strong></td><td align=\"left\">Did retrieval find <em>all</em> the passages needed?</td><td align=\"left\">Relevant docs are being missed — fix chunking/embedding</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The decomposition is what makes evaluation <em>actionable</em>: it tells you <strong>which half of the pipeline to fix.</strong> High recall but low faithfulness means retrieval is fine and the model is inventing — fix the prompt. Low recall means the answer never had a chance — fix chunking or the embedding model. Don't optimise blind.</p>\n<p>To score the <strong>retrieval</strong> half on its own — independently of whatever the generator later does with the passages — use the standard top-K ranking metrics. For a query whose relevant chunks you've labelled in the gold set:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\text{precision@k} = \\frac{\\#\\,\\text{relevant chunks in top }k}{k} \\qquad \\text{recall@k} = \\frac{\\#\\,\\text{relevant chunks in top }k}{\\#\\,\\text{all relevant chunks}}",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mtext>precision@k</mtext><mo>=</mo><mfrac><mrow><mi mathvariant=\"normal\">#</mi><mtext> </mtext><mtext>relevant chunks in top </mtext><mi>k</mi></mrow><mi>k</mi></mfrac><mspace width=\"2em\"/><mtext>recall@k</mtext><mo>=</mo><mfrac><mrow><mi mathvariant=\"normal\">#</mi><mtext> </mtext><mtext>relevant chunks in top </mtext><mi>k</mi></mrow><mrow><mi mathvariant=\"normal\">#</mi><mtext> </mtext><mtext>all relevant chunks</mtext></mrow></mfrac></mrow><annotation encoding=\"application/x-tex\">\\text{precision@k} = \\frac{\\#\\,\\text{relevant chunks in top }k}{k} \\qquad \\text{recall@k} = \\frac{\\#\\,\\text{relevant chunks in top }k}{\\#\\,\\text{all relevant chunks}}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\">precision@k</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.0574em;vertical-align:-0.686em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3714em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0315em;\">k</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\">#</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord text\"><span class=\"mord\">relevant chunks in top </span></span><span class=\"mord mathnormal\" style=\"margin-right:0.0315em;\">k</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:2em;\"></span><span class=\"mord text\"><span class=\"mord\">recall@k</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.2519em;vertical-align:-0.8804em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3714em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\">#</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord text\"><span class=\"mord\">all relevant chunks</span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\">#</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord text\"><span class=\"mord\">relevant chunks in top </span></span><span class=\"mord mathnormal\" style=\"margin-right:0.0315em;\">k</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.8804em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Precision@k</strong> asks <em>\"of the <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>k</mi></mrow><annotation encoding=\"application/x-tex\">k</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0315em;\">k</span></span></span></span> chunks I retrieved, what fraction were on-target?\"</em> (noise control). <strong>Recall@k</strong> asks <em>\"of every chunk that should have been found, what fraction made it into the top <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>k</mi></mrow><annotation encoding=\"application/x-tex\">k</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0315em;\">k</span></span></span></span>?\"</em> (coverage). When <em>rank order</em> matters — the best chunk should sit at position 1 so the generator reads it first — add <strong>mean reciprocal rank</strong> over <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>n</mi></mrow><annotation encoding=\"application/x-tex\">n</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mord mathnormal\">n</span></span></span></span> queries, where <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mtext>rank</mtext><mi>i</mi></msub></mrow><annotation encoding=\"application/x-tex\">\\text{rank}_i</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8444em;vertical-align:-0.15em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">rank</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> is the position of the first relevant chunk for query <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>i</mi></mrow><annotation encoding=\"application/x-tex\">i</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6595em;\"></span><span class=\"mord mathnormal\">i</span></span></span></span>:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\text{MRR} = \\frac{1}{n}\\sum_{i=1}^{n} \\frac{1}{\\text{rank}_i}",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mtext>MRR</mtext><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mn>1</mn><msub><mtext>rank</mtext><mi>i</mi></msub></mfrac></mrow><annotation encoding=\"application/x-tex\">\\text{MRR} = \\frac{1}{n}\\sum_{i=1}^{n} \\frac{1}{\\text{rank}_i}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord text\"><span class=\"mord\">MRR</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.9291em;vertical-align:-1.2777em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3214em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">n</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\">1</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mop op-limits\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.6514em;\"><span style=\"top:-1.8723em;margin-left:0em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">i</span><span class=\"mrel mtight\">=</span><span class=\"mord mtight\">1</span></span></span></span><span style=\"top:-3.05em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span><span class=\"mop op-symbol large-op\">∑</span></span></span><span style=\"top:-4.3em;margin-left:0em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">n</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.2777em;\"><span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3214em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">rank</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\">1</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.836em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>A first-place hit scores <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mn>1</mn></mrow><annotation encoding=\"application/x-tex\">1</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">1</span></span></span></span>, second place <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mn>0.5</mn></mrow><annotation encoding=\"application/x-tex\">0.5</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.5</span></span></span></span>, third <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mn>0.33</mn></mrow><annotation encoding=\"application/x-tex\">0.33</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.33</span></span></span></span> — so MRR rewards putting the right passage at the top.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>These metrics matter because <strong>a RAG system fails mostly at retrieval, not generation</strong> — a strong LLM reads supplied text well, but it cannot answer from a passage that was never fetched. Measuring precision@k, recall@k, and MRR <em>before</em> the model runs isolates the retrieval ceiling from the generation step: low recall@k means the answer was impossible no matter how good the LLM; low precision@k means you're drowning the model in noise. You're grading the funnel separately from the writer.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>Two tools do the measuring in practice:</p>\n<ul>\n<li><strong>RAGAS</strong> — an open-source framework that computes the four metrics above (largely using an LLM under the hood to check claims against context). Good for a repeatable scorecard.</li>\n<li><strong>LLM-as-judge</strong> — use a strong LLM with a rubric to grade answers for correctness, completeness, and groundedness. Flexible and cheap to stand up, but judges have known biases (they favour longer answers and their own style), so calibrate against a small set of human-labelled examples.</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "worked-example",
+       "title": "catching a confident liar",
+       "html": "<p>A client's HR policy bot answers \"Yes, employees may carry over up to 10 unused leave days,\" cites a real policy page, and demos beautifully. Build a <strong>gold set</strong> of ~50 real questions with human-verified answers and run RAGAS. Faithfulness comes back at <strong>0.6</strong> while context recall is <strong>0.95</strong>. Diagnosis is immediate: retrieval is finding the right pages (high recall) but the generator is fabricating the <em>number</em> — the actual policy says five days, and \"10\" appears nowhere in the retrieved text. The fix is not a better retriever; it's a stricter prompt (\"quote the exact figure; if absent, say you cannot confirm\") and re-test. <strong>Without the gold set and the metric split, you'd have shipped a bot that confidently misinforms staff about their leave</strong> — and only found out via a complaint.</p>"
+      }
+     ]
+    },
+    {
+     "id": "common-failure-modes",
+     "number": 7,
+     "title": "Common Failure Modes",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>A leader who can name these by sight saves weeks. Most RAG disappointments trace to one of:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Failure mode</th><th align=\"left\">Symptom</th><th align=\"left\">Root cause / fix</th></tr></thead><tbody><tr><td align=\"left\"><strong>Bad retrieval</strong></td><td align=\"left\">Right topic, wrong/incomplete answer</td><td align=\"left\">Weak embedding or no hybrid/reranking → add hybrid + rerank</td></tr><tr><td align=\"left\"><strong>Stale index</strong></td><td align=\"left\">Answers reflect old documents</td><td align=\"left\">No re-indexing pipeline → schedule/trigger re-ingest (Concept 9)</td></tr><tr><td align=\"left\"><strong>Poor chunking</strong></td><td align=\"left\">Fragments or bloated noisy passages</td><td align=\"left\">Wrong chunk size/strategy → evaluate chunking on real data</td></tr><tr><td align=\"left\"><strong>Lost in the middle</strong></td><td align=\"left\">Answer was retrieved but ignored</td><td align=\"left\">Too many chunks stuffed in; models attend less to the middle → retrieve fewer, rerank, put the best first</td></tr><tr><td align=\"left\"><strong>Missing access controls</strong></td><td align=\"left\">A user gets answers from docs they shouldn't see</td><td align=\"left\">Retrieval ignores permissions → filter the index by the user's entitlements <em>before</em> generation</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>That last row is the one that turns a quality bug into a <strong>security incident</strong>. If the corpus mixes documents with different audiences, retrieval must respect the asking user's permissions — otherwise the bot becomes a confidential-data exfiltration tool that quotes its sources. Treat access control as a requirement, not a phase-two feature, for any regulated or multi-tenant deployment.</p>"
+      }
+     ]
+    },
+    {
+     "id": "rag-vs-fine-tuning-vs-long-context",
+     "number": 8,
+     "title": "RAG vs Fine-tuning vs Long-Context",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>These three are constantly confused and constantly conflated in sales conversations. They solve <em>different</em> problems and frequently combine. (Fine-tuning and long-context are covered in depth in <a class=\"wikilink\" data-module=\"09\" href=\"#/module/09\">Large Language Models in Practice</a>.)</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Approach</th><th align=\"left\">What it's actually for</th><th align=\"left\">When to choose it</th><th align=\"left\">What it does NOT do</th></tr></thead><tbody><tr><td align=\"left\"><strong>RAG</strong></td><td align=\"left\">Injecting <em>knowledge</em> — facts, documents — at query time</td><td align=\"left\">Knowledge is large, private, or changes often; you need citations</td><td align=\"left\">Doesn't teach new <em>behaviour</em>, tone, or format</td></tr><tr><td align=\"left\"><strong>Fine-tuning</strong></td><td align=\"left\">Teaching <em>behaviour/format/style</em></td><td align=\"left\">You need a consistent output shape, domain tone, or a task pattern repeated at scale</td><td align=\"left\">Doesn't reliably inject fresh facts; stale the moment data changes</td></tr><tr><td align=\"left\"><strong>Long-context</strong></td><td align=\"left\">Putting <em>all the relevant text in the prompt</em> directly</td><td align=\"left\">The whole relevant corpus is small (a contract, a handful of docs)</td><td align=\"left\">Doesn't scale to large corpora; pay per token every call; \"lost in the middle\"</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>RAG changes <em>what the model knows</em> this question; fine-tuning changes <em>how the model behaves</em> every question; long-context changes <em>what you paste in</em> right now. The most common right answer for \"AI over our documents\" is <strong>RAG</strong>, sometimes with light fine-tuning on top for tone or output format. \"Just fine-tune it on our docs\" is the field's most expensive misconception — it's slow, costly, goes stale instantly, and still hallucinates. The corollary: if the client's entire knowledge base fits comfortably in a modern context window and rarely changes, <strong>skip RAG entirely</strong> and just put it in the prompt.</p>"
+      }
+     ]
+    },
+    {
+     "id": "cost--freshness",
+     "number": 9,
+     "title": "Cost & Freshness",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>RAG has two distinct cost lines, and a freshness obligation that clients routinely forget to budget for.</p>\n<ul>\n<li><strong>Indexing (one-off + on updates).</strong> Embedding every chunk costs money once at build, and again for every changed/new document. For most corpora this is modest and dominated by ingestion engineering effort, not embedding spend — but a multi-million-document corpus re-embedded on a model change is a real bill, so pin your embedding model.</li>\n<li><strong>Query (per question, recurring).</strong> Each question costs an embedding call, a retrieval lookup, optional reranking, and — the dominant cost — the generation tokens. This scales with usage and is the line that surprises clients at adoption.</li>\n<li><strong>Freshness = re-indexing.</strong> A RAG index is a <em>snapshot</em>. The moment a source document changes, the index is wrong until you re-ingest. Someone must own a re-indexing pipeline (scheduled, or event-triggered on document changes). \"How fresh must answers be?\" is a scoping question with direct cost implications: near-real-time freshness is materially more engineering than a nightly batch.</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>The embedding/indexing cost is a renovation — a chunk of spend up front and a smaller bill each time you remodel. The query cost is the utility bill — small per use, but it scales with how many people turn the lights on, and it's the number that grows after launch. Quote both, and quote the re-indexing pipeline as a line item, or you'll deliver a system that's accurate on launch day and quietly wrong a month later.</p>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "client-mission-patterns--commercial-angle",
+   "kind": "missions",
+   "title": "Client Mission Patterns / Commercial Angle",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>RAG is a <strong>flagship offer</strong> — the missions below are concrete, repeatable, and high-demand. Scope and price each as a package, not staff-augmentation.</p>\n<ul>\n<li>\n<p><strong>Internal Knowledge Assistant / Q&#x26;A over documents</strong> — <em>Problem:</em> employees waste hours hunting through wikis, drives, and PDFs for answers. <em>Deliverable:</em> a chat assistant grounded in the company's internal corpus, answering in natural language with <strong>citations to source documents</strong>, behind SSO. <em>Scope:</em> 6-10 weeks for a production v1 over a defined corpus (discovery + ingestion + pipeline + eval harness). <em>Who buys:</em> COO, Head of Operations, IT/Knowledge Management, internal-comms.</p>\n</li>\n<li>\n<p><strong>Customer-Support Copilot grounded in help docs</strong> — <em>Problem:</em> support agents are slow and inconsistent; customers can't self-serve. <em>Deliverable:</em> an agent-assist (or customer-facing) copilot grounded in the help centre and product docs, with <strong>draft answers + citations</strong> the agent edits and sends. <em>Scope:</em> 8-12 weeks including evaluation against historical tickets and a human-in-the-loop workflow. <em>Who buys:</em> Head of Customer Support / CX, VP Service. <em>Sells on a hard metric:</em> handle-time and first-contact-resolution.</p>\n</li>\n<li>\n<p><strong>Search &#x26; Synthesis over a regulated knowledge base (with access control)</strong> — <em>Problem:</em> legal/medical/financial teams need answers from a controlled corpus where <em>who sees what</em> is mandatory and sources are non-negotiable. <em>Deliverable:</em> a permissioned RAG system with <strong>per-user access filtering</strong>, mandatory citations, audit logging, and an evaluation report on faithfulness. <em>Scope:</em> 10-16 weeks; governance and access control dominate. <em>Who buys:</em> General Counsel, Compliance, CISO, regulated business units. <em>The premium tier</em> — pairs naturally with <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a> and <a class=\"wikilink\" data-module=\"15\" href=\"#/module/15\">Responsible AI: Interpretability, Fairness, Safety &#x26; the EU AI Act</a>.</p>\n</li>\n<li>\n<p><strong>RAG Evaluation &#x26; Hardening of an existing PoC</strong> — <em>Problem:</em> \"we built a RAG demo and it's unreliable / hallucinates / we don't trust it.\" <em>Deliverable:</em> a diagnostic — a <strong>gold evaluation set</strong>, RAGAS + LLM-as-judge scorecard, a prioritised fix list (chunking, hybrid search, reranking, prompts, access control), and a re-test showing the lift. <em>Scope:</em> 3-6 weeks, fixed-price, low-risk entry point. <em>Who buys:</em> an engineering lead or product owner with a stalled PoC. <em>Excellent door-opener</em> into the larger build above.</p>\n</li>\n</ul>\n<p><strong>Buy-vs-build for the client:</strong> the <em>plumbing</em> — embedding models, vector store, LLM API — is commodity; <strong>buy it.</strong> Your build budget goes into the differentiators: clean ingestion of <em>their</em> messy documents, chunking and retrieval tuned on <em>their</em> data, the <strong>evaluation harness</strong>, access control, and the workflow it lives in. <strong>What to charge for:</strong> the production pipeline + the evaluation harness as packaged IP (the eval harness is reusable across clients and is what separates you from a weekend demo). <strong>What NOT to promise — say this explicitly in the proposal:</strong></p>\n<ul>\n<li><strong>Never promise zero hallucination.</strong> RAG <em>reduces</em> it sharply and makes it <em>checkable</em> via citations; it does not eliminate it. Promise groundedness with sources and a measured faithfulness target, not perfection.</li>\n<li><strong>Don't promise accuracy numbers before you've seen the data</strong> — commit to a <em>method</em> (the gold set + metrics) for establishing and improving them.</li>\n<li><strong>Don't promise it stays accurate for free</strong> — re-indexing and evaluation are ongoing, not one-off.</li>\n</ul>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "tools--vendor-landscape",
+   "kind": "tools",
+   "title": "Tools & Vendor Landscape",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p><em>As of 2026 — treat names/prices as perishable; re-check before quoting.</em></p>"
+    },
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Tool / Category</th><th align=\"left\">Use here</th><th align=\"left\">OSS / Paid</th><th align=\"left\">Note</th></tr></thead><tbody><tr><td align=\"left\"><code>pgvector</code> (Postgres extension)</td><td align=\"left\">Vectors alongside relational data</td><td align=\"left\">OSS</td><td align=\"left\">Best default if already on Postgres; no new system</td></tr><tr><td align=\"left\">Elastic / OpenSearch</td><td align=\"left\">Hybrid (keyword + vector) search at scale</td><td align=\"left\">OSS / Paid tiers</td><td align=\"left\">Reuse existing search ops; hybrid for free</td></tr><tr><td align=\"left\">Pinecone / Weaviate / Qdrant / Milvus</td><td align=\"left\">Dedicated vector DB</td><td align=\"left\">Mixed (OSS + managed)</td><td align=\"left\">For large scale / strict latency; managed = lock-in &#x26; data residency</td></tr><tr><td align=\"left\">Embedding models (OpenAI, Cohere, Voyage; OSS: BGE, E5, GTE)</td><td align=\"left\">Turn text into vectors</td><td align=\"left\">Paid API / OSS</td><td align=\"left\">Pin the model — changing it forces a full re-index</td></tr><tr><td align=\"left\">Rerankers (Cohere Rerank; OSS cross-encoders)</td><td align=\"left\">Re-score top candidates</td><td align=\"left\">Paid / OSS</td><td align=\"left\">Cheap quality lift on a shortlist</td></tr><tr><td align=\"left\">Hosted LLMs (Anthropic Claude, OpenAI, Google, Mistral)</td><td align=\"left\">The generator</td><td align=\"left\">Paid (per-token)</td><td align=\"left\">Dominant query cost; compare price/latency/data terms</td></tr><tr><td align=\"left\">LangChain / LlamaIndex</td><td align=\"left\">RAG orchestration frameworks</td><td align=\"left\">OSS</td><td align=\"left\">Fast to prototype; watch abstraction lock-in &#x26; churn</td></tr><tr><td align=\"left\">RAGAS</td><td align=\"left\">Automated RAG evaluation</td><td align=\"left\">OSS</td><td align=\"left\">The repeatable scorecard for faithfulness/relevance/recall</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The differentiator is never the tool — it's your ingestion, retrieval tuning, and evaluation discipline. Rent the rest.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "when-is-this-overkill",
+   "kind": "overkill",
+   "title": "When Is This Overkill?",
+   "blocks": [
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Situation</th><th align=\"left\">RAG is overkill — do this instead</th></tr></thead><tbody><tr><td align=\"left\">The whole corpus fits in a context window and rarely changes</td><td align=\"left\">Put it all in the prompt (long-context); skip retrieval entirely</td></tr><tr><td align=\"left\">The question is answerable from general knowledge</td><td align=\"left\">Just prompt the LLM — no retrieval needed</td></tr><tr><td align=\"left\">A handful of documents, one-off</td><td align=\"left\">Paste them in; don't build a pipeline for ten PDFs</td></tr><tr><td align=\"left\">Tens of millions of chunks but a prototype to validate value</td><td align=\"left\">Start with pgvector / an in-memory index; defer the dedicated vector DB</td></tr><tr><td align=\"left\">The real need is exact-match lookup of structured records</td><td align=\"left\">A database query or plain keyword search beats a vector index</td></tr><tr><td align=\"left\">Answers must be 100% deterministic and auditable</td><td align=\"left\">A decision table or rules engine, not a generative model</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The most senior move is recommending long-context or plain search over RAG when the corpus is small — it costs the client less and you the credibility that wins the genuinely hard mission.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "resources",
+   "kind": "resources",
+   "title": "Resources",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "books--long-reads",
+     "number": null,
+     "title": "Books & Long Reads",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Chip Huyen — <em>AI Engineering</em> — the pragmatic chapter on RAG and retrieval in the modern stack. <em>(Paid)</em></li>\n<li>\"Retrieval-Augmented Generation for Large Language Models: A Survey\" (Gao et al., 2024) — the readable map of RAG techniques. <em>(Free)</em></li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "articles--docs-free",
+     "number": null,
+     "title": "Articles & Docs (Free)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>RAGAS documentation — the four-metric evaluation framework, with examples.</li>\n<li>\"Lost in the Middle\" (Liu et al., 2023) — why stuffing too many chunks backfires; one of the most useful failure-mode reads.</li>\n<li>LlamaIndex / LangChain RAG guides — concrete pipeline patterns (chunking, hybrid, reranking).</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "go-deeper",
+     "number": null,
+     "title": "Go Deeper",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Deeper math &#x26; architecture (BM25, dense retrieval, ANN/HNSW, advanced RAG patterns) → <span class=\"vault-ref\" title=\"In the Obsidian vault: 17 - RAG &#x26; Applied LLM Systems\">RAG &#x26; Applied LLM Systems</span> (AI Scientist Path).</li>\n<li>Deeper production code (building and serving the pipeline) → <span class=\"vault-ref\" title=\"In the Obsidian vault: 08 - NLP &#x26; LLMs\">NLP &#x26; LLMs</span> (ML Engineer Path).</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "practical-artifacts",
+   "kind": "artifacts",
+   "title": "Practical Artifacts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "decision-checklist--should-this-be-a-rag-mission",
+     "number": null,
+     "title": "Decision Checklist — \"Should this be a RAG mission?\"",
+     "blocks": [
+      {
+       "type": "checklist",
+       "checklistId": "10/practical-artifacts/1",
+       "items": [
+        {
+         "id": "0",
+         "html": "Is the knowledge <strong>private, large, or frequently changing</strong>? (If small &#x26; static → long-context.)"
+        },
+        {
+         "id": "1",
+         "html": "Does the client need <strong>citations / verifiable sources</strong>? (RAG's core value.)"
+        },
+        {
+         "id": "2",
+         "html": "Have we agreed <strong>how fresh</strong> answers must be, and who owns re-indexing?"
+        },
+        {
+         "id": "3",
+         "html": "Does the corpus mix <strong>audiences/permissions</strong>? (If so, access control is in scope from day one.)"
+        },
+        {
+         "id": "4",
+         "html": "Is there a <strong>gold evaluation set</strong> plan before we promise any quality number?"
+        },
+        {
+         "id": "5",
+         "html": "Have we sized <strong>both</strong> indexing cost and per-query run cost?"
+        },
+        {
+         "id": "6",
+         "html": "Is the client expecting RAG when they actually need <strong>fine-tuning</strong> (behaviour/format)?"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "red-flags",
+     "number": null,
+     "title": "Red Flags",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"Can you guarantee it won't hallucinate?\" — reset to <em>grounded + cited + measured faithfulness</em>, never zero.</li>\n<li>\"Just fine-tune it on our documents.\" — almost always the wrong tool; RAG injects facts, fine-tuning changes behaviour.</li>\n<li>\"The demo works great.\" — demos hide retrieval failures; ask for the evaluation set and the faithfulness score.</li>\n<li>No owner for re-indexing — the system will be quietly stale within weeks.</li>\n<li>Mixed-permission corpus with no access-control requirement — a security incident waiting to happen.</li>\n<li>Vector DB chosen before anyone counted the chunks — likely an over-build; pgvector probably suffices.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "scoping-prompts-ask-the-client",
+     "number": null,
+     "title": "Scoping Prompts (ask the client)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"Where do these documents live today, in what formats, and how messy are they really?\"</li>\n<li>\"How current must an answer be — minutes, a day, a week old?\"</li>\n<li>\"Should every user be able to see answers from every document, or are there access boundaries?\"</li>\n<li>\"When the assistant doesn't know, what should it do?\" <em>(The right answer is: say so and cite nothing.)</em></li>\n<li>\"How will we — and you — agree it's good enough to launch? What's the gold set?\"</li>\n<li>\"Roughly how many questions per day at full adoption?\" <em>(Drives run cost.)</em></li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "self-assessment",
+   "kind": "self-assessment",
+   "title": "Self-Assessment",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Before moving on, you should be able to:</p>"
+    },
+    {
+     "type": "checklist",
+     "checklistId": "10/self-assessment/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Explain in one minute why RAG beats fine-tuning for injecting fresh, private knowledge"
+      },
+      {
+       "id": "1",
+       "html": "Sketch the ingest → chunk → embed → store → retrieve → augment → generate → cite pipeline from memory"
+      },
+      {
+       "id": "2",
+       "html": "Decide pgvector vs a dedicated vector DB for a given corpus size and SLA"
+      },
+      {
+       "id": "3",
+       "html": "Explain why hybrid search and reranking lift quality, in plain language to a non-technical buyer"
+      },
+      {
+       "id": "4",
+       "html": "Diagnose whether a failing RAG system is a <em>retrieval</em> or a <em>generation</em> problem from its metrics"
+      },
+      {
+       "id": "5",
+       "html": "Scope and price one of the four RAG archetypes, and state out loud what you will not promise"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  }
+ ]
+}

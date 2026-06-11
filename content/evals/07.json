@@ -1,0 +1,347 @@
+{
+  "moduleId": "07",
+  "quiz": [
+    {
+      "id": "q1",
+      "conceptRef": "the-computer-vision-task-menu",
+      "prompt": "A retailer asks: \"Can AI look at our shelf photos and tell us how many facings of each product are visible?\" Which task is this, and why does naming it matter?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Object detection — boxes + labels for *each* object — because counting individual items requires locating every instance; naming it fixes the data, model class, metric, and price.",
+          "correct": true,
+          "explanation": "Right. \"Count items on a shelf\" is the module's canonical detection example. Getting the task wrong means quoting the wrong budget — naming the task correctly is half the scoping job."
+        },
+        {
+          "id": "b",
+          "text": "Image classification — one label per photo is the simplest and cheapest framing, so default to it.",
+          "correct": false,
+          "explanation": "Classification outputs *one label for the whole image* — it cannot count or locate anything. Cheapest is the right instinct, but only among framings that can actually answer the business question."
+        },
+        {
+          "id": "c",
+          "text": "Segmentation — pixel-perfect masks of every product give the most complete answer.",
+          "correct": false,
+          "explanation": "Counting facings needs boxes, not pixels. Masks cost roughly 10× the annotation effort of boxes, and the module says to push back hard on pixel-perfect requests until the business decision actually requires the pixels."
+        },
+        {
+          "id": "d",
+          "text": "Image similarity / search — match each shelf photo against reference product images.",
+          "correct": false,
+          "explanation": "Similarity answers \"find images like this one\" (visual search, dedup). It doesn't localise or count instances inside one image — that's detection's job."
+        }
+      ],
+      "takeaway": "Name the task before anything else — classification, detection, segmentation, OCR, similarity, or anomaly — because the task fixes the data, model, metric, and price.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q2",
+      "conceptRef": "the-computer-vision-task-menu",
+      "prompt": "A vendor benchmark reports a detector's IoU scores. Which statement about IoU is correct?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "IoU is overlap area divided by total joint area, so it punishes boxes that are too big *and* too small — it measures localisation quality, with ≥ 0.5 the usual \"correct\" cut-off.",
+          "correct": true,
+          "explanation": "Exactly. Predict too big and the union balloons; too small and the intersection shrinks — either way the score drops. That two-sided penalty is why IoU rewards being in the right place *and* the right size, not just \"roughly near the object.\""
+        },
+        {
+          "id": "b",
+          "text": "Predicting generously large boxes is a safe strategy, since a box containing the object always scores well.",
+          "correct": false,
+          "explanation": "This is the misconception IoU was built to kill: an oversized box inflates the *union*, so the score drops even though the object is inside. Sloppy-but-containing boxes are exactly what IoU penalises."
+        },
+        {
+          "id": "c",
+          "text": "IoU is the share of images in the test set where the model found the object.",
+          "correct": false,
+          "explanation": "That would be a per-dataset hit rate. IoU is computed *per prediction* — the geometric overlap between one predicted box/mask and its ground truth. Aggregation across classes and thresholds is what mAP does."
+        },
+        {
+          "id": "d",
+          "text": "mAP already fixes the IoU threshold at 0.5, so quoting mAP alone is fully specified.",
+          "correct": false,
+          "explanation": "mAP is averaged across classes *and across IoU thresholds*, and vendors report it at different settings. The module's instruction is explicit: treat mAP as the headline number but always ask *at what IoU*."
+        }
+      ],
+      "takeaway": "IoU scores localisation with a two-sided penalty (0.5 is the usual bar), and when someone quotes mAP, always ask at what IoU.",
+      "difficulty": "stretch"
+    },
+    {
+      "id": "q3",
+      "conceptRef": "pretrained-models--when-to-fine-tune",
+      "prompt": "A team's first proposal for reading passports at check-in is: \"We'll fine-tune our own vision model.\" Nobody has tried anything else yet. What's the right correction?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Reading a passport is a generic task — start with an off-the-shelf API, and only climb to fine-tuning if the cheaper rung provably fails.",
+          "correct": true,
+          "explanation": "Right. The escalation ladder runs API → pretrained + fine-tune → (almost never) from scratch, and you climb only when the rung below provably fails. \"We'll fine-tune our own model before anyone checked an API\" is a named red flag."
+        },
+        {
+          "id": "b",
+          "text": "Approve it — fine-tuned models are always more accurate than generic APIs on identity documents.",
+          "correct": false,
+          "explanation": "Generic, well-solved tasks (read a passport, detect common objects) are exactly where off-the-shelf APIs shine. Fine-tuning buys accuracy on *your specific* images — your defect, your form — not on a globally standardised document."
+        },
+        {
+          "id": "c",
+          "text": "Escalate further: train from scratch so the airline owns the IP outright.",
+          "correct": false,
+          "explanation": "From-scratch is reserved for truly novel domains (some medical/satellite/scientific imaging) with no usable pretrained base — tens of thousands of labels and serious compute, a research bet rather than a delivery. IP ownership doesn't change the economics."
+        },
+        {
+          "id": "d",
+          "text": "Reject vision entirely — passports must be keyed in manually for legal reasons.",
+          "correct": false,
+          "explanation": "There's no such blanket rule; passport OCR is a mature commodity. The real correction is about *sequence* — try the cheap generic rung first — not about abandoning automation."
+        }
+      ],
+      "takeaway": "Climb the ladder cheapest-first — off-the-shelf API, then fine-tune a pretrained model, almost never from scratch — and only when the rung below provably fails.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q4",
+      "conceptRef": "practical-concerns-annotation-edge-latency-privacy",
+      "prompt": "For a custom defect-detection mission requiring fine-tuning, which budget line is most often the largest — and most often missing from quotes?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Annotation — humans drawing boxes/masks on thousands of images plus a quality-review pass; mitigate with active learning and pre-labelling, but price it explicitly.",
+          "correct": true,
+          "explanation": "Right. A tag takes seconds, a box 10-30 seconds, a mask minutes — multiplied by thousands of images, annotation is often the largest line item. \"Annotation cost missing from the budget entirely\" is a named red flag."
+        },
+        {
+          "id": "b",
+          "text": "GPU compute for the fine-tuning runs.",
+          "correct": false,
+          "explanation": "Transfer learning makes the compute modest — you pay only for the last mile of domain specifics, not for teaching the model what an edge is. The module is explicit: budget for annotation, not GPUs."
+        },
+        {
+          "id": "c",
+          "text": "Licence fees for the pretrained model backbone.",
+          "correct": false,
+          "explanation": "Backbones are mostly open source — though commercial-use licences (e.g. some YOLO variants) deserve a check, they're a compliance item, not the dominant cost. The expensive ingredient is human labelling time."
+        },
+        {
+          "id": "d",
+          "text": "Cloud inference serving once the model is deployed.",
+          "correct": false,
+          "explanation": "Serving costs are real but predictable and rarely dominant — and many vision jobs run on edge hardware anyway. The under-budgeted, project-killing line is building the labelled dataset."
+        }
+      ],
+      "takeaway": "Custom vision lives or dies on labelled data: annotation — not compute — is usually the biggest line item, so price it explicitly and shrink it with active learning and pre-labelling.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q5",
+      "conceptRef": "multimodal-vision-language-models--the-practical-default",
+      "prompt": "A platform moderates 8 million product photos per day against one fixed compliance rule. The PoC uses a multimodal LLM API and works well. What should the production recommendation be?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Graduate the fixed, high-volume task to a small fine-tuned classifier — far cheaper per call and faster — keeping multimodal for the varied, ambiguous edge cases.",
+          "correct": true,
+          "explanation": "Right. \"High volume, fixed task, tight unit cost\" is the module's first listed case where a multimodal model is the *wrong* tool. Use multimodal for variety and reasoning; use a fine-tuned specialist for volume and precision."
+        },
+        {
+          "id": "b",
+          "text": "Keep the multimodal API — it needed no training data, so it will always be the cheapest total-cost option.",
+          "correct": false,
+          "explanation": "Zero training data is a *prototyping* advantage. At 8M calls/day, per-call API pricing compounds into a runaway bill, and a general model is slower than a small specialist. \"Cheap to start\" and \"cheap at scale\" are different properties."
+        },
+        {
+          "id": "c",
+          "text": "Keep the multimodal API because general models are always more accurate than small fine-tuned ones.",
+          "correct": false,
+          "explanation": "On a narrow, fixed, well-specified task, a fine-tuned specialist typically matches or beats the generalist — the intern-vs-specialist-machine intuition. The generalist wins on *variety*, not on one repetitive job."
+        },
+        {
+          "id": "d",
+          "text": "Switch to a segmentation model, since moderation needs pixel-level understanding.",
+          "correct": false,
+          "explanation": "A yes/no compliance check is classification, not segmentation — pixel masks would multiply annotation cost for nothing. This is the \"pixel-perfect masks\" red flag in a different costume."
+        }
+      ],
+      "takeaway": "Multimodal models are the default first try for variety and ambiguity, but high-volume fixed tasks graduate to a cheap fine-tuned specialist.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q6",
+      "conceptRef": "a-worked-example-invoice-processing-the-2026-way",
+      "prompt": "Your invoice-extraction prototype reaches 94% field accuracy with a multimodal model. What turns this into a deliverable a finance team can actually run on?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A pipeline: extraction plus confidence scoring plus validation rules (does VAT + net = gross?) plus a human review queue — measured as share auto-processed without error and hours of keying removed.",
+          "correct": true,
+          "explanation": "Exactly the worked example. A wrong *total* is a financial error, so the deliverable is the workflow with a human fallback, not raw extraction — and success is measured in the client's terms, not as model accuracy in isolation. The model was the easy part."
+        },
+        {
+          "id": "b",
+          "text": "More fine-tuning until accuracy reaches 100%, then ship without a review step.",
+          "correct": false,
+          "explanation": "\"100% accuracy on documents\" is on the module's do-not-promise list. The long tail of messy layouts guarantees residual errors; chasing perfection delays shipping while the design still lacks the fallback that makes errors safe."
+        },
+        {
+          "id": "c",
+          "text": "Ship as-is — 94% is excellent, and accounting will catch the rest downstream during reconciliation.",
+          "correct": false,
+          "explanation": "6% of 3,000 invoices/month is ~180 financial errors pushed silently into the books. A pipeline with no human review queue for low-confidence cases is a named red flag — the fallback must be designed in, not outsourced to luck."
+        },
+        {
+          "id": "d",
+          "text": "Replace the multimodal model with classic OCR, which is more reliable on totals.",
+          "correct": false,
+          "explanation": "Classic OCR returns characters without layout understanding — it's *weaker* on varied invoice layouts, which is precisely why the multimodal approach won here. The reliability gap is closed by validation and human review, not by stepping back a generation."
+        }
+      ],
+      "takeaway": "The deliverable is a pipeline with confidence scores, validation rules, and a human review queue — measured as share auto-processed and hours saved, never as model accuracy alone.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q7",
+      "conceptRef": "rights-consent--deepfakes--the-caveat-you-must-voice",
+      "prompt": "Marketing wants to clone the CEO's voice for localised ad narration and asks you to demo it this week. What is the tech lead's correct move?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Name the gates before the demo: explicit, documented consent for the voice, vendor indemnity/IP terms checked, and disclosure/watermarking baked into the deliverable.",
+          "correct": false,
+          "explanation": "Close — but read choice (b): consent must be obtained, not merely \"named,\" before a cloned voice is demoed at all. Demoing first and papering consent after is exactly the order the module warns against: the demo dazzles, and the caveats never land."
+        },
+        {
+          "id": "b",
+          "text": "Voice cloning requires explicit, documented consent *before* anything is generated — secure it first, check the vendor's IP/indemnity terms, and bake disclosure into the deliverable rather than bolting it on.",
+          "correct": true,
+          "explanation": "Right. Cloning a real person's voice without documented consent is a hard no — legally and ethically — and it applies to the client's own staff too. Rights, consent, and disclosure are scoping gates a tech lead voices *before* the demo dazzles everyone."
+        },
+        {
+          "id": "c",
+          "text": "Proceed — the CEO is the company's own employee and public figure, so consent is implicit.",
+          "correct": false,
+          "explanation": "There is no implicit consent for biometric likeness or voice. The module is explicit that the deepfake risk \"applies to your client's own staff and customers too\" — seniority and publicity don't waive it."
+        },
+        {
+          "id": "d",
+          "text": "Proceed if the TTS vendor's terms of service permit voice cloning.",
+          "correct": false,
+          "explanation": "Vendor ToS govern your contract with the vendor, not the CEO's personal rights or the EU AI Act's transparency obligations for synthetic media. The consent must come from the person whose voice it is, documented."
+        }
+      ],
+      "takeaway": "For generative media, rights, consent, and disclosure are scoping gates to settle before the demo — voice cloning without explicit documented consent is a hard no.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q8",
+      "conceptRef": "generative-media--beyond-text",
+      "prompt": "A client wants to replace their video agency with generative AI: weekly 15-second social clips *and* a 20-minute brand film with recurring characters. What's the honest 2026 maturity read?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Commit to the short clips — short, controllable b-roll is realistic in 2026 — but treat the long film as R&D: long-form consistency with stable characters is still fragile and labour-intensive to direct.",
+          "correct": true,
+          "explanation": "Exactly the module's maturity table: video is the fastest-moving and least mature modality. Promise short-form, treat long-form as R&D — and voice the deepfake/disclosure caveats alongside."
+        },
+        {
+          "id": "b",
+          "text": "Commit to both — video generation matured alongside text-to-image, which is now production-grade.",
+          "correct": false,
+          "explanation": "Text-to-image is mature; video is \"emerging.\" Conflating modality maturities is exactly the over-promise the per-modality table exists to prevent. Long, consistent narrative video with stable characters is the part that's still fragile."
+        },
+        {
+          "id": "c",
+          "text": "Decline both — generative video output can't legally be used commercially.",
+          "correct": false,
+          "explanation": "There's no blanket ban — short marketing clips are a listed solid use case. The real issues are nuanced: training-data/output IP is still shifting, so check vendor indemnity terms and don't promise clean exclusive ownership."
+        },
+        {
+          "id": "d",
+          "text": "Commit to both but quote the long film at the same per-minute rate as the short clips.",
+          "correct": false,
+          "explanation": "Even where long-form is attempted, it's labour-intensive to direct — consistency over time is the hard part, so cost doesn't scale linearly with duration. Quoting it like b-roll guarantees an overrun."
+        }
+      ],
+      "takeaway": "Give per-modality maturity reads dated to 2026 — speech and images are mature, video is emerging — and promise short-form while treating long-form as R&D.",
+      "difficulty": "stretch"
+    }
+  ],
+  "exercises": [
+    {
+      "id": "ex1",
+      "title": "Scope the invoice-processing mission, the 2026 way",
+      "estimatedMinutes": 25,
+      "scenario": "A logistics group's finance shared-services centre receives **~4,000 supplier invoices a month** in dozens of layouts (PDFs, scans, photos of paper). Four clerks key them in manually. The CFO asks for \"AI that reads the invoices\" and a vendor has already pitched a custom-trained extraction model per template at a six-figure price. You're asked for a counter-proposal and a one-page scoping note.",
+      "givens": [
+        "~4,000 invoices/month, dozens of supplier layouts, quality ranging from clean PDFs to phone photos",
+        "Fields needed: supplier, invoice number, date, line items, VAT, total — a wrong *total* posts a financial error",
+        "An existing vendor master list and an ERP the results must post into",
+        "No labelled training data exists today"
+      ],
+      "tasks": [
+        "Name the task(s) precisely and explain why the per-template custom-model pitch is the wrong starting rung on the escalation ladder.",
+        "Design the pipeline you would propose instead, including the three reliability components that make 90-something-percent field accuracy safe to run on.",
+        "Define success metrics in the CFO's terms, not model terms.",
+        "List what you will explicitly *not* promise in the proposal."
+      ],
+      "solution": "**Step 1 — name the task and the right rung.** This is **OCR + document understanding + extraction**: read each invoice into structured fields. The vendor's per-template custom model is the pre-multimodal approach: dozens of layouts would mean dozens of templates, endless maintenance, and a labelling project before any value. The 2026 starting rung is a **multimodal vision-language model** prompted to return the fields as JSON — it reads layout *and* text the way a human does, handles the messy variety, needs no labels, and yields a working prototype in days. Climb to fine-tuning only if measured accuracy on real invoices proves insufficient — not before.\n\n**Step 2 — the pipeline, not the model.** Invoice in → multimodal extraction to a fixed JSON schema → **(1) confidence scoring** per field → **(2) validation rules**: does VAT + net = gross? is the supplier in the vendor master? is the invoice number format plausible? are line items summing to the total? → **(3) human review queue**: anything low-confidence or failing a check routes to a clerk with the original image side-by-side; everything else auto-posts to the ERP. The clerks move from keying everything to reviewing exceptions. Reliability is engineered around the model — a wrong total is a financial error, so raw extraction is never the deliverable.\n\n**Step 3 — success in CFO terms.** (a) **Share of invoices auto-processed without error** (target agreed after a measurement phase on their real invoices, e.g. start ~70% and improve); (b) **hours of manual keying removed** per month; (c) **error rate reaching the ERP** versus today's manual baseline (humans miskey too — measure the baseline); (d) cycle time from receipt to posting. Explicitly *not* the headline: model field accuracy in isolation — 94% sounds great until you ask which 6%.\n\n**Step 4 — the non-promises.** No **100% accuracy on documents** — the long tail of ugly scans guarantees exceptions, which is what the review queue is for. No specific accuracy number **before measuring on their actual invoices** — commit to a target and a measurement method instead. No fully-automated day one — the human path shrinks as confidence data accumulates. And scope creep guard: \"reads any document type\" is unboundable; this phase covers supplier invoices only, with new document types as increments.\n\n**Commercial shape:** 6-10 weeks for the first document type. The value — and your margin — is in the workflow, validation, and fallback design, not the OCR, which is a rented commodity.",
+      "rubric": {
+        "keyPoints": [
+          "Task named as OCR + document understanding + extraction, with multimodal-first justified against per-template custom training",
+          "Pipeline includes all three reliability components: confidence scoring, validation rules (arithmetic + vendor-list checks), and a human review queue",
+          "Success metrics are business metrics: share auto-processed without error, hours removed, error rate vs the manual baseline",
+          "Non-promises stated: no 100% accuracy, no quoted accuracy before measuring on real invoices, scope bounded to one document type"
+        ],
+        "pitfalls": [
+          "Selling the model instead of the pipeline — the model was the easy part; the workflow and fallback carry the value",
+          "Shipping extraction with no human review queue, silently pushing wrong totals into the ERP",
+          "Quoting accuracy before seeing the client's real (messy, ugly) documents",
+          "Accepting the vendor's framing that custom training is needed before the cheap multimodal rung was even tried"
+        ],
+        "takeaways": [
+          "In 2026 document AI, a prompted multimodal model replaces per-template extractors — but reliability (confidence + validation + human queue) is what makes it shippable",
+          "Measure success as share auto-processed and hours saved; a model-accuracy number alone hides exactly the failures the client fears"
+        ],
+        "transfer": "The pattern — automate the confident majority, route the uncertain minority to humans, and measure end-to-end rather than per-component — is how every risky automation ships: fraud screening (auto-clear, auto-block, human review band), medical test triage, content moderation, even code-review bots. Whenever errors are costly and the model is imperfect, the deliverable is a confidence-routed workflow, and the human queue is a feature, not an admission of failure."
+      }
+    },
+    {
+      "id": "ex2",
+      "title": "Defect detection on the line: scope the hidden engineering",
+      "estimatedMinutes": 30,
+      "scenario": "A beverage manufacturer wants AI to spot defective bottles (cracks, bad caps, contamination) on a filling line running at **20 bottles/second**. They have **15,000 photos of good bottles** and **70 photos of defects** collected over a year. The plant's network connection is unreliable, and line cameras occasionally capture operators in frame. The plant director expects \"a model demo in a month\" and asks what could possibly make this expensive.",
+      "givens": [
+        "Line speed 20 bottles/second — a flag decision is only useful if it arrives before the rejection mechanism (~40 ms window)",
+        "Data: 15,000 'good' images, 70 defect images across several defect types",
+        "Unreliable plant connectivity; cameras sometimes capture operators (faces)",
+        "Defects missed cost recalls; false alarms stop the line — both expensive, asymmetrically"
+      ],
+      "tasks": [
+        "Name the right task framing given the 15,000-vs-70 data shape, and say why ordinary classification is the wrong frame.",
+        "Make the cloud-vs-edge call and defend it with the latency and connectivity numbers.",
+        "List the four cost/constraint lines the director hasn't budgeted (annotation, edge toolchain, latency engineering, privacy) with one sentence each on what they imply here.",
+        "State the human-in-the-loop design and what you will not promise."
+      ],
+      "solution": "**Step 1 — frame it as anomaly detection.** With 15,000 good examples and only 70 defects spread across several types, a supervised good/bad classifier would have almost nothing to learn the \"bad\" class from — and new defect types would be invisible. The right frame is **visual anomaly detection**: *learn normal, flag deviations*. The 70 defect images become validation/threshold-setting material, not training data. This framing also matches the mission archetype: it copes with few defect samples by design.\n\n**Step 2 — edge, not cloud.** At 20 bottles/second the decision must land within ~40 ms to drive the rejection mechanism. A cloud round-trip is tens-to-hundreds of milliseconds *when the network works* — and this plant's connectivity is unreliable, so a cloud dependency means the line either stops or runs unprotected during outages. Inference must run **on a device at the line**. That constrains model size and dictates an edge toolchain: model compression/quantisation and a specialised runtime. Decide this now — it reshapes the whole architecture, the hardware budget, and which models are even candidates.\n\n**Step 3 — the four unbudgeted lines.** (1) **Annotation & data collection:** a structured data-collection phase on the actual line (lighting, angles, seasonal product changes) plus labelling review — often the largest line item; mitigate with pre-labelling and active learning on uncertain frames. (2) **Edge toolchain:** compression, quantisation, on-device runtime, plus a deployment/update mechanism for models on plant hardware — a different engineering discipline from training. (3) **Latency engineering:** hitting 40 ms at 20 fps *sustained* is a hard target; a big accurate model that can't keep up with the line is a failed mission — the FPS/ms number goes in the contract, not in a hope. (4) **Privacy:** operators in frame make this **personal data** under GDPR — lawful basis, retention limits, and face blurring (or camera repositioning/cropping) as a built-in pipeline step, designed in from day one, not a final-week checkbox.\n\n**Step 4 — human-in-the-loop and non-promises.** Flagged bottles divert to a human-confirm station rather than auto-scrapping (protects against false-alarm line stops while trust builds); a dashboard tracks flag rates and drift, and the threshold is tuned from the business asymmetry — missed defects (recall risk) cost more than a diverted good bottle, so bias toward sensitivity within the line's tolerance for diversions. **Do not promise:** pixel-perfect catch with zero false alarms; a production system in a month (a *demo* in a month is possible — say so and name the difference); or a model that catches defect types it has never seen evidence of. Scope: 8-14 weeks including the on-line data-collection phase; the edge deployment and line-speed latency are where the real engineering — and budget — live.",
+      "rubric": {
+        "keyPoints": [
+          "Anomaly framing (learn normal, flag deviations) chosen and justified by the 15,000-vs-70 data shape",
+          "Edge deployment defended with both the ~40 ms latency window and the unreliable connectivity — and its toolchain consequences named",
+          "All four hidden cost lines surfaced: annotation/data collection, edge toolchain, sustained-latency engineering, GDPR/face-blurring privacy",
+          "Human-confirm step plus threshold reasoning from the asymmetric costs of misses vs false alarms"
+        ],
+        "pitfalls": [
+          "Framing it as supervised classification and 'training on the 70 defect images' — too few to learn from, blind to new defect types",
+          "Quoting a cloud architecture without noticing the 40 ms / 20 fps constraint or the flaky network",
+          "Treating operator faces as irrelevant — image data with people in it is personal data and triggers GDPR obligations",
+          "Promising a production-ready system in a month because a demo is achievable in a month"
+        ],
+        "takeaways": [
+          "The model is rarely the hard part — annotation, edge deployment, latency, and privacy decide whether a vision mission ships and what it costs",
+          "When 'bad' examples are scarce, frame the problem as anomaly detection and spend the scarce defect images on validation, not training"
+        ],
+        "transfer": "The 'learn normal, flag deviations' frame appears wherever failures are rare and varied: fraud detection, network intrusion, predictive maintenance on machine vibrations, even monitoring API error patterns. And the edge-vs-cloud decision logic — hard real-time budget + unreliable connectivity ⇒ compute moves to the data — is the same calculation behind in-car autonomy, point-of-sale systems, and offline-first mobile design. Constraints on latency and connectivity reshape architectures everywhere, not just in vision."
+      }
+    }
+  ]
+}

@@ -1,0 +1,524 @@
+{
+ "id": "13",
+ "title": "MLOps & Productionization",
+ "weeks": [
+  26,
+  27
+ ],
+ "part": "IV — Data & Production Platform",
+ "partIndex": 4,
+ "addon": false,
+ "pitchHtml": "<p>A model that wins on a validation set is a science result, not a product. MLOps is the discipline of turning that result into something that runs reliably, costs a predictable amount, and keeps working after the data shifts under it. This module is the <strong>leader's view</strong> of that discipline: not how to write the Dockerfile or the FastAPI handler — the ML Engineer Path does that — but what to <strong>budget, staff, monitor, and refuse to promise</strong>. The recurring question of this path takes a specific shape here: the value of a model is realised only in production, and the <em>run cost and reliability tax</em> of keeping it there is the part clients (and inexperienced teams) systematically forget to price.</p>",
+ "prev": "12",
+ "next": "14",
+ "sectionCount": 8,
+ "quizCount": 8,
+ "exerciseCount": 2,
+ "sections": [
+  {
+   "id": "learning-objectives",
+   "kind": "objectives",
+   "title": "Learning Objectives",
+   "blocks": [
+    {
+     "type": "checklist",
+     "checklistId": "13/learning-objectives/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Explain the \"notebook → product\" gap and why most models never ship — in business, not technical, terms"
+      },
+      {
+       "id": "1",
+       "html": "Choose a <strong>serving pattern</strong> (batch / real-time / streaming / edge) from a use case, and know its cost and reliability implications"
+      },
+      {
+       "id": "2",
+       "html": "Describe what <strong>monitoring and drift detection</strong> must catch, and tie the alerts back to evaluation metrics"
+      },
+      {
+       "id": "3",
+       "html": "Decide a <strong>retraining cadence</strong> and justify it on cost vs decay, not on habit"
+      },
+      {
+       "id": "4",
+       "html": "Explain how <strong>CI/CD for ML</strong> differs from software CI/CD (the extra data + model gates)"
+      },
+      {
+       "id": "5",
+       "html": "Scope <strong>LLMOps</strong> for a GenAI app: prompt versioning, eval pipelines, cost/latency monitoring, guardrails, tracing"
+      },
+      {
+       "id": "6",
+       "html": "Estimate the <strong>ongoing run cost and SLA staffing</strong> a productionised model demands, and place an org on an MLOps maturity ladder"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "key-concepts",
+   "kind": "concepts",
+   "title": "Key Concepts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "the-notebook--product-gap-and-the-production-loop",
+     "number": 1,
+     "title": "The \"Notebook → Product\" Gap and the Production Loop",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>A notebook proves a model <em>can</em> predict. A product requires that it predicts <strong>on live data, on time, every time, while someone watches it and pays the bill</strong>. The gap between those two is where most AI initiatives quietly die — not because the model was wrong, but because nobody owned everything around it.</p>\n<p>The famous version of this: the ML code is the small box in the middle; the system around it is everything else.</p>"
+      },
+      {
+       "type": "diagram",
+       "text": "        ┌──────────────────────────────────────────────────────┐\n        │  data collection · validation · feature serving       │\n        │  ┌──────────┐  serving · monitoring · CI/CD            │\n        │  │ ML model │  retraining · registry · governance      │\n        │  └──────────┘  infra · on-call · cost control          │\n        └──────────────────────────────────────────────────────┘\n              the model is ~5-10% of the work that ships it"
+      },
+      {
+       "type": "html",
+       "html": "<p>The other reframe a leader needs: <strong>production ML is a loop, not a launch.</strong> A model is never \"done\"; the world it learned from keeps moving.</p>"
+      },
+      {
+       "type": "diagram",
+       "text": "   data ─▶ train ─▶ validate ─▶ deploy ─▶ serve ─▶ monitor ─┐\n     ▲                                                       │\n     └──────────────── retrain on drift / decay ◀────────────┘"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Shipping a model is taking on a <em>liability</em>, not banking an asset. The training project is a one-off cost; the loop above is a recurring one that runs until you decommission the model. Most failed AI programmes priced the launch and forgot the loop. When you scope, ask \"who runs this in month seven?\" — if there's no answer, you haven't finished scoping.</p>"
+      }
+     ]
+    },
+    {
+     "id": "serving-patterns-how-predictions-get-delivered",
+     "number": 2,
+     "title": "Serving Patterns: How Predictions Get Delivered",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The single most cost- and complexity-determining choice is <em>how</em> predictions reach the consumer. Walk this table and stop at the cheapest pattern the use case tolerates — the same simplest-first discipline as <a class=\"wikilink\" data-module=\"01\" href=\"#/module/01\">AI &#x26; Data Landscape &#x26; Tech-Lead Mindset</a>.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Pattern</th><th align=\"left\">Latency</th><th align=\"left\">When to reach for it</th><th align=\"left\">Run cost &#x26; reliability tax</th></tr></thead><tbody><tr><td align=\"left\"><strong>Batch</strong></td><td align=\"left\">Hours–overnight</td><td align=\"left\">Predictions can be precomputed (churn scores, nightly recommendations, risk lists)</td><td align=\"left\">Lowest. A scheduled job; if it fails you rerun it. No always-on infra.</td></tr><tr><td align=\"left\"><strong>Real-time API</strong></td><td align=\"left\">Milliseconds</td><td align=\"left\">A user/system needs an answer <em>now</em> (fraud check, search rank, live quote)</td><td align=\"left\">Always-on service, autoscaling, an SLA, on-call. The expensive default.</td></tr><tr><td align=\"left\"><strong>Streaming</strong></td><td align=\"left\">Seconds</td><td align=\"left\">Decisions on a continuous event flow (clickstream, sensors, transactions)</td><td align=\"left\">Highest plumbing cost: a streaming platform + state. Specialist skills.</td></tr><tr><td align=\"left\"><strong>Edge / on-device</strong></td><td align=\"left\">Milliseconds, offline</td><td align=\"left\">Connectivity, privacy, or latency forbid a round trip (mobile, IoT, vehicles)</td><td align=\"left\">Hard updates, device fragmentation, no server-side fix. Niche, costly.</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The decision in one line: <strong>default to batch; escalate to real-time only when a human or system genuinely cannot wait; reach for streaming/edge only when the use case structurally forces it.</strong> Teams routinely build a real-time API for predictions a nightly batch job would have served — and inherit an SLA, an on-call rota, and a multiple of the cost for nothing.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>\"Real-time\" is a cost decision dressed as a technical one. Going from batch to real-time often does not change the model at all — it changes your infra bill and your staffing, because <em>always-on</em> means someone is accountable when it falls over at 2am. Make the client name the cost of waiting before you agree they can't.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>For the implementation — FastAPI handlers, batch scoring jobs, caching, feature serving, the full system-design framework — point to and reuse <span class=\"vault-ref\" title=\"In the Obsidian vault: 09 - ML System Design\">ML System Design</span> and <span class=\"vault-ref\" title=\"In the Obsidian vault: 06 - MLOps &#x26; Deployment\">MLOps &#x26; Deployment</span>. Do not rebuild it.</p>"
+      }
+     ]
+    },
+    {
+     "id": "deployment-conceptually-containers-apis-registries",
+     "number": 3,
+     "title": "Deployment, Conceptually: Containers, APIs, Registries",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>A leader needs the vocabulary, not the YAML. Three ideas cover most conversations:</p>\n<ul>\n<li><strong>Containers</strong> package the model <em>with its exact environment</em> (libraries, versions, code) so \"works on my machine\" becomes \"works identically everywhere.\" This is what makes a deployment reproducible and is why \"we'll just copy the notebook to the server\" is a red flag.</li>\n<li><strong>APIs</strong> are the contract: a defined request in, a defined prediction out, versioned so consumers don't break when you update the model. The API <em>is</em> the product boundary — it's what the rest of the business integrates against.</li>\n<li><strong>Model registry</strong> is the versioned, governed store of <em>which model is which</em>: what data and code produced it, who approved it, whether it's in staging or production, and how to roll back. Without it you get <code>model_final_v3_REAL.pkl</code> and no audit trail (see Concept 6).</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Containers, an API contract, and a registry are the difference between a deployment you can <em>reason about</em> and one you merely <em>hope about</em>. They cost a few engineer-days up front and save the project the first time something breaks at 2am — which it will.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>Dockerfiles, registry setup, and serving code live in <span class=\"vault-ref\" title=\"In the Obsidian vault: 06 - MLOps &#x26; Deployment\">MLOps &#x26; Deployment</span>; do not re-teach them here — link.</p>"
+      }
+     ]
+    },
+    {
+     "id": "monitoring--drift-why-models-rot-silently",
+     "number": 4,
+     "title": "Monitoring & Drift: Why Models Rot Silently",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Software fails loudly (a 500, a stack trace). <strong>Models fail silently</strong>: they keep returning confident, well-formed, <em>increasingly wrong</em> answers, and nothing throws an error. The world drifts away from the data the model learned, and only your business metrics — or a regulator — notice. This is the single most under-budgeted part of production ML.</p>\n<p>Three distinct failure modes, often conflated:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Failure mode</th><th align=\"left\">What changed</th><th align=\"left\">Plain example</th><th align=\"left\">First signal</th></tr></thead><tbody><tr><td align=\"left\"><strong>Data drift</strong></td><td align=\"left\">The <em>inputs</em> shifted</td><td align=\"left\">A new product line floods features the model never saw</td><td align=\"left\">Input feature distributions move vs the training baseline</td></tr><tr><td align=\"left\"><strong>Concept drift</strong></td><td align=\"left\">The <em>input→output relationship</em> shifted</td><td align=\"left\">COVID changes what \"normal\" spend looks like; fraud tactics adapt</td><td align=\"left\">Accuracy falls even though inputs look familiar</td></tr><tr><td align=\"left\"><strong>Model decay</strong></td><td align=\"left\">Performance degrades over time, any cause</td><td align=\"left\">Quietly worsening predictions, accumulating</td><td align=\"left\">The live metric slides below its floor</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>What a tech lead must ensure is monitored — in rough priority:</p>\n<ol>\n<li><strong>Live business / outcome metric</strong> (conversion, fraud caught, error cost). The only thing that actually matters; everything else is a leading indicator.</li>\n<li><strong>Model quality metric</strong> once ground truth arrives — the same metric you validated on (tie this back to <a class=\"wikilink\" data-module=\"05\" href=\"#/module/05\">Model Evaluation, Validation &#x26; Experimentation</a>; monitoring is just that evaluation, repeated forever on live data).</li>\n<li><strong>Input drift</strong> — feature distributions vs the training baseline. Catches problems <em>before</em> the outcome does.</li>\n<li><strong>Prediction drift</strong> — the distribution of outputs over time.</li>\n<li><strong>Operational health</strong> — latency (P50/P95/P99), error rate, throughput, cost per call. The SLA layer.</li>\n</ol>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Ground truth is usually <em>late</em> — you learn whether a churn prediction was right only weeks later. So you watch input/prediction drift as an <em>early warning</em> and treat the lagging outcome metric as the <em>verdict</em>. The trap is monitoring only latency and uptime (easy, technical) while the model's accuracy silently halves (hard, requires labels). A model can be 100% \"up\" and 100% wrong.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The headline number behind drift alerts is the <strong>Population Stability Index (PSI)</strong> — the metric most monitoring tools report when they tell you a feature has moved:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\text{PSI} = \\sum_i (a_i - e_i)\\,\\ln\\frac{a_i}{e_i}",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mtext>PSI</mtext><mo>=</mo><munder><mo>∑</mo><mi>i</mi></munder><mo stretchy=\"false\">(</mo><msub><mi>a</mi><mi>i</mi></msub><mo>−</mo><msub><mi>e</mi><mi>i</mi></msub><mo stretchy=\"false\">)</mo><mtext> </mtext><mi>ln</mi><mo>⁡</mo><mfrac><msub><mi>a</mi><mi>i</mi></msub><msub><mi>e</mi><mi>i</mi></msub></mfrac></mrow><annotation encoding=\"application/x-tex\">\\text{PSI} = \\sum_i (a_i - e_i)\\,\\ln\\frac{a_i}{e_i}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord text\"><span class=\"mord\">PSI</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.3277em;vertical-align:-1.2777em;\"></span><span class=\"mop op-limits\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.05em;\"><span style=\"top:-1.8723em;margin-left:0em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span><span style=\"top:-3.05em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span><span class=\"mop op-symbol large-op\">∑</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.2777em;\"><span></span></span></span></span></span><span class=\"mopen\">(</span><span class=\"mord\"><span class=\"mord mathnormal\">a</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.9436em;vertical-align:-0.836em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">e</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mop\">ln</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.1076em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathnormal\">e</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathnormal\">a</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.836em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>Bin the feature, then for each bin <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>i</mi></mrow><annotation encoding=\"application/x-tex\">i</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6595em;\"></span><span class=\"mord mathnormal\">i</span></span></span></span> compare <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>a</mi><mi>i</mi></msub></mrow><annotation encoding=\"application/x-tex\">a_i</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.5806em;vertical-align:-0.15em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">a</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> — the <em>actual</em> proportion of live (production) records in that bin — against <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>e</mi><mi>i</mi></msub></mrow><annotation encoding=\"application/x-tex\">e_i</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.5806em;vertical-align:-0.15em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">e</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> — the <em>expected</em> proportion from the training baseline. The standard rule-of-thumb thresholds a leader should recognise on a dashboard:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">PSI</th><th align=\"left\">Reading</th><th align=\"left\">Action</th></tr></thead><tbody><tr><td align=\"left\"><strong>&#x3C; 0.1</strong></td><td align=\"left\">Stable</td><td align=\"left\">No action — the feature looks like training</td></tr><tr><td align=\"left\"><strong>0.1 – 0.25</strong></td><td align=\"left\">Moderate shift</td><td align=\"left\">Watch; investigate if several features move together</td></tr><tr><td align=\"left\"><strong>> 0.25</strong></td><td align=\"left\">Significant drift</td><td align=\"left\">Investigate and likely retrain — the model is seeing a different world</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>PSI is large exactly when <em>much</em> of the mass moved <em>far</em>: a bin contributes when its share changed (<span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>a</mi><mi>i</mi></msub><mo>−</mo><msub><mi>e</mi><mi>i</mi></msub></mrow><annotation encoding=\"application/x-tex\">a_i - e_i</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.7333em;vertical-align:-0.15em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">a</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.5806em;vertical-align:-0.15em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">e</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span>) <strong>and</strong> the relative move is big (<span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>ln</mi><mo>⁡</mo><mfrac><msub><mi>a</mi><mi>i</mi></msub><msub><mi>e</mi><mi>i</mi></msub></mfrac></mrow><annotation encoding=\"application/x-tex\">\\ln\\frac{a_i}{e_i}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1.1566em;vertical-align:-0.4451em;\"></span><span class=\"mop\">ln</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.7115em;\"><span style=\"top:-2.655em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">e</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3281em;\"><span style=\"top:-2.357em;margin-left:0em;margin-right:0.0714em;\"><span class=\"pstrut\" style=\"height:2.5em;\"></span><span class=\"sizing reset-size3 size1 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.143em;\"><span></span></span></span></span></span></span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.4101em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">a</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3281em;\"><span style=\"top:-2.357em;margin-left:0em;margin-right:0.0714em;\"><span class=\"pstrut\" style=\"height:2.5em;\"></span><span class=\"sizing reset-size3 size1 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.143em;\"><span></span></span></span></span></span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.4451em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span>). A handful of records crossing a boundary barely registers; a whole segment vanishing or appearing lights it up. That is why it works as a single \"how far has this feature drifted from training?\" gauge you can threshold and alert on.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>An alternative when you want a distribution-shape test rather than a binned score is the <strong>Kolmogorov–Smirnov (KS) statistic</strong>: <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>D</mi><mo>=</mo><msub><mrow><mi>max</mi><mo>⁡</mo></mrow><mi>x</mi></msub><mo stretchy=\"false\">∣</mo><msub><mi>F</mi><mi>a</mi></msub><mo stretchy=\"false\">(</mo><mi>x</mi><mo stretchy=\"false\">)</mo><mo>−</mo><msub><mi>F</mi><mi>e</mi></msub><mo stretchy=\"false\">(</mo><mi>x</mi><mo stretchy=\"false\">)</mo><mo stretchy=\"false\">∣</mo></mrow><annotation encoding=\"application/x-tex\">D = \\max_x \\lvert F_a(x) - F_e(x)\\rvert</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0278em;\">D</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mop\"><span class=\"mop\">max</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1514em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">x</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mopen\">∣</span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">F</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1514em;\"><span style=\"top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">a</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mopen\">(</span><span class=\"mord mathnormal\">x</span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">F</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1514em;\"><span style=\"top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">e</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mopen\">(</span><span class=\"mord mathnormal\">x</span><span class=\"mclose\">)∣</span></span></span></span> — the largest vertical gap between the actual and expected <em>cumulative</em> distributions. Bigger <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>D</mi></mrow><annotation encoding=\"application/x-tex\">D</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0278em;\">D</span></span></span></span> = more drift; tools report it with a p-value per feature.</p>\n<p>The mechanics of running these per feature are coded in <span class=\"vault-ref\" title=\"In the Obsidian vault: 06 - MLOps &#x26; Deployment\">MLOps &#x26; Deployment</span>; the deeper statistics live in the AI Scientist Path. Your job is to insist the monitoring <em>exists</em>, has thresholds, and pages a human.</p>"
+      }
+     ]
+    },
+    {
+     "id": "retraining-strategy-triggers-and-the-cost-of-cadence",
+     "number": 5,
+     "title": "Retraining Strategy: Triggers and the Cost of Cadence",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Once you accept production is a loop, the question becomes <em>when do we close it</em> — when do we retrain? Three triggers, and a cost trade behind each:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Trigger</th><th align=\"left\">Retrain when…</th><th align=\"left\">Watch out for</th></tr></thead><tbody><tr><td align=\"left\"><strong>Drift / decay-triggered</strong></td><td align=\"left\">Monitoring shows the live metric crossed its floor or inputs drifted materially</td><td align=\"left\">Best signal, but needs the monitoring of Concept 4 to exist first</td></tr><tr><td align=\"left\"><strong>Scheduled</strong></td><td align=\"left\">A fixed cadence (nightly / weekly / monthly) regardless of signal</td><td align=\"left\">Simple and predictable; retrains needlessly when stable, lags when volatile</td></tr><tr><td align=\"left\"><strong>Event-driven</strong></td><td align=\"left\">A known change (new product, new market, policy shift, new labelled data)</td><td align=\"left\">Requires the business to <em>tell</em> the ML system the world changed</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The cadence trade is a genuine cost/benefit dial:</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Retraining isn't free and isn't always better. Each cycle costs compute, an engineer's time, and a <em>fresh validation + re-approval</em> (you cannot ship an unvalidated model — see Concept 7). Retrain too often and you burn money and risk shipping a worse model from a noisy week; too rarely and you eat the cost of decay. The right cadence is set by <em>how fast this domain actually moves</em>: fraud and pricing drift in days; a document classifier may be stable for a year. Tie cadence to observed drift, not to a calendar habit.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>A pragmatic default for an early mission: <strong>monitor first, retrain manually on alert, automate the cadence only once you've seen how fast this model actually decays.</strong> Automated retraining is a capability to <em>earn</em>, not to ship on day one.</p>"
+      }
+     ]
+    },
+    {
+     "id": "experiment-tracking--model-registry-reproducibility-as-governance",
+     "number": 6,
+     "title": "Experiment Tracking & Model Registry: Reproducibility as Governance",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Two adjacent capabilities a leader should treat as non-negotiable infrastructure, not nice-to-haves:</p>\n<ul>\n<li><strong>Experiment tracking</strong> records, for every training run, the parameters, metrics, code version, and data version that produced it. Without it, \"which settings gave us that 0.92?\" has no answer and the model is <em>not reproducible</em> — which is also a compliance failure.</li>\n<li><strong>Model registry</strong> (introduced in Concept 3) is the versioned, staged, approved store of production models, with lineage and rollback.</li>\n</ul>\n<p>Together they answer the questions an auditor, a regulator, or a post-incident review <em>will</em> ask: <em>which model was live on this date, what produced it, who approved it, and can we reproduce it?</em> Under the EU AI Act this stops being good hygiene and becomes an obligation for higher-risk systems (see <a class=\"wikilink\" data-module=\"15\" href=\"#/module/15\">Responsible AI: Interpretability, Fairness, Safety &#x26; the EU AI Act</a>).</p>\n<p>The hands-on (MLflow / Weights &#x26; Biases setup, registry staging, A/B comparison) is in <span class=\"vault-ref\" title=\"In the Obsidian vault: 07 - Experiment Tracking &#x26; Model Registry\">Experiment Tracking &#x26; Model Registry</span> — point there; teach the <em>why</em> here, not the API.</p>"
+      }
+     ]
+    },
+    {
+     "id": "cicd-for-ml-same-spirit-extra-gates",
+     "number": 7,
+     "title": "CI/CD for ML: Same Spirit, Extra Gates",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>A leader who knows software CI/CD already has 80% of this. CI/CD for ML is ordinary continuous integration/deployment <strong>plus gates that software pipelines don't have</strong>, because an ML system can break in two ways software can't: bad <em>data</em> and a bad <em>model</em> — both of which pass every code test.</p>"
+      },
+      {
+       "type": "diagram",
+       "text": "  Software CI/CD:   code ─▶ lint ─▶ unit tests ─▶ build ─▶ deploy\n  ML CI/CD adds:                 ├▶ DATA validation  (schema, ranges, nulls)\n                                 └▶ MODEL validation (metric above a floor on a\n                                    held-out set, no regression vs production)\n                                                      ─▶ deploy ─▶ monitor (Concept 4)"
+      },
+      {
+       "type": "html",
+       "html": "<p>The two extra gates are the whole point:</p>\n<ul>\n<li><strong>Data validation</strong> — the incoming/feature data matches the expected schema, ranges, and null rates. Catches the silent upstream breakage that would otherwise poison training or serving.</li>\n<li><strong>Model validation</strong> — the candidate clears a metric floor on a held-out set <em>and</em> doesn't regress against the model currently in production. This is the automated form of <a class=\"wikilink\" data-module=\"05\" href=\"#/module/05\">Model Evaluation, Validation &#x26; Experimentation</a>, wired into the deploy pipeline so a worse model can't ship by accident.</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>In software, the artefact is the code, and tests assert the code's behaviour. In ML, the artefact is <em>code + data + a trained model</em>, so you need to validate all three. A green test suite tells you the code runs; it tells you nothing about whether the model is any good or the data is sane. That's why \"we have CI\" doesn't mean \"we have ML CI.\"</p>"
+      }
+     ]
+    },
+    {
+     "id": "llmops-the-new-wrinkle",
+     "number": 8,
+     "title": "LLMOps: The New Wrinkle",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Putting a <strong>GenAI / LLM app</strong> in production rhymes with classic MLOps but adds problems that don't exist for a churn model. You usually don't own or retrain the model (you rent it via an API — see <a class=\"wikilink\" data-module=\"09\" href=\"#/module/09\">Large Language Models in Practice</a>), so the operational weight shifts from <em>training pipelines</em> to <em>prompts, evaluation, cost, latency, and guardrails</em>.</p>\n<p>What changes, and what a leader must put in place:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Classic MLOps</th><th align=\"left\">LLMOps adds</th><th align=\"left\">Why it matters</th></tr></thead><tbody><tr><td align=\"left\">Version the <em>model</em></td><td align=\"left\">Version the <strong>prompt</strong> (and the model behind the API, which the vendor can change under you)</td><td align=\"left\">A prompt edit is a deploy; an unannounced vendor model update is silent drift you don't control</td></tr><tr><td align=\"left\">Validate a metric on a labelled set</td><td align=\"left\"><strong>Eval pipelines</strong> — graded test suites (often LLM-as-judge + human spot-checks) for quality, safety, regression</td><td align=\"left\">There's rarely a single accuracy number; you assemble a behavioural test suite (ties to <a class=\"wikilink\" data-module=\"05\" href=\"#/module/05\">Model Evaluation, Validation &#x26; Experimentation</a>)</td></tr><tr><td align=\"left\">Cost ≈ infra time</td><td align=\"left\"><strong>Token cost &#x26; latency monitoring per call/feature</strong></td><td align=\"left\">Spend scales with usage and prompt length and can run away overnight — this is a live budget line, not a fixed cost</td></tr><tr><td align=\"left\">Input range checks</td><td align=\"left\"><strong>Guardrails</strong> — input/output filtering, prompt-injection defence, PII redaction, refusal handling</td><td align=\"left\">The failure mode is a confidently wrong, unsafe, or leaking answer to a user (ties to <a class=\"wikilink\" data-module=\"11\" href=\"#/module/11\">Agentic Architectures &#x26; LLM App Patterns</a>)</td></tr><tr><td align=\"left\">Log predictions</td><td align=\"left\"><strong>Tracing / observability</strong> — capture the full chain: prompt, retrieved context, tool calls, intermediate steps, final output</td><td align=\"left\">Multi-step RAG/agent apps are otherwise undebuggable; you can't fix what you can't see</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>With a classic model you mostly worry that it <em>decays</em>. With an LLM app you also worry that it <em>misbehaves</em> (hallucinates, gets jailbroken, leaks data) and that it <em>costs</em> an amount that moves with traffic. So LLMOps front-loads <strong>evals, guardrails, tracing, and a cost dashboard</strong> where classic MLOps front-loaded retraining pipelines. For agents specifically, tracing isn't optional — it's the only way to see why a five-step loop went wrong (see <a class=\"wikilink\" data-module=\"11\" href=\"#/module/11\">Agentic Architectures &#x26; LLM App Patterns</a>).</p>"
+      }
+     ]
+    },
+    {
+     "id": "run-cost-sla-and-mlops-maturity--the-budget-reality",
+     "number": 9,
+     "title": "Run Cost, SLA, and MLOps Maturity — the Budget Reality",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>This is the section a tech lead is actually paid for. Three uncomfortable truths to put in front of a client:</p>\n<ol>\n<li>\n<p><strong>The run cost is recurring and often dwarfs the build.</strong> Compute (always-on serving, retraining, GPU/token spend), licences/tooling, <em>and people</em> (on-call, monitoring, retraining, incident response). A real-time model with an SLA is a permanent operational commitment, not a delivered artefact.</p>\n</li>\n<li>\n<p><strong>An SLA is a staffing decision.</strong> \"99.9% uptime\" means someone is on-call and you've built failover. Promising an SLA you haven't staffed is the fastest route to a furious client. If nobody owns nights, you do not have an SLA — you have a hope.</p>\n<p><strong>Availability</strong> is just uptime as a fraction of total time, quoted in \"nines\":</p>\n<p><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mtext>Availability</mtext><mo>=</mo><mfrac><mtext>uptime</mtext><mrow><mtext>uptime</mtext><mo>+</mo><mtext>downtime</mtext></mrow></mfrac></mrow><annotation encoding=\"application/x-tex\">\\text{Availability} = \\frac{\\text{uptime}}{\\text{uptime} + \\text{downtime}}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\">Availability</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.3947em;vertical-align:-0.4811em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.9136em;\"><span style=\"top:-2.655em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">uptime</span></span><span class=\"mbin mtight\">+</span><span class=\"mord text mtight\"><span class=\"mord mtight\">downtime</span></span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.4461em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">uptime</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.4811em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></p>\n<p>Each extra nine costs roughly 10× the engineering. The numbers worth memorising — how much downtime a year each level <em>permits</em>:</p>\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n<table><thead><tr><th align=\"left\">SLA</th><th align=\"left\">\"Nines\"</th><th align=\"left\">Allowed downtime / year</th></tr></thead><tbody><tr><td align=\"left\">99%</td><td align=\"left\">\"two nines\"</td><td align=\"left\">~3.65 days</td></tr><tr><td align=\"left\">99.9%</td><td align=\"left\">\"three nines\"</td><td align=\"left\">~8.8 hours</td></tr><tr><td align=\"left\">99.99%</td><td align=\"left\">\"four nines\"</td><td align=\"left\">~52 minutes</td></tr></tbody></table>\n<p>The complement is the lever you actually manage — the <strong>error budget</strong>:</p>\n<p><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mtext>Error budget</mtext><mo>=</mo><mn>1</mn><mo>−</mo><mtext>SLA</mtext></mrow><annotation encoding=\"application/x-tex\">\\text{Error budget} = 1 - \\text{SLA}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\">Error budget</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.7278em;vertical-align:-0.0833em;\"></span><span class=\"mord\">1</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord text\"><span class=\"mord\">SLA</span></span></span></span></span></p>\n<blockquote>\n<p><strong>Intuition.</strong> The error budget reframes reliability as a <em>spendable allowance</em>, not a moral absolute. A 99.9% SLA grants ~8.8 hours of failure a year; deploys, retrains, and experiments <em>spend</em> that budget. While budget remains you can take risks and ship; when it's exhausted you freeze changes and stabilise. It turns \"don't break it\" into a number both you and the client can plan against.</p>\n</blockquote>\n<p>The other reliability numbers a leader reads off a dashboard are <strong>latency percentiles</strong> — p50, p95, p99: the value below which 50%, 95%, or 99% of requests complete. p50 is the typical (median) request; <strong>p99 is the slow tail</strong> — 1 in 100 calls is at least this slow.</p>\n<blockquote>\n<p><strong>Intuition.</strong> Report tail latency (p95/p99), not the average — the mean hides the pain. A snappy 40 ms average can still mean 1 request in 100 takes 3 seconds, and those slow calls land on your highest-volume users and trip your SLA. Users feel the worst experiences, not the typical one, so you size infra and write SLAs against the tail.</p>\n</blockquote>\n</li>\n<li>\n<p><strong>Maturity is a ladder; don't sell a rung you can't stand on.</strong> Where an org sits determines what you can responsibly promise:</p>\n</li>\n</ol>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Maturity</th><th align=\"left\">What it looks like</th><th align=\"left\">Honest promise at this level</th></tr></thead><tbody><tr><td align=\"left\"><strong>0 — Manual</strong></td><td align=\"left\">Notebooks, manual deploys, no monitoring, \"retrain when someone notices\"</td><td align=\"left\">\"We can ship one model, manually watched\"</td></tr><tr><td align=\"left\"><strong>1 — Repeatable</strong></td><td align=\"left\">Containerised serving, experiment tracking, a registry, basic drift monitoring</td><td align=\"left\">\"Reproducible deploys and we'll see decay before the client does\"</td></tr><tr><td align=\"left\"><strong>2 — Automated</strong></td><td align=\"left\">CI/CD with data+model gates, automated/triggered retraining, alerting</td><td align=\"left\">\"The loop largely runs itself; humans handle exceptions\"</td></tr><tr><td align=\"left\"><strong>3 — Full MLOps</strong></td><td align=\"left\">Self-healing pipelines, feature store, A/B + canary, governance baked in</td><td align=\"left\">\"Fleet-scale, audited, multiple models — a platform\"</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Most clients asking for \"AI in production\" are at level 0 and imagining level 3. Your value is naming the real rung, scoping the <em>next</em> one, and pricing the run cost they didn't see — not selling a maturity they can't operate. Selling level 3 to a level-0 org builds a platform nobody can run; the honest, sellable move is the uplift to the <em>next</em> rung.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<h4>Worked example — pricing the loop, not the launch</h4>\n<p>A retailer has a churn model from a PoC (notebook, ~0.88 AUC) and wants it \"live so the CRM team gets daily at-risk scores.\"</p>\n<ul>\n<li><strong>Pattern:</strong> the CRM acts on a list each morning — <strong>batch</strong>, not real-time. That alone removes always-on infra, an SLA, and an on-call rota. (A team chasing novelty might have proposed a real-time API and 3× the run cost for zero added value.)</li>\n<li><strong>Build (one-off, ~4-6 weeks):</strong> containerise the model, a scheduled scoring job writing scores to the warehouse, a registry entry with lineage, a data-validation gate on the input feed, and drift + AUC monitoring with thresholds. The model is the smallest part.</li>\n<li><strong>Run (recurring — the part the client forgot):</strong> the nightly job's compute; monitoring + alerting; an <em>estimated</em> ~1-3 engineer-days/month to watch drift, investigate alerts, and retrain when the live AUC slips below an agreed floor (say 0.83). Quantify it as a monthly figure, because it never stops.</li>\n<li><strong>What you don't promise:</strong> a fixed accuracy forever (you commit to a <em>floor</em> and a <em>response</em> when breached), real-time latency, or \"set and forget.\" You promise a monitored loop with a named owner and a retraining trigger.</li>\n</ul>\n<p>The lesson is the whole module: the sellable, honest deliverable is <strong>the loop with its run cost made explicit</strong>, not a one-time \"deployment.\"</p>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "client-mission-patterns--commercial-angle",
+   "kind": "missions",
+   "title": "Client Mission Patterns / Commercial Angle",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>These are the productionisation missions — they convert a promising PoC into something the client can actually rely on, and the run cost into a line item.</p>\n<ul>\n<li><strong>Productionize a PoC model (deploy + monitor)</strong> — <em>Problem:</em> a data-science PoC works in a notebook but isn't live and nobody trusts it to stay right. <em>Deliverable:</em> the model containerised and served in the right pattern (usually batch), with a registry entry, a data-validation gate, drift + performance monitoring with alert thresholds, and a written runbook naming the owner and retraining trigger. <em>Scope:</em> 4-8 weeks, fixed price. <em>Who buys:</em> a Head of Data / CTO who has a model and no way to operate it.</li>\n<li><strong>MLOps platform setup / maturity uplift</strong> — <em>Problem:</em> several teams ship models ad-hoc; no shared tooling, no reproducibility, deploys are heroic. <em>Deliverable:</em> a target-state MLOps architecture, a chosen and configured toolchain (registry, tracking, CI/CD with data+model gates, monitoring), reference templates, and an explicit move from maturity rung <em>N</em> to <em>N+1</em>. <em>Scope:</em> 6-12 weeks, often a retainer afterwards. <em>Who buys:</em> a platform/engineering lead or CTO scaling beyond the first model.</li>\n<li><strong>Monitoring &#x26; automated-retraining setup</strong> — <em>Problem:</em> a model is live but rotting blind, or retraining is a manual scramble. <em>Deliverable:</em> drift + outcome monitoring wired to alerts, a defined retraining trigger and cadence, and a validation-gated retraining pipeline so a worse model can't ship. <em>Scope:</em> 3-6 weeks. <em>Who buys:</em> the team already running a model in production who got burned by silent decay.</li>\n<li><strong>LLMOps for a GenAI application</strong> — <em>Problem:</em> a GenAI feature shipped on vibes — no prompt versioning, no evals, runaway token cost, no tracing, weak guardrails. <em>Deliverable:</em> prompt/version management, an automated eval suite (LLM-judge + human spot-checks), a cost &#x26; latency dashboard with budget alerts, guardrails (injection defence, PII redaction, refusal handling), and end-to-end tracing. <em>Scope:</em> 4-8 weeks. <em>Who buys:</em> a product owner whose GenAI feature is live and either overspending or misbehaving.</li>\n</ul>\n<p><strong>Buy-vs-build for the client:</strong> <em>buy</em> the commodity plumbing — registry, tracking, monitoring, tracing, serving runtimes are mature off-the-shelf products; do <strong>not</strong> build a bespoke MLOps platform for one or two models. <em>Build</em> only the glue, the validation gates, and the domain-specific evals — that's where the defensible value is. <strong>What to charge for:</strong> the build as fixed price, and the <em>run/operate</em> loop as a retainer or managed-service line — clients underprice this, so make it explicit and recurring. <strong>What NOT to promise:</strong> a permanent accuracy number (commit to a floor + a response), an SLA you haven't staffed, \"fully autonomous retraining\" on a green-field engagement, or a maturity rung the client's team cannot operate after you leave.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "tools--vendor-landscape",
+   "kind": "tools",
+   "title": "Tools & Vendor Landscape",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p><em>As of 2026 — treat names/prices as perishable; re-check before quoting.</em></p>"
+    },
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Tool / Category</th><th align=\"left\">Use here</th><th align=\"left\">OSS / Paid</th><th align=\"left\">Note (lock-in / caveat)</th></tr></thead><tbody><tr><td align=\"left\">MLflow</td><td align=\"left\">Experiment tracking + model registry</td><td align=\"left\">OSS (managed options exist)</td><td align=\"left\">The common open default; self-host to avoid lock-in</td></tr><tr><td align=\"left\">Weights &#x26; Biases</td><td align=\"left\">Tracking, registry, dashboards</td><td align=\"left\">Paid (free tier)</td><td align=\"left\">Polished; per-seat cost, hosted by default</td></tr><tr><td align=\"left\">Evidently AI · NannyML</td><td align=\"left\">Drift &#x26; performance monitoring</td><td align=\"left\">OSS (paid cloud)</td><td align=\"left\">Pairs with your own pipeline; NannyML estimates performance without labels</td></tr><tr><td align=\"left\">Cloud ML platforms (SageMaker, Vertex AI, Azure ML)</td><td align=\"left\">End-to-end lifecycle on one cloud</td><td align=\"left\">Paid (consumption)</td><td align=\"left\">Fast to start; the strongest lock-in — watch egress &#x26; buy-in</td></tr><tr><td align=\"left\">KServe · Seldon · BentoML</td><td align=\"left\">Model serving runtimes</td><td align=\"left\">OSS (paid tiers)</td><td align=\"left\">For real-time/multi-model scale; Kubernetes skills assumed</td></tr><tr><td align=\"left\">Feature stores (Feast, Tecton)</td><td align=\"left\">Consistent features train↔serve</td><td align=\"left\">OSS / Paid</td><td align=\"left\">Real value only past a certain scale — overkill for a first model</td></tr><tr><td align=\"left\">LangSmith · Langfuse · Arize Phoenix</td><td align=\"left\">LLM/agent tracing, evals, observability</td><td align=\"left\">Paid / OSS</td><td align=\"left\">The LLMOps tracing layer; Langfuse/Phoenix are OSS options</td></tr><tr><td align=\"left\">Helicone · vendor usage dashboards</td><td align=\"left\">LLM cost &#x26; latency monitoring</td><td align=\"left\">Paid (free tier)</td><td align=\"left\">Watch token spend per feature; budget alerts essential</td></tr><tr><td align=\"left\">GitHub Actions · GitLab CI (+ data/model gates)</td><td align=\"left\">CI/CD with ML validation gates</td><td align=\"left\">Paid / OSS</td><td align=\"left\">Reuse existing software CI; add the data+model gates yourself</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>For <em>how</em> to wire these up, the ML Engineer Path is the territory; this table is just the map.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "when-is-this-overkill",
+   "kind": "overkill",
+   "title": "When Is This Overkill?",
+   "blocks": [
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Situation</th><th align=\"left\">Full MLOps is overkill — do this instead</th></tr></thead><tbody><tr><td align=\"left\">One model, scored monthly, by one analyst</td><td align=\"left\">A scheduled script + a logged metric. Skip the platform.</td></tr><tr><td align=\"left\">A genuine PoC still proving value</td><td align=\"left\">Don't productionise yet — keep it a notebook until the value is proven; productionising a doomed PoC is wasted money.</td></tr><tr><td align=\"left\">A single low-volume LLM feature, internal only</td><td align=\"left\">Version prompts in git, a lightweight eval checklist, a cost alert. Skip the full LLMOps stack.</td></tr><tr><td align=\"left\">Predictions tolerate overnight staleness</td><td align=\"left\">Batch. Don't build a real-time API and inherit an SLA.</td></tr><tr><td align=\"left\">Two or three models total</td><td align=\"left\">Buy a managed registry + monitoring tool. Don't build a bespoke platform.</td></tr><tr><td align=\"left\">Stable domain, model decays yearly</td><td align=\"left\">Monitor + retrain manually on alert. Don't automate a retraining pipeline you'll run once a year.</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The senior move is matching the operational machinery to the <em>number and volatility</em> of models, not to ambition. A platform for one stable model is a cost centre with no payoff.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "resources",
+   "kind": "resources",
+   "title": "Resources",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "books",
+     "number": null,
+     "title": "Books",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Chip Huyen — <em>Designing Machine Learning Systems</em> — the canonical text; deployment, monitoring, and the production loop in business-aware language. <em>(Paid)</em></li>\n<li>Chip Huyen — <em>AI Engineering</em> — the LLMOps-era companion: evals, prompts, cost, guardrails for GenAI apps. <em>(Paid)</em></li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "courses-free",
+     "number": null,
+     "title": "Courses (Free)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li><strong>MLOps Zoomcamp</strong> (DataTalksClub) — end-to-end, hands-on; good for the team that will operate the loop.</li>\n<li><strong>Full Stack Deep Learning — Deployment &#x26; Monitoring</strong> — pragmatic lectures on shipping and watching models.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "articles-free",
+     "number": null,
+     "title": "Articles (Free)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li><em>Hidden Technical Debt in Machine Learning Systems</em> (Sculley et al.) — why the model is the small box; foundational reading for the run-cost argument.</li>\n<li><em>Continuous Delivery for Machine Learning</em> (Sato/Fowler, martinfowler.com) — CI/CD-for-ML in clear, leader-readable terms.</li>\n<li>Vendor LLM pricing pages — for live token cost when budgeting an LLMOps mission. <em>Date everything.</em></li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "go-deeper",
+     "number": null,
+     "title": "Go Deeper",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Deeper systems &#x26; technical leadership → <span class=\"vault-ref\" title=\"In the Obsidian vault: 24 - ML Systems Engineering &#x26; Technical Leadership\">ML Systems Engineering &#x26; Technical Leadership</span> (AI Scientist Path).</li>\n<li>Deeper code: serving, Docker, CI/CD, drift → <span class=\"vault-ref\" title=\"In the Obsidian vault: 06 - MLOps &#x26; Deployment\">MLOps &#x26; Deployment</span>; reproducibility &#x26; registries → <span class=\"vault-ref\" title=\"In the Obsidian vault: 07 - Experiment Tracking &#x26; Model Registry\">Experiment Tracking &#x26; Model Registry</span>; end-to-end architecture → <span class=\"vault-ref\" title=\"In the Obsidian vault: 09 - ML System Design\">ML System Design</span> (ML Engineer Path).</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "practical-artifacts",
+   "kind": "artifacts",
+   "title": "Practical Artifacts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "decision-checklist--is-this-model-ready-for-production",
+     "number": null,
+     "title": "Decision Checklist — \"Is this model ready for production?\"",
+     "blocks": [
+      {
+       "type": "checklist",
+       "checklistId": "13/practical-artifacts/1",
+       "items": [
+        {
+         "id": "0",
+         "html": "Is the serving pattern the <em>cheapest</em> the use case tolerates (defaulted to batch, escalated only with a reason)?"
+        },
+        {
+         "id": "1",
+         "html": "Is the model containerised and registered with lineage (data + code version), not a loose <code>.pkl</code>?"
+        },
+        {
+         "id": "2",
+         "html": "Is there a data-validation gate on the inputs and a model-validation gate (metric floor, no regression) before deploy?"
+        },
+        {
+         "id": "3",
+         "html": "Is monitoring live for the <em>outcome</em> metric and input drift — not just latency/uptime — with thresholds that alert a human?"
+        },
+        {
+         "id": "4",
+         "html": "Is there a named retraining trigger and an owner who runs this in month seven?"
+        },
+        {
+         "id": "5",
+         "html": "For LLM apps: prompts versioned, an eval suite, a cost/latency alert, guardrails, and tracing?"
+        },
+        {
+         "id": "6",
+         "html": "Has the recurring <em>run cost</em> (compute + tooling + people) been quantified and priced — not just the build?"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "red-flags",
+     "number": null,
+     "title": "Red Flags",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"We'll just copy the notebook to the server.\" (No container, no reproducibility, no gates.)</li>\n<li>\"It's deployed, so we're done.\" (You've started the loop, not finished the project.)</li>\n<li>Monitoring shows uptime and latency but no model-quality or drift metric. (Up and wrong.)</li>\n<li>A real-time API for predictions a nightly batch job would serve. (Self-inflicted SLA and cost.)</li>\n<li>An SLA promised with nobody on-call. (A hope, not an SLA.)</li>\n<li>A bespoke MLOps platform proposed for one or two models. (Buy it.)</li>\n<li>A live GenAI feature with no prompt versioning, no evals, and no cost alert. (Misbehaving and overspending, blind.)</li>\n<li>\"It'll retrain itself automatically\" on a green-field, level-0 engagement. (Earned, not shipped on day one.)</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "scoping-prompts-ask-the-client",
+     "number": null,
+     "title": "Scoping Prompts (ask the client)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"Who operates and watches this model in six months, and is that role staffed?\"</li>\n<li>\"How fresh do predictions need to be — is overnight acceptable, or must it be instant? What's the cost of waiting?\"</li>\n<li>\"How will we know the model has gone wrong, and how fast does ground truth arrive?\"</li>\n<li>\"How quickly does this domain change — what's actually driving a retrain?\"</li>\n<li>\"What uptime do you truly need, and have we staffed the on-call that implies?\"</li>\n<li>\"What's the <em>monthly</em> run budget — compute, tooling, and people — and who owns it?\"</li>\n<li><em>(GenAI)</em> \"What's the per-feature token budget, what happens when the model is unsafe or wrong, and can we trace why?\"</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "self-assessment",
+   "kind": "self-assessment",
+   "title": "Self-Assessment",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Before moving on, you should be able to:</p>"
+    },
+    {
+     "type": "checklist",
+     "checklistId": "13/self-assessment/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Explain the notebook→product gap and frame production ML as a recurring loop, not a launch"
+      },
+      {
+       "id": "1",
+       "html": "Choose a serving pattern from a use case and state its run-cost and reliability consequences"
+      },
+      {
+       "id": "2",
+       "html": "Specify what to monitor so a silently rotting model is caught, tying it back to evaluation"
+      },
+      {
+       "id": "3",
+       "html": "Set and defend a retraining cadence on cost-vs-decay grounds"
+      },
+      {
+       "id": "4",
+       "html": "Articulate how ML CI/CD differs from software CI/CD and why the data+model gates matter"
+      },
+      {
+       "id": "5",
+       "html": "Scope an LLMOps engagement (prompts, evals, cost/latency, guardrails, tracing) and place a client on the MLOps maturity ladder with an honest next-rung promise"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  }
+ ]
+}

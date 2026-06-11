@@ -1,0 +1,349 @@
+{
+ "moduleId": "13",
+ "quiz": [
+  {
+   "id": "q1",
+   "conceptRef": "the-notebook--product-gap-and-the-production-loop",
+   "prompt": "<p>A client's PoC churn model hits 0.88 AUC in a notebook. The sponsor asks: \"How long to deploy it — and then we're done, right?\" What's the honest answer?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Deployment <em>starts</em> a loop, not finishes a project: the model is ~5-10% of the system, and the recurring part — monitoring, retraining, on-call, run cost — runs until decommissioning. The scoping question is \"who runs this in month seven?\"",
+     "correct": true,
+     "explanation": "This is the module's core reframe: shipping a model is taking on a <em>liability</em>, not banking an asset. The training project is a one-off cost; the loop (serve → monitor → retrain) is recurring. Most failed AI programmes priced the launch and forgot the loop."
+    },
+    {
+     "id": "b",
+     "text": "About a week — wrap the notebook in an API, copy it to a server, and hand it to IT.",
+     "correct": false,
+     "explanation": "\"Just copy the notebook to the server\" is a named red flag: no container, no reproducibility, no validation gates, no monitoring. It produces a deployment you can only <em>hope</em> about — and nobody owns it when it degrades."
+    },
+    {
+     "id": "c",
+     "text": "The model is done; the remaining work is purely an IT integration task with no ML-specific content.",
+     "correct": false,
+     "explanation": "The system around the model — data validation, serving, monitoring, drift detection, retraining, registry — is precisely the ML-specific work, and it's most of the effort. Treating it as generic IT is why most AI initiatives quietly die in the notebook→product gap."
+    },
+    {
+     "id": "d",
+     "text": "Quite a while — the main remaining work is pushing the AUC higher before production.",
+     "correct": false,
+     "explanation": "Squeezing more offline AUC doesn't close the production gap at all. A 0.88 model that runs reliably, monitored, on live data beats a 0.91 model in a notebook — and the live AUC will drift regardless, which is what the loop exists to catch."
+    }
+   ],
+   "takeaway": "Production ML is a loop, not a launch: the model is the small box, and the question that completes the scoping is \"who runs this in month seven?\"",
+   "difficulty": "core"
+  },
+  {
+   "id": "q2",
+   "conceptRef": "serving-patterns-how-predictions-get-delivered",
+   "prompt": "<p>A CRM team will act on a list of at-risk customers each morning. The engineering team proposes a real-time prediction API \"so the architecture is future-proof.\" What should you decide?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Batch — a nightly scoring job serves a morning-consumed list perfectly, and the real-time API would add an SLA, an on-call rota, and a multiple of the run cost for zero added value.",
+     "correct": true,
+     "explanation": "Default to batch; escalate only when a human or system genuinely cannot wait. The consumption pattern (a list, read each morning) sets the requirement, not architectural ambition. \"Future-proof\" here means \"permanently more expensive.\""
+    },
+    {
+     "id": "b",
+     "text": "The real-time API — fresher predictions are always more valuable, and the team will eventually need it anyway.",
+     "correct": false,
+     "explanation": "Fresher than the decision cadence is waste: the list is consumed once a day, so sub-second scores change nothing. \"Real-time\" is a cost decision dressed as a technical one — always-on means someone is accountable at 2am, and that's staffing, not just infra."
+    },
+    {
+     "id": "c",
+     "text": "Streaming — churn signals arrive continuously, so the pipeline should process events as they happen.",
+     "correct": false,
+     "explanation": "Streaming has the highest plumbing cost (platform + state + specialist skills) and fits decisions made <em>on</em> a continuous flow. The decision here happens once a day, in a morning queue. Events arriving continuously doesn't mean decisions are made continuously."
+    },
+    {
+     "id": "d",
+     "text": "Split the difference: real-time API, but with a relaxed SLA to keep costs down.",
+     "correct": false,
+     "explanation": "An always-on service is an always-on service — autoscaling, deployment surface, failure modes, and someone watching it. A \"relaxed SLA\" doesn't remove the standing infrastructure or the operational ownership; batch removes both."
+    }
+   ],
+   "takeaway": "Default to batch and escalate only when someone genuinely cannot wait — a real-time API for a morning-consumed list buys an SLA and an on-call rota for nothing.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q3",
+   "conceptRef": "monitoring--drift-why-models-rot-silently",
+   "prompt": "<p>Six months after launch, a fraud model's dashboard shows 100% uptime and healthy latency, but the business reports rising fraud losses. What's the most likely explanation?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "The model is rotting silently — fraud tactics shifted (concept drift), and the monitoring watches only operational health, so nothing alerted; a model can be 100% \"up\" and increasingly wrong.",
+     "correct": true,
+     "explanation": "Software fails loudly; models fail silently — confident, well-formed, increasingly wrong answers with no stack trace. Fraud is a fast-drifting domain (adversaries adapt). Monitoring only latency/uptime is the named trap: easy technical metrics standing in for the hard one that matters."
+    },
+    {
+     "id": "b",
+     "text": "If uptime and latency are healthy, the model is fine — the losses must come from a business-process problem.",
+     "correct": false,
+     "explanation": "This is exactly the trap. Operational health says the <em>service</em> answers; it says nothing about whether the answers are right. The live business metric is the verdict, and it's pointing at the model."
+    },
+    {
+     "id": "c",
+     "text": "This must be data drift — the input features have visibly changed distribution.",
+     "correct": false,
+     "explanation": "Not necessarily — with adaptive fraud, the input→output <em>relationship</em> can shift while inputs look familiar; that's concept drift, and input-distribution monitors can stay quiet through it. The distinction matters because the detection signals differ (input drift vs falling accuracy once labels arrive)."
+    },
+    {
+     "id": "d",
+     "text": "Retrain immediately on the latest data — diagnosis can wait until after the metric recovers.",
+     "correct": false,
+     "explanation": "Retraining blind is a gamble: if a pipeline broke or labels shifted, you retrain <em>on</em> the problem. First confirm what moved (inputs, predictions, outcome metric), then retrain through a validation gate so a worse model can't ship in a panic."
+    }
+   ],
+   "takeaway": "Models fail silently: monitor the outcome metric, model quality, and drift — not just uptime and latency — because a model can be 100% up and 100% wrong.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q4",
+   "conceptRef": "monitoring--drift-why-models-rot-silently",
+   "prompt": "<p>A monitoring dashboard shows PSI = 0.31 on two key features of a churn model. Ground truth (actual churn) won't arrive for weeks. How do you read this, and what do you do?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "PSI > 0.25 signals significant drift — the model is seeing a different world than it trained on. Treat it as an early warning: investigate now (and likely retrain), rather than waiting weeks for the outcome metric to confirm the damage.",
+     "correct": true,
+     "explanation": "That's the standard threshold reading: &#x3C; 0.1 stable, 0.1–0.25 watch, > 0.25 investigate and likely retrain. Because ground truth is late, input drift is the early-warning system and the lagging outcome metric is the verdict — waiting for the verdict means weeks of degraded decisions."
+    },
+    {
+     "id": "b",
+     "text": "PSI of 0.31 is below the alarm threshold of 0.5, so no action is needed yet.",
+     "correct": false,
+     "explanation": "There is no 0.5 threshold in the standard rule of thumb — 0.25 is already the \"significant drift\" line. Misremembering the thresholds turns the early-warning system into a late-warning system."
+    },
+    {
+     "id": "c",
+     "text": "PSI proves accuracy has dropped, so ship a retrained model today without further checks.",
+     "correct": false,
+     "explanation": "PSI measures input <em>distribution shift</em>, not accuracy — it's a leading indicator, not the verdict. And any retrained candidate still has to clear the model-validation gate (metric floor, no regression); drift is never a licence to skip validation."
+    },
+    {
+     "id": "d",
+     "text": "Ignore PSI until the actual churn labels arrive — only the real outcome metric justifies action.",
+     "correct": false,
+     "explanation": "That defeats the entire purpose of drift monitoring. Ground truth is <em>late by nature</em> here; input drift exists precisely so you can act before the lagging metric confirms what the drift already told you."
+    }
+   ],
+   "takeaway": "PSI > 0.25 means the model is seeing a different world than it trained on — investigate and likely retrain now, because waiting for late ground truth means weeks of silent damage.",
+   "difficulty": "stretch"
+  },
+  {
+   "id": "q5",
+   "conceptRef": "retraining-strategy-triggers-and-the-cost-of-cadence",
+   "prompt": "<p>For a newly productionised document-classification model in a stable domain, the client asks: \"Should we set up automated nightly retraining from day one, to be safe?\" What's the right call?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "No — monitor first, retrain manually on alert, and automate the cadence only once you've observed how fast this model actually decays. Automated retraining is a capability you earn, not one you ship on day one.",
+     "correct": true,
+     "explanation": "The cadence should be set by how fast the domain moves — fraud drifts in days, a document classifier may be stable for a year. Each retrain costs compute, engineer time, and a fresh validation + re-approval; nightly retraining a stable model burns money and risks shipping a worse model from a noisy day."
+    },
+    {
+     "id": "b",
+     "text": "Yes — more frequent retraining is always safer, since the model can only get more current.",
+     "correct": false,
+     "explanation": "Retraining isn't free and isn't always better: a noisy week can produce a <em>worse</em> model, and every cycle requires validation and re-approval before shipping. \"Always fresher\" is a calendar habit, not a cost-benefit argument."
+    },
+    {
+     "id": "c",
+     "text": "Yes, but skip the validation step on automated retrains to keep the pipeline fast.",
+     "correct": false,
+     "explanation": "You cannot ship an unvalidated model — that's the hard rule. An automated pipeline without a validation gate is a machine for occasionally deploying regressions at high speed, with nobody watching."
+    },
+    {
+     "id": "d",
+     "text": "No — retrain only when the client complains that predictions seem off.",
+     "correct": false,
+     "explanation": "That replaces monitoring with the client as your alerting system — the most expensive drift detector there is. The trigger should come from drift/decay monitoring crossing agreed thresholds, not from eroded trust."
+    }
+   ],
+   "takeaway": "Tie retraining cadence to observed decay, not to a calendar habit: monitor first, retrain manually on alert, and automate only once you know how fast this model actually rots.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q6",
+   "conceptRef": "cicd-for-ml-same-spirit-extra-gates",
+   "prompt": "<p>A client says: \"We already have solid CI/CD — every deploy runs the full test suite, all green. So our ML deployment pipeline is covered.\" What's missing?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "The two ML-specific gates: data validation (schema, ranges, null rates on incoming data) and model validation (metric above a floor on held-out data, no regression vs the production model) — because an ML system can break via bad data or a bad model while every code test stays green.",
+     "correct": true,
+     "explanation": "In ML the artefact is <em>code + data + a trained model</em>, and software tests assert only the first. A green suite tells you the code runs; it says nothing about whether the data is sane or the model is any good. That's why \"we have CI\" ≠ \"we have ML CI.\""
+    },
+    {
+     "id": "b",
+     "text": "Nothing significant — a trained model is just another build artefact, so standard CI/CD covers it.",
+     "correct": false,
+     "explanation": "A model passes every unit test while being silently terrible: trained on broken upstream data, or simply worse than the version it replaces. Standard CI/CD has no gate that would catch either failure — they're invisible to code tests by construction."
+    },
+    {
+     "id": "c",
+     "text": "Canary deployments — gradual traffic shifting is the ML-specific addition to CI/CD.",
+     "correct": false,
+     "explanation": "Canary/A-B rollout is valuable (it's a maturity-level-3 capability), but it's a <em>release</em> technique, not the missing gate. Without data and model validation, a canary just exposes a smaller share of users to an unvalidated model first."
+    },
+    {
+     "id": "d",
+     "text": "Faster pipelines — ML models are big, so the gap is mainly build performance and artifact storage.",
+     "correct": false,
+     "explanation": "Build speed and artifact handling are engineering conveniences. The structural gap is that ML breaks in two ways software can't — bad data and bad models — and both sail through a software-only pipeline unchecked."
+    }
+   ],
+   "takeaway": "ML CI/CD is software CI/CD plus two gates — data validation and model validation — because bad data and bad models both pass every code test.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q7",
+   "conceptRef": "llmops-the-new-wrinkle",
+   "prompt": "<p>Your team productionised classic ML models before; now a GenAI assistant built on a hosted LLM API is going live. What's the most important shift in operational focus?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "You don't own or retrain the model, so the weight shifts from training pipelines to prompts-as-versioned-deploys, behavioural eval suites, per-feature token-cost and latency monitoring, guardrails, and end-to-end tracing.",
+     "correct": true,
+     "explanation": "That's the LLMOps wrinkle: a prompt edit is a deploy, the vendor can update the model under you (silent drift you don't control), cost moves with traffic and prompt length, and multi-step apps are undebuggable without tracing. Classic MLOps front-loaded retraining; LLMOps front-loads evals, guardrails, tracing, and a cost dashboard."
+    },
+    {
+     "id": "b",
+     "text": "Operations get simpler — the vendor runs the model, so monitoring and versioning are mostly their problem now.",
+     "correct": false,
+     "explanation": "The vendor runs the <em>weights</em>; everything that makes your feature behave — prompts, retrieved context, guardrails, spend — is yours. Worse, an unannounced vendor model update is drift you didn't cause and can't prevent, which makes your own eval suite <em>more</em> necessary, not less."
+    },
+    {
+     "id": "c",
+     "text": "The core new work is setting up pipelines to retrain the LLM regularly on company data.",
+     "correct": false,
+     "explanation": "You typically rent the model via an API and don't retrain it at all — that's precisely why the operational weight moves elsewhere. Importing classic retraining reflexes into an LLM app means investing in the one lever you don't have."
+    },
+    {
+     "id": "d",
+     "text": "Pick a single accuracy metric for the assistant and wire it into the existing model-validation gate, as with any model.",
+     "correct": false,
+     "explanation": "There's rarely a single accuracy number for open-ended generation. You assemble a graded behavioural test suite — often LLM-as-judge plus human spot-checks — covering quality, safety, and regression. The validation <em>spirit</em> carries over; the single-metric mechanics don't."
+    }
+   ],
+   "takeaway": "LLMOps shifts the operational weight from training pipelines to prompts, evals, token cost, guardrails, and tracing — because the model is rented and can change under you.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q8",
+   "conceptRef": "run-cost-sla-and-mlops-maturity--the-budget-reality",
+   "prompt": "<p>A client at MLOps maturity level 0 (notebooks, manual deploys, no monitoring) asks you to commit to a 99.99%-uptime scoring API. How should you respond?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Reframe it: four nines allows ~52 minutes of downtime a year and is a staffing-and-failover commitment, with each extra nine costing roughly 10× the engineering — so first ask what uptime the use case truly needs, and scope the honest next maturity rung instead.",
+     "correct": true,
+     "explanation": "An SLA is a staffing decision: if nobody owns nights, you have a hope, not an SLA. Most clients asking for \"AI in production\" are at level 0 imagining level 3 — your value is naming the real rung and pricing the run cost they didn't see, not selling reliability they can't operate."
+    },
+    {
+     "id": "b",
+     "text": "Accept — modern cloud platforms make four nines essentially automatic.",
+     "correct": false,
+     "explanation": "The platform's own SLA doesn't cover your model service, your data dependencies, or your deploys — and 52 minutes/year of allowed downtime demands failover and an on-call rota. Promising an SLA you haven't staffed is the fastest route to a furious client."
+    },
+    {
+     "id": "c",
+     "text": "Counter with 99% — it sounds almost the same and is much easier to hit.",
+     "correct": false,
+     "explanation": "Two nines permits ~3.65 <em>days</em> of downtime a year — a wildly different promise than four nines' ~52 minutes, and \"sounds similar\" is exactly how SLA conversations go wrong. The right move is deriving the requirement from the use case, not haggling over nines."
+    },
+    {
+     "id": "d",
+     "text": "Accept, but plan to absorb any breaches with contract penalty clauses rather than engineering.",
+     "correct": false,
+     "explanation": "Penalties price the failure; they don't prevent it, and a repeatedly-down model service destroys the client relationship the penalties were meant to protect. The error-budget framing is the honest tool: an SLA grants a spendable failure allowance you manage with engineering and staffing."
+    }
+   ],
+   "takeaway": "An SLA is a staffing decision — each extra nine costs ~10× the engineering — so name the client's real maturity rung and sell the next one, not a reliability level nobody can operate.",
+   "difficulty": "stretch"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "title": "Design the drift-monitoring and retraining plan",
+   "estimatedMinutes": 30,
+   "scenario": "<p>A logistics client runs a delivery-time prediction model you productionised three months ago: nightly batch scoring, predictions consumed by the dispatch team each morning. Ground truth (actual delivery time) arrives within ~2 days. This morning the monitoring dashboard shows: PSI on <code>parcel_weight</code> = 0.08, PSI on <code>origin_depot</code> = 0.18, PSI on <code>destination_zone</code> = 0.31. The live error metric (MAE) is still within its agreed floor. The client's ops lead asks: <em>\"One feature is flashing red — do we retrain tonight?\"</em></p>\n<p>They also want, in writing, the standing monitoring-and-retraining plan you should have given them at handover.</p>",
+   "givens": [
+    "Serving: nightly batch; dispatch team acts on the scores each morning",
+    "Ground-truth lag: ~2 days (fast, by ML standards)",
+    "Agreed quality floor: live MAE may degrade at most 15% vs the validation baseline before action is mandatory",
+    "PSI rule-of-thumb thresholds: &#x3C; 0.1 stable; 0.1–0.25 moderate (watch); > 0.25 significant drift",
+    "Context the client mentions in passing: a new e-commerce customer was onboarded two weeks ago, shipping to regions the company rarely served before"
+   ],
+   "tasks": [
+    "Interpret the three PSI readings and answer the \"retrain tonight?\" question with a justified yes/no and the action you take instead (or as well).",
+    "Write the standing monitoring plan: what is monitored, in priority order, with thresholds and who gets alerted.",
+    "Define the retraining strategy: trigger(s), validation gating, and why you would or wouldn't automate the cadence at this stage.",
+    "State what you commit to the client and what you explicitly do not promise."
+   ],
+   "solution": "<p><strong>Step 1 — read the dashboard, answer the question.</strong> <code>parcel_weight</code> (0.08) is stable; <code>origin_depot</code> (0.18) is a moderate shift — watch it; <code>destination_zone</code> (0.31) is past the 0.25 line: <strong>significant drift — the model is seeing destinations it didn't train on.</strong> The likely cause is sitting in the givens: the new e-commerce customer shipping to rarely-served regions. So: <strong>no, don't retrain tonight on reflex — investigate today.</strong> Two reasons: (1) the live MAE is still within its floor, and with only ~2 days of ground-truth lag you'll see real degradation almost immediately if it comes; (2) drift here is <em>explained and expected</em> (a known business event — this is the event-driven trigger firing, not a mystery). The right same-day actions: slice live MAE by destination zone — if errors concentrate in the new regions, schedule a retrain with the new customer's data included as soon as enough labelled deliveries exist; meanwhile, flag to dispatch that predictions for the new zones carry lower confidence. Retraining \"tonight\" on two weeks of thin data for the new zones could easily ship a worse model — and any candidate must clear validation anyway.</p>\n<p><strong>Step 2 — the standing monitoring plan (priority order).</strong></p>\n<ol>\n<li><strong>Business/outcome metric</strong>: on-time-dispatch performance attributable to the model's queue — the verdict (weekly review with ops).</li>\n<li><strong>Model quality</strong>: live MAE vs the validation baseline, computed as ground truth lands (~2-day lag); alert at 10% degradation (warning), 15% (action floor — pages the owning engineer).</li>\n<li><strong>Input drift</strong>: PSI per key feature vs the training baseline, nightly; warn at 0.1–0.25, alert at > 0.25 — the early-warning layer for the day ground truth ever slows down.</li>\n<li><strong>Prediction drift</strong>: distribution of predicted delivery times, nightly — catches silent pipeline breakage even before labels.</li>\n<li><strong>Operational health</strong>: did the nightly job run, on time, with expected row counts (freshness + volume). A scoring job that silently skipped a night is confidently-stale data by morning.\nEvery alert names a human: the runbook lists the owning engineer and the escalation path.</li>\n</ol>\n<p><strong>Step 3 — retraining strategy.</strong> Triggers, in order of trust: (a) <strong>decay-triggered</strong> — live MAE crosses the 15% floor → mandatory retrain; (b) <strong>drift-triggered</strong> — PSI > 0.25 sustained a week on a key feature → investigate, retrain if error slices confirm; (c) <strong>event-driven</strong> — the business tells us the world changed (new customer, new regions — exactly today's case) → plan a retrain as labelled data accumulates. Every candidate passes the <strong>validation gate</strong>: beats the floor on a held-out recent window, no regression vs production, registered with lineage before deploy. <strong>Do not automate the cadence yet</strong>: three months in, we haven't observed a full decay cycle. Monitor first, retrain manually on alert, automate only once the decay rate is known — automated retraining is earned, not shipped on day one.</p>\n<p><strong>Step 4 — commitments.</strong> Committed: a monitored loop — thresholds, alerts that page a named owner, a documented retraining trigger and runbook, and a response within an agreed time when the floor is breached. Explicitly not promised: a fixed accuracy forever (you commit to a <em>floor and a response</em>, because the world drifts), retraining on any fixed calendar regardless of signal, or \"set and forget.\"</p>",
+   "rubric": {
+    "keyPoints": [
+     "PSI readings interpreted correctly against the 0.1 / 0.25 thresholds, with 0.31 identified as significant drift linked to the known business event",
+     "\"Retrain tonight?\" answered as investigate-first — justified by the stable MAE, the fast ground-truth lag, and the risk of retraining on thin new-zone data",
+     "Monitoring plan in priority order: outcome metric and model quality above drift, drift above operational health, with thresholds and a named alerted human",
+     "Retraining defined with explicit triggers and a validation gate, and automation deliberately deferred until the decay rate has been observed"
+    ],
+    "pitfalls": [
+     "Reflex-retraining on a drift alert without diagnosis — risking a worse model trained on two weeks of thin data, and skipping the validation gate under time pressure",
+     "Monitoring only operational health (job ran, latency fine) — the named trap that lets a model be 100% up and increasingly wrong",
+     "Ignoring the event-driven signal: the business <em>told</em> you the world changed; drift monitoring just confirmed it",
+     "Promising a fixed accuracy or fully-automated retraining on a three-month-old deployment"
+    ],
+    "takeaways": [
+     "Drift metrics are the early warning and the outcome metric is the verdict — when ground truth is fast, use it; when it's slow, drift is all you have",
+     "Retraining is a triggered, validated, owned process — not a calendar habit and not a panic response"
+    ],
+    "transfer": "This is the universal pattern for operating any decision system whose environment moves: leading indicators with thresholds, a lagging verdict metric, diagnosis before intervention, and changes gated by validation. The same loop runs credit-risk scorecard governance in banks, A/B-tested pricing engines, even infrastructure capacity planning — and the \"investigate before you retrain\" discipline is the ops sibling of \"diagnose before you medicate\" in incident response: acting on an alert without understanding it converts one incident into two."
+   }
+  },
+  {
+   "id": "ex2",
+   "title": "Price the loop, not the launch",
+   "estimatedMinutes": 30,
+   "scenario": "<p>An insurer has a claims-fraud PoC (notebook, ~0.86 AUC) and wants it \"live for the fraud team.\" The fraud analysts work a prioritised queue each morning; claims arrive continuously but nothing is auto-blocked — a flagged claim just gets reviewed sooner. An eager solution architect has already sketched a real-time scoring API on an autoscaling cluster with a 99.9% SLA.</p>\n<p>The client asks you to validate the architecture and produce the budget: build cost and — for the first time, they admit — the recurring run cost. The client has never run a model in production before (no registry, no monitoring, manual everything).</p>",
+   "givens": [
+    "Consumption pattern: fraud analysts triage a queue each morning; no automated blocking, no system needs sub-second answers",
+    "Real-time option: always-on serving ≈ 1,100 euros/month infra, plus a 99.9% SLA implying staffed on-call (three nines = ~8.8 hours allowed downtime/year)",
+    "Batch option: nightly scoring job ≈ 90 euros/month compute; no SLA beyond \"scores ready by 7am\", no on-call rota",
+    "Either way: monitoring + alerting tooling ≈ 150 euros/month; estimated 1–3 engineer-days/month to watch drift, investigate alerts, and retrain on trigger (fully loaded ≈ 600 euros/day)",
+    "Agreed quality floor: live AUC ≥ 0.81 (vs 0.86 at validation), with a defined response when breached"
+   ],
+   "tasks": [
+    "Choose the serving pattern and justify it against the consumption pattern; state what the real-time proposal would have cost the client in money and obligations.",
+    "Itemise the build (one-off) and the run (recurring) — then put a monthly number on the run cost for your recommended design.",
+    "Place the client on the MLOps maturity ladder and state the honest promise you can make at the next rung.",
+    "Write the three-sentence budget summary for the sponsor, including what you do not promise."
+   ],
+   "solution": "<p><strong>Step 1 — serving pattern.</strong> The fraud team acts on a <strong>morning queue</strong>: predictions can be precomputed. That's the batch signature. <strong>Nightly batch scoring</strong>, writing scores into the queue before 7am. The real-time API would have cost ~1,100 euros/month in standing infra versus ~90 — but the bigger items are the <em>obligations</em>: a 99.9% SLA means ~8.8 hours/year of allowed downtime, which means failover and a staffed on-call rota for a client that has never operated a model. A real-time API for a morning-consumed queue is the textbook self-inflicted SLA. (If the client later automates <em>blocking</em> decisions at claim-submission time, that's a genuinely different use case — re-scope then; don't pre-build for it now.)</p>\n<p><strong>Step 2 — build vs run.</strong>\n<em>Build (one-off, ~4–6 weeks):</em> containerise the model (no loose <code>.pkl</code>); scheduled nightly scoring job writing to the queue; registry entry with data/code lineage; <strong>data-validation gate</strong> on the input feed (schema, ranges, nulls); drift (PSI) + live-AUC monitoring with thresholds; runbook naming the owner and the retraining trigger. The model itself is the smallest part of this list — say so.\n<em>Run (recurring, monthly):</em> compute ~90; monitoring tooling ~150; people: 1–3 engineer-days/month at ~600 euros/day = 600–1,800. <strong>Total ≈ 840–2,040 euros/month, headline ≈ 1,500 euros/month</strong> — versus ~3,000+ for the real-time design <em>before</em> counting on-call staffing. The people line dominates, which is the point clients miss: the run cost is mostly humans watching the loop, and it never stops.</p>\n<p><strong>Step 3 — maturity ladder.</strong> The client is at <strong>level 0</strong> (manual everything). This engagement delivers <strong>level 1 — Repeatable</strong>: containerised serving, a registry, basic drift monitoring. The honest promise at that rung: <em>\"reproducible deploys, and we'll see decay before your fraud losses do.\"</em> Do not promise level-2 automated retraining on a green-field engagement — it's earned after the loop has run manually and the decay rate is known.</p>\n<p><strong>Step 4 — sponsor summary.</strong> <em>\"We recommend nightly batch scoring: it serves your team's morning queue identically to a real-time API at roughly half the monthly cost and without an on-call rota you'd have to staff. Build is a fixed ~4–6 week engagement; the run cost is ~1,500 euros/month ongoing — mostly the engineering time that watches drift and retrains when the live AUC slips below the agreed 0.81 floor. We commit to a monitored loop with a named owner, an alert threshold, and a defined response — not to a fixed accuracy forever, an unstaffed SLA, or set-and-forget.\"</em></p>",
+   "rubric": {
+    "keyPoints": [
+     "Batch chosen from the consumption pattern (morning queue), with the real-time option costed and rejected for both money and obligations (SLA = staffing)",
+     "Build and run itemised separately, with a concrete monthly run figure and recognition that the people line dominates the run cost",
+     "Client placed at maturity level 0 with the engagement scoped to level 1 and the matching honest promise",
+     "Commitments framed as floor + response (AUC ≥ 0.81, alert, retrain), never a fixed accuracy or an unstaffed SLA"
+    ],
+    "pitfalls": [
+     "Validating the real-time architecture because it's already sketched — inheriting an SLA, an on-call rota, and a cost multiple for zero decision value",
+     "Quoting only the build and leaving the recurring run cost (especially the engineer-days) off the budget — the module's central failure",
+     "Selling automated retraining or a high maturity rung to a level-0 org that can't operate it after you leave",
+     "Promising an accuracy number forever instead of a monitored floor with a defined response"
+    ],
+    "takeaways": [
+     "The sellable, honest deliverable is the loop with its run cost made explicit — a monitored, owned, retrainable system priced monthly, not a one-time deployment",
+     "Match the serving pattern to the decision cadence and the operational machinery to the client's real maturity rung"
+    ],
+    "transfer": "Pricing the loop instead of the launch is the TCO discipline that applies to anything with a recurring operational tail: infrastructure (the cluster is cheap, the on-call isn't), security tooling (the SIEM licence vs the analysts who triage it), even content platforms (the CMS vs the editorial workflow). Whenever a buyer prices the visible artefact and forgets the humans who keep it true, the consultant's job is to surface the recurring line before the contract is signed — it protects the client's budget and your margin simultaneously."
+   }
+  }
+ ]
+}

@@ -1,0 +1,381 @@
+{
+ "moduleId": "09",
+ "quiz": [
+  {
+   "id": "q1",
+   "conceptRef": "what-an-llm-is-intuitively",
+   "prompt": "<p>A client asks why their LLM assistant confidently cited a regulation article that doesn't exist. What is the most accurate root-cause explanation?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "The model is a next-token predictor with a compressed, lossy statistical impression of its training text — it has no database of facts, so fluent-but-false output is intrinsic, not a bug to patch.",
+     "correct": true,
+     "explanation": "Exactly. Hallucination comes from what an LLM <em>is</em>. Fluency is not accuracy: the model generates plausible continuations, including plausible fake citations. You manage it (RAG with citations, 'say I don't know' instructions, human review) — you don't fix it."
+    },
+    {
+     "id": "b",
+     "text": "The model's training data contained that wrong citation, so retraining on clean data will remove the problem.",
+     "correct": false,
+     "explanation": "Hallucinated citations are usually <em>invented</em>, not memorised errors. The model composes plausible-looking references from patterns. No amount of data cleaning makes a next-token predictor stop producing confident inventions."
+    },
+    {
+     "id": "c",
+     "text": "The temperature was set too high; at temperature 0 the model only outputs true statements.",
+     "correct": false,
+     "explanation": "Temperature controls randomness, not truthfulness. At low temperature the model deterministically picks its most likely tokens — which can be a confidently wrong citation. Determinism ≠ accuracy."
+    },
+    {
+     "id": "d",
+     "text": "The context window was too small to hold the real regulation, so the model truncated it incorrectly.",
+     "correct": false,
+     "explanation": "If the regulation was never <em>given</em> to the model, the window size is irrelevant. The failure is generating unsupported content — which is why grounding (RAG) plus citation checking is the mitigation."
+    }
+   ],
+   "takeaway": "Hallucination is intrinsic to next-token prediction: treat output as a draft from a knowledgeable but unaccountable junior, and bound it — never assume you can eliminate it.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q2",
+   "conceptRef": "the-central-decision-tree-how-to-adapt-an-llm",
+   "prompt": "<p>A support bot keeps answering questions about <em>last year's</em> product catalogue. The client says: \"Let's fine-tune it on our current docs.\" What should you recommend?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Agree — fine-tuning on the current catalogue is the standard way to update the model's knowledge.",
+     "correct": false,
+     "explanation": "This is the single most expensive common mistake. Fine-tuning teaches <em>behaviour</em> (style, format, taxonomy), not <em>facts</em>. The moment the catalogue changes again, the model is stale and you're retraining."
+    },
+    {
+     "id": "b",
+     "text": "RAG — the gap is \"it doesn't know our facts\", and the facts change, so inject current documents at query time.",
+     "correct": true,
+     "explanation": "Right. \"Doesn't know X\" → RAG; \"doesn't sound/format like us\" → maybe fine-tune. Changing knowledge is precisely what retrieval at query time is for: update the document store, not the model."
+    },
+    {
+     "id": "c",
+     "text": "Switch to a stronger model — bigger models have more up-to-date knowledge.",
+     "correct": false,
+     "explanation": "A stronger model is the lever for \"not smart enough\", not \"doesn't know our private facts\". No hosted model knows the client's internal catalogue, and all of them have training cut-offs."
+    },
+    {
+     "id": "d",
+     "text": "Stuff the entire catalogue into the system prompt on every call — context windows are big enough now.",
+     "correct": false,
+     "explanation": "Technically possible, financially careless: input tokens are re-billed on <em>every</em> request, and huge prompts dilute attention (\"lost in the middle\"). RAG sends only the relevant chunks."
+    }
+   ],
+   "takeaway": "RAG injects knowledge; fine-tuning teaches behaviour. If the complaint is \"it doesn't know X\", the answer is RAG — and fine-tuning on changing facts is a trap.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q3",
+   "conceptRef": "the-central-decision-tree-how-to-adapt-an-llm",
+   "prompt": "<p>Which ordering of adaptation levers correctly goes from cheapest to most expensive — the order in which you should exhaust them?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Better prompt → RAG → fine-tune → pretrain (with \"stronger model\" as a cheap dial available at any rung)",
+     "correct": true,
+     "explanation": "This is the decision spine of the module. Hours → days-weeks → weeks+data → almost never. Make stakeholders justify each step <em>up</em>, never each step down."
+    },
+    {
+     "id": "b",
+     "text": "Fine-tune → RAG → better prompt → pretrain, because training changes are more durable than prompt changes",
+     "correct": false,
+     "explanation": "Durability isn't the criterion — cost, time and risk are. Jumping straight to fine-tuning is named in the module as one of the two most expensive mistakes."
+    },
+    {
+     "id": "c",
+     "text": "RAG → better prompt → pretrain → fine-tune, because retrieval is now cheaper than prompt engineering",
+     "correct": false,
+     "explanation": "Prompting costs hours and is ~free; RAG costs days-to-weeks of pipeline work. And pretraining is essentially never the answer for a consulting client — it's months and €€€€."
+    },
+    {
+     "id": "d",
+     "text": "There is no useful ordering — pick the lever that matches the team's existing skills.",
+     "correct": false,
+     "explanation": "Team skills affect execution, not the economics. The cheapest-first ladder exists because each rung up adds cost, delay and risk; skipping rungs burns budget on problems a prompt might have solved."
+    }
+   ],
+   "takeaway": "Better prompt → RAG → fine-tune → (almost never) pretrain. Stop at the cheapest rung that clears the bar.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q4",
+   "conceptRef": "cost--latency-model--the-tech-lead-core",
+   "prompt": "<p>A feature handles <strong>1,000 requests/day</strong> with ~<strong>2,000 input tokens</strong> and ~<strong>500 output tokens</strong> per request, on a model priced <strong>$3 / 1M input</strong> and <strong>$15 / 1M output</strong>. Roughly what does a 30-day month cost?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "≈ $40/month",
+     "correct": false,
+     "explanation": "Too low — this is roughly what you'd get if you only counted input tokens at one-third the volume. Check: per request = (2000/10⁶ × $3) + (500/10⁶ × $15)."
+    },
+    {
+     "id": "b",
+     "text": "≈ $405/month",
+     "correct": true,
+     "explanation": "Per request: (2,000/10⁶ × $3) + (500/10⁶ × $15) = $0.006 + $0.0075 = $0.0135. Monthly: 1,000 × 30 × $0.0135 ≈ $405. Note the output half ($0.0075) costs more than the input half despite being 4× fewer tokens."
+    },
+    {
+     "id": "c",
+     "text": "≈ $4,050/month",
+     "correct": false,
+     "explanation": "Off by 10× — a decimal slip in the per-token arithmetic. This is exactly why you do the whiteboard calculation before quoting, not after the invoice arrives."
+    },
+    {
+     "id": "d",
+     "text": "Impossible to estimate without knowing the model's parameter count.",
+     "correct": false,
+     "explanation": "Parameter count is irrelevant to the bill. Providers price per token: cost = input tokens × p_in + output tokens × p_out, times volume. That's the entire model."
+    }
+   ],
+   "takeaway": "cost = (input tokens × p_in + output tokens × p_out) × volume. You must be able to do this on a whiteboard before quoting.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q5",
+   "conceptRef": "cost--latency-model--the-tech-lead-core",
+   "prompt": "<p>The monthly bill for an assistant with a large, stable system prompt (examples + policy, ~1,400 of 1,500 input tokens) is too high. Which lever cuts the cost most directly?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Prompt caching — the stable 1,400-token prefix is re-billed on every call, and cache reads cost roughly a tenth of normal input.",
+     "correct": true,
+     "explanation": "A fat <em>fixed</em> preamble is the textbook caching case. Keep volatile content (user question, date) at the end so the prefix stays cacheable. Caching does nothing for large <em>variable</em> prompts — the distinction matters."
+    },
+    {
+     "id": "b",
+     "text": "Raise the temperature so the model answers faster and uses fewer tokens.",
+     "correct": false,
+     "explanation": "Temperature shapes the sampling distribution; it changes neither speed nor token counts in any reliable way. It's a quality/diversity knob, not a cost lever."
+    },
+    {
+     "id": "c",
+     "text": "Move to the batch API for all user-facing requests.",
+     "correct": false,
+     "explanation": "Batch (~half price) is for non-urgent bulk jobs — latency is minutes to hours. An interactive assistant can't wait. Right lever, wrong workload."
+    },
+    {
+     "id": "d",
+     "text": "Self-host an open-weight model to stop paying per token.",
+     "correct": false,
+     "explanation": "Self-hosting swaps a per-token bill for GPUs, engineering and ops burden — at low/medium volume it's usually <em>more</em> expensive. It's an escalation justified by privacy, scale or control, not a cost trick."
+    }
+   ],
+   "takeaway": "Match the cost lever to the workload: caching for stable prefixes, batch for non-urgent bulk, shorter outputs always — and remember output is the expensive half.",
+   "difficulty": "stretch"
+  },
+  {
+   "id": "q6",
+   "conceptRef": "hosted-api-vs-open-weight--self-hosted",
+   "prompt": "<p>Which client situation genuinely <em>forces</em> self-hosting an open-weight model rather than using a hosted API?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Defence-sector contract where data contractually cannot leave the client's perimeter, in any form.",
+     "correct": true,
+     "explanation": "Perimeter constraints (health, defence, some public-sector/banking) are one of the three real forcing conditions, with extreme steady volume and model permanence/control. Everything else is usually solvable with an EU region + contractual no-train clause."
+    },
+    {
+     "id": "b",
+     "text": "The client is in the EU and worries about GDPR.",
+     "correct": false,
+     "explanation": "For most European clients, a hosted provider with an EU data region and a no-training clause clears the bar — at a fraction of self-hosting cost. GDPR concern is a governance question to resolve, not an automatic self-host trigger."
+    },
+    {
+     "id": "c",
+     "text": "The CTO wants the prestige of \"running our own model\".",
+     "correct": false,
+     "explanation": "Named in the module's red flags verbatim: self-hosting chosen for prestige, not for a real privacy/scale/control constraint. It buys weeks of infra work and an ops burden for nothing."
+    },
+    {
+     "id": "d",
+     "text": "Usage is spiky — a few hundred requests on busy days, near zero otherwise.",
+     "correct": false,
+     "explanation": "Spiky low volume is the <em>worst</em> case for self-hosting: you pay for idle GPUs. Pay-per-token pricing is exactly what absorbs spikiness cheaply."
+    }
+   ],
+   "takeaway": "Rent unless a specific constraint forces you to run: data perimeter, extreme steady volume, or model permanence/control. Privacy is a governance question before it is an infrastructure one.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q7",
+   "conceptRef": "llm-evaluation--reliability",
+   "prompt": "<p>In a proposal review, a colleague wrote: \"Our extraction assistant will achieve 95% accuracy.\" No eval set exists yet. What is the right correction?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Promise the <em>method</em> instead — an eval set built on the client's real documents, a regression suite, human review for low-confidence cases — and a process for improving the measured number.",
+     "correct": true,
+     "explanation": "Never promise an accuracy number before you've measured on the client's real data. The demo hides the long tail; the eval set is the single most valuable asset you build. Selling the method is both honest and more defensible commercially."
+    },
+    {
+     "id": "b",
+     "text": "Soften it to \"approximately 95%\" to keep the proposal competitive.",
+     "correct": false,
+     "explanation": "A hedged invented number is still an invented number — and it anchors the client. When real documents come in at 78%, you own the gap."
+    },
+    {
+     "id": "c",
+     "text": "Replace accuracy with perplexity, which is the standard intrinsic LLM metric.",
+     "correct": false,
+     "explanation": "Perplexity measures how surprised the model is by text — useful for comparing base models, but it says nothing about whether <em>your feature</em> extracts fields correctly. Never quote it to a client as accuracy."
+    },
+    {
+     "id": "d",
+     "text": "Run the prompt at temperature 0 so results are deterministic, making the 95% claim safe.",
+     "correct": false,
+     "explanation": "Determinism removes run-to-run variance, not error. A deterministic system can be deterministically wrong on 20% of real inputs you haven't seen yet."
+    }
+   ],
+   "takeaway": "Never promise an accuracy number before an eval set exists on the client's real data — promise the eval method and the improvement process.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q8",
+   "conceptRef": "choosing-a-model",
+   "prompt": "<p>You're scoping a JSON-extraction feature. Which combination of model-selection strategy and temperature setting is right?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Prototype on the strongest model to confirm the task is solvable, then step down to the cheapest tier that still passes the eval set; run at low temperature.",
+     "correct": true,
+     "explanation": "Prototyping strong removes capability as a variable; stepping down optimises cost against a measured bar. Low temperature suits extraction — you want the same answer twice, validated against a schema."
+    },
+    {
+     "id": "b",
+     "text": "Start with the cheapest model to keep the pilot budget low, and only move up if users complain; run at high temperature for richer output.",
+     "correct": false,
+     "explanation": "Starting cheap confounds two unknowns — is the task too hard, or the model too weak? And high temperature on extraction invites format drift. \"Users complain\" is not an eval strategy."
+    },
+    {
+     "id": "c",
+     "text": "Pick the model with the largest context window, since extraction documents can be long; temperature doesn't matter for structured output.",
+     "correct": false,
+     "explanation": "Window size is one constraint, not the selection criterion — capability, cost at volume, latency and data terms are the four axes. And temperature absolutely matters: low T makes validated, repeatable extraction far more reliable."
+    },
+    {
+     "id": "d",
+     "text": "Always use the top-tier model in production — extraction errors are too costly to risk a smaller one.",
+     "correct": false,
+     "explanation": "Match the tier to the hardest request <em>as measured by your eval set</em>, not by reflex. If a mid-tier passes the bar, the top tier is pure margin burn — often 2-5× the cost for no measured gain."
+    }
+   ],
+   "takeaway": "Prototype strong, then step down to the cheapest model that passes the eval set; sizing temperature to the task (low for extraction, high for ideation) is free reliability.",
+   "difficulty": "stretch"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "title": "Cost model for a document-extraction pipeline",
+   "estimatedMinutes": 25,
+   "scenario": "<p>A legal-ops department receives <strong>800 contracts per working day</strong> (22 days/month). Each contract is ~<strong>6,000 tokens</strong> once OCR'd; the extraction prompt (instructions + schema + 2 examples) adds a <strong>stable 1,800-token prefix</strong>. The model returns ~<strong>350 tokens</strong> of structured JSON per contract. Extraction is a nightly job — nobody waits on it interactively.</p>\n<p>The client wants a monthly cost estimate for a mid-tier model at <strong>$3 / 1M input</strong> and <strong>$15 / 1M output</strong>, and asks what you'd do to reduce the bill.</p>",
+   "givens": [
+    "Volume: 800 contracts/day × 22 days = 17,600 contracts/month",
+    "Input per contract: 6,000 (document) + 1,800 (stable prefix) = 7,800 tokens",
+    "Output per contract: ~350 tokens",
+    "Pricing: $3 / 1M input, $15 / 1M output; batch API ≈ half price; cached input reads ≈ 0.1× normal input price"
+   ],
+   "tasks": [
+    "Compute the naive monthly cost (no caching, no batch).",
+    "Recompute applying the two levers that fit this workload, stating which you apply and why.",
+    "State the cost <em>per contract</em> before and after, and one sentence you would put in the proposal about how the estimate scales."
+   ],
+   "solution": "<p><strong>Step 1 — naive monthly cost.</strong></p>\n<p>Per contract: input = 7,800/10⁶ × $3 = $0.0234; output = 350/10⁶ × $15 = $0.00525. Total ≈ <strong>$0.0287/contract</strong>.</p>\n<p>Monthly: 17,600 × $0.0287 ≈ <strong>$505/month</strong>.</p>\n<p><strong>Step 2 — apply the right levers.</strong> This is a nightly bulk job → <strong>batch API</strong> (≈ half price) applies to everything. The 1,800-token prefix is stable → <strong>prompt caching</strong> makes those tokens ≈ 0.1× on reads.</p>\n<p>With caching, effective input per contract ≈ 6,000 + (1,800 × 0.1) = 6,180 tokens → 6,180/10⁶ × $3 = $0.01854; output unchanged at $0.00525 → $0.0238/contract. Batch halves it: ≈ <strong>$0.0119/contract</strong>.</p>\n<p>Monthly: 17,600 × $0.0119 ≈ <strong>$209/month</strong> — roughly <strong>2.4× cheaper</strong> than naive.</p>\n<p><strong>Step 3 — the proposal sentence.</strong> Per contract: $0.0287 naive → $0.0119 optimised. In the proposal: <em>\"Model cost scales linearly with contract volume at ≈ $0.012 per contract under current pricing (assumptions: ~6K tokens/contract, batch processing, cached prompt); we will re-validate against live pricing and include a usage alert at 150% of forecast volume.\"</em></p>\n<p><strong>Sanity notes.</strong> Output is small here, so input dominates — the opposite of chat workloads; that's <em>why</em> caching and batch are the high-yield levers on this job. The exact cache-write premium and discount rates vary by provider — name your assumptions and re-check the pricing page before quoting.</p>",
+   "rubric": {
+    "keyPoints": [
+     "Naive cost computed from the formula: ≈ $0.029/contract, ≈ $500/month (±10% for rounding is fine)",
+     "Picked batch API <em>because</em> the job is non-urgent bulk, and caching <em>because</em> the prefix is stable — the justification matters as much as the arithmetic",
+     "Optimised cost ≈ $0.012/contract, ≈ $200-220/month",
+     "Proposal language names assumptions (tokens/contract, pricing date) and includes a volume cap or alert"
+    ],
+    "pitfalls": [
+     "Quoting the pilot's volume instead of production volume — the classic estimate-killer",
+     "Applying the batch discount to an interactive workload, or caching to a <em>variable</em> prefix — levers only work on the workloads they fit",
+     "Forgetting that the document itself (6,000 tokens) is not cacheable — only the stable 1,800-token prefix is",
+     "Presenting a single point number with no assumptions — quote a range, name assumptions, add a usage alert"
+    ],
+    "takeaways": [
+     "The whole cost model is requests × (input × p_in + output × p_out) — the skill is estimating token counts and knowing which levers fit which workload",
+     "Input-heavy batch jobs and output-heavy chat jobs optimise differently; diagnose which half dominates before pulling levers"
+    ],
+    "transfer": "This is the same reasoning as any consumption-priced infrastructure: cloud egress fees, serverless invocations, per-seat vs metered SaaS. Whenever a unit price meets a volume forecast, model production volume, find the dominant cost term, and attack <em>that</em> term with the lever designed for it."
+   }
+  },
+  {
+   "id": "ex2",
+   "title": "Route the complaint to the right adaptation lever",
+   "estimatedMinutes": 30,
+   "scenario": "<p>You inherit an internal-knowledge assistant pilot at an insurance company. Three complaints landed this week:</p>\n<ol>\n<li><em>\"It gives generic answers about coverage — it clearly doesn't know our policy documents, and it can't cite where an answer comes from.\"</em></li>\n<li><em>\"Even when it has the right policy text in front of it, it mangles the multi-step reasoning about which clause overrides which.\"</em></li>\n<li><em>\"The tone is wrong — answers must follow our regulated response template, exactly, every time, across ~3,000 answers a day.\"</em></li>\n</ol>\n<p>For each complaint, choose the adaptation lever (prompt / RAG / stronger model / fine-tune / pretrain), justify it in one or two sentences, and state the order in which you'd sequence the three fixes and why.</p>",
+   "givens": [
+    "The pilot currently uses a small/fast model with a one-paragraph system prompt and no retrieval",
+    "Policy documents change quarterly; the response template changes rarely",
+    "Volume at rollout: ~3,000 answers/day"
+   ],
+   "tasks": [
+    "Map each complaint to one lever, with a one-to-two sentence justification each.",
+    "Sequence the three fixes and justify the order.",
+    "Name the one lever you would refuse to reach for here, and the sentence you'd use to talk a stakeholder out of it."
+   ],
+   "solution": "<p><strong>Complaint 1 → RAG.</strong> \"Doesn't know our facts / can't cite\" is the RAG signature. Policy documents change quarterly, so baking them into weights would go stale; retrieval injects current text at query time and enables citations.</p>\n<p><strong>Complaint 2 → stronger model.</strong> The knowledge is present (\"right policy text in front of it\") but the <em>reasoning</em> fails — that's \"not smart enough\", the one gap a model swap fixes in minutes. Try the next tier up and re-run the eval set before anything structural.</p>\n<p><strong>Complaint 3 → first prompt, then fine-tune if it plateaus.</strong> A strict output template is <em>behaviour</em>, not knowledge. At 3,000/day with a rarely-changing template, this is the rare profile where fine-tuning is justified — durable, narrow, high-volume. But the honest sequence is to exhaust prompting first (template + few-shot examples + structured output validation); only fine-tune if measured compliance plateaus below the bar.</p>\n<p><strong>Sequencing: 1 → 2 → 3.</strong> RAG first because grounding changes <em>what the other fixes are evaluated against</em> — there's no point tuning tone or reasoning on answers that lack the right source text. Model swap second because it's minutes of work and may partially fix 3's formatting too. Template work last, against an eval set that now has grounded, well-reasoned answers to measure compliance on.</p>\n<p><strong>The refused lever: pretraining</strong> (and premature fine-tuning for complaints 1-2). The sentence: <em>\"Fine-tuning teaches behaviour, not facts — your policies change quarterly, so we'd be retraining a stale model four times a year; retrieval keeps the model current for a fraction of the cost.\"</em></p>",
+   "rubric": {
+    "keyPoints": [
+     "Complaint 1 mapped to RAG with the changing-facts + citation justification",
+     "Complaint 2 mapped to stronger model — recognising that knowledge-in-context but reasoning-failure is the \"not smart enough\" gap",
+     "Complaint 3 mapped to prompt-first-then-maybe-fine-tune, noting it's behaviour (template), durable, and high-volume — the legitimate fine-tune profile",
+     "Sequence is justified by dependency (ground first, then reason, then style), not by ease alone"
+    ],
+    "pitfalls": [
+     "Mapping complaint 1 to fine-tuning — the canonical RAG-vs-fine-tune confusion the module warns is one of the two most expensive mistakes",
+     "Jumping to fine-tune for complaint 3 without exhausting prompt + few-shot + output validation first",
+     "Treating the three complaints as one problem with one fix — different gaps take different levers",
+     "Forgetting that every fix needs the eval set re-run — otherwise you can't tell whether the lever worked"
+    ],
+    "takeaways": [
+     "Diagnose the gap before choosing the lever: doesn't know → RAG; not smart enough → stronger model; wrong style/format at volume → maybe fine-tune",
+     "Sequence fixes by dependency, and re-measure after each one"
+    ],
+    "transfer": "This is differential diagnosis, the same move as performance debugging (is it CPU, I/O, or the algorithm?) or churn analysis (price, product, or onboarding?). The general skill: refuse to accept a proposed <em>solution</em> until the <em>failure mode</em> is named — then the cheapest adequate fix usually picks itself."
+   }
+  },
+  {
+   "id": "ex3",
+   "title": "Design the eval-and-guardrail plan for an LLM triage feature",
+   "estimatedMinutes": 30,
+   "scenario": "<p>A telecom client wants LLM triage for <strong>~2,500 inbound support emails/day</strong>: classify each into one of 12 categories, flag urgent ones, and route them. Misrouting a normal email costs minutes; missing an <em>urgent</em> one (outage, vulnerable customer, legal threat) is serious. The client's PM asks: <em>\"It's non-deterministic — how will we ever know it works, and how do we keep it safe?\"</em></p>\n<p>Design the evaluation and guardrail approach you would put in the proposal.</p>",
+   "givens": [
+    "12 routing categories + an urgency flag; ~2,500 emails/day at rollout",
+    "Historical data: ~50,000 routed emails from the last year (existing categories, no urgency labels)",
+    "Asymmetric error costs: missed-urgent ≫ misroute"
+   ],
+   "tasks": [
+    "Specify the eval set: where it comes from, roughly how large, and how it handles the urgency labels that don't exist yet.",
+    "Choose the metric(s), respecting the asymmetric error costs.",
+    "Specify the guardrails and the human-in-the-loop boundary.",
+    "Write the two-sentence answer you'd give the PM verbatim."
+   ],
+   "solution": "<p><strong>Step 1 — the eval set.</strong> Sample ~1,000-1,500 emails <em>stratified</em> across the 12 categories from the 50K historical pool (so rare categories aren't drowned out), and have the client's own team label urgency on that sample — SME labels, not ours, because urgency is their judgment call. Hold it fixed as the regression baseline; every prompt or model change re-runs against it. This eval set, not the prompt, is the most valuable asset the project builds.</p>\n<p><strong>Step 2 — metrics that respect the asymmetry.</strong> Classification here is the constrained case, so classical metrics apply: per-category accuracy/F1 for routing, but for the urgency flag the headline metric is <strong>recall on urgent</strong> (missing one is the expensive failure), with precision tracked so the urgent queue doesn't flood. Set the operating point from the cost asymmetry: accept more false-urgent to keep urgent-recall very high. Report <em>both</em> numbers, never a single blended accuracy.</p>\n<p><strong>Step 3 — guardrails and the human boundary.</strong> (a) Structured output: the model must return one of the 12 category IDs + urgency boolean against a schema — anything unparseable falls to the human queue. (b) Confidence routing: low-confidence classifications go to humans rather than being forced into a category. (c) An \"urgent\" detection routes to a human <em>immediately</em> — the model flags, it never resolves. (d) Regression suite on every change, plus weekly drift monitoring of category distribution (a shifted mix is the early warning that the world changed). (e) A kill switch back to all-human routing.</p>\n<p><strong>Step 4 — the PM answer.</strong> <em>\"We can't prove a non-deterministic system correct, so we bound it and watch it: we'll measure it on ~1,500 of your real emails labelled by your team, hold urgent-recall to the bar we agree, and route anything the model is unsure about — and every urgent flag — to a human. You'll see the numbers on a dashboard before we automate anything, and the model never resolves an urgent case on its own.\"</em></p>",
+   "rubric": {
+    "keyPoints": [
+     "Eval set from the client's <em>real</em> historical emails, stratified, with SME-labelled urgency — and held fixed as a regression baseline",
+     "Urgent-recall named as the headline metric, justified by the cost asymmetry; precision tracked as the counterweight",
+     "Guardrails include schema validation, confidence-based fallback to humans, and urgent-always-escalates",
+     "Some form of ongoing monitoring (drift in category mix, regression on every change) — evaluation is a loop, not a gate"
+    ],
+    "pitfalls": [
+     "Promising an accuracy number before the eval set exists — promise the method and the measurement process",
+     "One blended accuracy metric that hides the missed-urgent failure mode the client actually fears",
+     "Letting the model act autonomously on urgent cases — high-stakes + no human in the loop is the module's hard red line",
+     "Building the eval set from synthetic or demo emails instead of the client's real long tail"
+    ],
+    "takeaways": [
+     "You can't prove an LLM correct — you measure it on real data, bound it with guardrails, and keep humans where errors are expensive",
+     "Pick the metric from the business cost asymmetry, not the textbook default"
+    ],
+    "transfer": "The bound-and-watch pattern is how all safety-critical automation ships: fraud scoring, medical triage, autonomous-vehicle disengagement. And the asymmetric-metric move is pure Module 05 — wherever error costs differ, the operating point comes from the payoff matrix, not from maximising headline accuracy."
+   }
+  }
+ ]
+}

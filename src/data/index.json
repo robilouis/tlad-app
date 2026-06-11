@@ -1,0 +1,372 @@
+{
+ "modules": [
+  {
+   "id": "01",
+   "title": "AI & Data Landscape & Tech-Lead Mindset",
+   "weeks": [
+    1,
+    2
+   ],
+   "part": "I — Foundations & Framing",
+   "partIndex": 1,
+   "addon": false,
+   "pitchHtml": "<p>Before you can build a pole or sell an offer, you need a map of the territory and a way of thinking that keeps you out of trouble. This module gives both: what \"AI &#x26; Data\" actually contains, who does what, and the single decision you'll make more than any other — <em>should we even use ML/AI here, and if so, the cheap version or the expensive one?</em> The recurring question of this whole path starts here: <strong>does the value justify the complexity?</strong></p>",
+   "prev": null,
+   "next": "02",
+   "sectionCount": 8,
+   "quizCount": 8,
+   "exerciseCount": 2
+  },
+  {
+   "id": "02",
+   "title": "Math & Stats Intuition for Leaders",
+   "weeks": [
+    3,
+    4
+   ],
+   "part": "I — Foundations & Framing",
+   "partIndex": 1,
+   "addon": false,
+   "pitchHtml": "<p>You will never derive a gradient in a client meeting. But you will sit across from a data scientist or a vendor who quotes you an \"average\", a \"95% accuracy\", a \"statistically significant lift\", and a \"the model just learns the function\" — and your job is to know which of those is load-bearing and which is a polite way of saying <em>trust me</em>. This module gives you the <strong>intuition</strong> to follow a data-science conversation, smell nonsense, and make the call — not the maths to do the work yourself. It is the deliberately-lightened distillation of the AI Scientist path's <span class=\"vault-ref\" title=\"In the Obsidian vault: 01 - Mathematical Toolkit\">Mathematical Toolkit</span> and <span class=\"vault-ref\" title=\"In the Obsidian vault: 02 - Statistical Learning Theory\">Statistical Learning Theory</span>: keep the judgment, drop the proofs.</p>",
+   "prev": "01",
+   "next": "03",
+   "sectionCount": 8,
+   "quizCount": 8,
+   "exerciseCount": 3
+  },
+  {
+   "id": "03",
+   "title": "Working with Data: Sources, Quality & Feature Engineering",
+   "weeks": [
+    5,
+    6
+   ],
+   "part": "II — Core ML in Practice",
+   "partIndex": 2,
+   "addon": false,
+   "pitchHtml": "<p>\"Garbage in, garbage out\" is the oldest law in this field and the one most often ignored in a sales meeting. A model is a function of its data; no architecture rescues a dataset that is incomplete, mislabelled, or quietly leaking the answer. For a tech lead this module is mostly about <em>protecting the mission</em>: knowing what kind of data you're dealing with, how to judge whether it's good enough, how to price the cleaning that nobody wants to pay for, and how to spot the silent killers — above all <strong>data leakage</strong> — before they make you promise a number you can't hit in production. The hands-on pandas/code lives in the ML Engineer Path's <span class=\"vault-ref\" title=\"In the Obsidian vault: 03 - Data Processing &#x26; Feature Engineering\">Data Processing &#x26; Feature Engineering</span>; here we stay at the leader's altitude — <em>what / when / scope / sell</em>.</p>",
+   "prev": "02",
+   "next": "04",
+   "sectionCount": 8,
+   "quizCount": 8,
+   "exerciseCount": 2
+  },
+  {
+   "id": "04",
+   "title": "Classical ML & Forecasting in Practice",
+   "weeks": [
+    7,
+    9
+   ],
+   "part": "II — Core ML in Practice",
+   "partIndex": 2,
+   "addon": false,
+   "pitchHtml": "<p>This is the module that pays the bills. Strip away the hype and most of the <em>realised</em> value in AI today still comes from a boring, reliable engine: a few good features feeding a gradient-boosted tree, or a well-chosen forecast. These methods are cheap to build, cheap to run, explainable enough to trust, and beat fancy deep learning on the structured (tabular) and time-series problems that make up the bulk of business demand. Your job as a tech lead is not to derive them — it's to know which one a problem wants, what it costs, how to scope a mission around it, and when even <em>this</em> is too much. The recurring lesson of this module: <strong>good features + boosted trees beat deep learning on most tabular problems, at a fraction of the cost</strong> — and forecasting rewards the team that respects the value/complexity budget.</p>",
+   "prev": "03",
+   "next": "05",
+   "sectionCount": 8,
+   "quizCount": 8,
+   "exerciseCount": 2
+  },
+  {
+   "id": "05",
+   "title": "Model Evaluation, Validation & Experimentation",
+   "weeks": [
+    10,
+    11
+   ],
+   "part": "II — Core ML in Practice",
+   "partIndex": 2,
+   "addon": false,
+   "pitchHtml": "<p>A model that looks good in a notebook and a model that moves the client's needle are two different things — and the gap between them is where most AI missions quietly fail. This module is about <em>knowing whether a model is actually good, whether it's actually helping the business, and how to challenge an evaluation when a data scientist hands you one.</em> For a tech lead, evaluation is not a maths topic; it's a <strong>risk-management and trust-building</strong> topic. The single most valuable thing you can learn here is to read an eval critically — because the number on the slide is almost never the number that matters.</p>",
+   "prev": "04",
+   "next": "06",
+   "sectionCount": 8,
+   "quizCount": 8,
+   "exerciseCount": 3
+  },
+  {
+   "id": "06",
+   "title": "Deep Learning Essentials",
+   "weeks": [
+    12,
+    13
+   ],
+   "part": "III — Deep Learning & Modern AI",
+   "partIndex": 3,
+   "addon": false,
+   "pitchHtml": "<p>Deep learning is the engine behind the AI that makes headlines — image recognition, speech, translation, and ultimately the large language models in later modules. But for a tech lead, the headline is also the trap: deep learning is <em>more expensive, more data-hungry, and harder to staff</em> than the classical ML of <a class=\"wikilink\" data-module=\"04\" href=\"#/module/04\">Classical ML &#x26; Forecasting in Practice</a>, and it only earns that cost on a specific kind of problem. This module gives you the intuition — what a neural network actually is, how it learns, why it needs GPUs — without a single derivation. The one idea to walk away with, the one that reshapes every cost estimate, is <strong>transfer learning</strong>: you almost never train a deep model from scratch; you start from a pretrained one and adapt it. That single move collapses the data, compute, and talent bill from \"research lab\" to \"a small team in a few weeks\" — and it's the difference between a deep-learning mission you can sell and one you can't.</p>",
+   "prev": "05",
+   "next": "07",
+   "sectionCount": 8,
+   "quizCount": 8,
+   "exerciseCount": 2
+  },
+  {
+   "id": "07",
+   "title": "Computer Vision & Multimodal in Practice",
+   "weeks": [
+    14,
+    15
+   ],
+   "part": "III — Deep Learning & Modern AI",
+   "partIndex": 3,
+   "addon": false,
+   "pitchHtml": "<p>This module covers everything AI does with non-text perception and generation: reading images and documents, finding defects on a production line, transcribing a call, and generating a marketing visual from a sentence. It deliberately merges two worlds that the deeper paths keep apart — <strong>classic computer vision</strong> (classify, detect, segment, read) and <strong>generative media</strong> (text-to-image, speech, audio, video) — because for a tech lead they answer the same business question: <em>what can we do with pixels and sound, and what does it cost to ship?</em> The good news in 2026 is that most of this is now a <strong>rented API call or a fine-tuned pretrained model</strong>, not a research project. Your job is to know which task a client problem maps to, when an off-the-shelf model is enough, where the annotation and privacy costs hide, and how to scope a mission that delivers. We keep only the few formulas a tech lead should recognise on a whiteboard — the overlap metric, the convolution sketch — and leave the heavy derivations to the deeper paths.</p>",
+   "prev": "06",
+   "next": "08",
+   "sectionCount": 8,
+   "quizCount": 8,
+   "exerciseCount": 2
+  },
+  {
+   "id": "08",
+   "title": "NLP & Embeddings in Practice",
+   "weeks": [
+    16,
+    17
+   ],
+   "part": "III — Deep Learning & Modern AI",
+   "partIndex": 3,
+   "addon": false,
+   "pitchHtml": "<p>Most of your clients' value is locked inside text — tickets, contracts, reviews, emails, knowledge bases — and they want it out. This module is the leader's map of turning <strong>text into something a machine can act on</strong>: the classic task menu (classification, extraction, sentiment, summarisation, translation), how text becomes numbers, and the one idea that underpins modern search and RAG — <strong>embeddings</strong>. The era when you built a bespoke NLP pipeline per task is largely over; an LLM does most of it out of the box. But knowing the framing, and knowing the <em>one</em> primitive (embeddings) that LLMs did <strong>not</strong> make obsolete, is what lets you scope these missions, price them, and decide when a small dedicated model still wins. The recurring question returns in a new form: <strong>buy the language commodity, build only the part that's yours.</strong></p>",
+   "prev": "07",
+   "next": "09",
+   "sectionCount": 8,
+   "quizCount": 8,
+   "exerciseCount": 2
+  },
+  {
+   "id": "09",
+   "title": "Large Language Models in Practice",
+   "weeks": [
+    18,
+    19
+   ],
+   "part": "III — Deep Learning & Modern AI",
+   "partIndex": 3,
+   "addon": false,
+   "pitchHtml": "<p>Large language models are the capability clients ask for by name — \"an AI assistant\", \"summarise our documents\", \"extract data from these PDFs\". Your job as a tech lead is not to build one (you'll rent it) but to make four decisions well: <strong>how to adapt it</strong> (prompt vs RAG vs fine-tune vs bigger model vs pretrain), <strong>what it will cost</strong> at the volume the client actually has, <strong>which model</strong> to put behind the feature, and <strong>how to know it works</strong>. This module is the decision spine. The value is enormous and the commodity is cheap — but the failure modes (hallucination, runaway cost, \"it worked in the demo\") are exactly the ones that lose client trust. Get the <em>when</em> and the <em>what it costs</em> right and you've done 80% of the leadership job; the maths of why these models work lives in the AI Scientist path.</p>",
+   "prev": "08",
+   "next": "10",
+   "sectionCount": 8,
+   "quizCount": 8,
+   "exerciseCount": 3
+  },
+  {
+   "id": "10",
+   "title": "RAG & Knowledge Systems",
+   "weeks": [
+    20,
+    21
+   ],
+   "part": "III — Deep Learning & Modern AI",
+   "partIndex": 3,
+   "addon": false,
+   "pitchHtml": "<p>A raw LLM is a brilliant generalist with two crippling gaps for enterprise work: it doesn't know your private or current data, and when it doesn't know, it makes something up confidently. <strong>Retrieval-Augmented Generation (RAG)</strong> closes both gaps without retraining anything — you fetch the relevant passages from the client's own documents at question time and hand them to the model as context, then ask it to answer <em>only</em> from those passages and cite them. This is the single most-requested LLM mission type, because almost every client has a pile of knowledge (help docs, contracts, wikis, tickets, regulations) and wants to ask it questions in plain language. This module gives you the leader's view: what RAG is, the pipeline as intuition, the handful of decisions that actually determine quality, how to prove it works, and — at length — how to scope, price, and sell it without over-promising.</p>",
+   "prev": "09",
+   "next": "11",
+   "sectionCount": 8,
+   "quizCount": 8,
+   "exerciseCount": 3
+  },
+  {
+   "id": "11",
+   "title": "Agentic Architectures & LLM App Patterns",
+   "weeks": [
+    22,
+    23
+   ],
+   "part": "III — Deep Learning & Modern AI",
+   "partIndex": 3,
+   "addon": false,
+   "pitchHtml": "<p>\"Agents\" is the most over-claimed word in 2026 AI. Strip the hype and an agent is something specific: an LLM that can <strong>use tools</strong>, <strong>loop</strong>, and keep <strong>memory/state</strong> to pursue a goal with some autonomy over its own steps. That capability is real and occasionally transformative — and it is also the fastest way to ship a fragile, expensive, hard-to-debug system that a plain prompt or a fixed pipeline would have done better. This module is mostly judgment, almost no maths: what these things actually are, the spectrum of patterns from a single prompt up to multi-agent systems, and the one decision a tech lead is paid to get right — <em>is an autonomous agent the right call here, or an over-engineered liability?</em> The recurring answer, repeated deliberately below: <strong>prefer the least-autonomous pattern that clears the bar.</strong></p>",
+   "prev": "10",
+   "next": "12",
+   "sectionCount": 8,
+   "quizCount": 8,
+   "exerciseCount": 2
+  },
+  {
+   "id": "12",
+   "title": "Data Engineering & Platforms",
+   "weeks": [
+    24,
+    25
+   ],
+   "part": "IV — Data & Production Platform",
+   "partIndex": 4,
+   "addon": false,
+   "pitchHtml": "<p>Every module before this one assumed the data was <em>there</em> — clean, fresh, reachable. This is the module about making that assumption true. The data platform is the plumbing under the whole stack: the pipelines that move data from the apps where it's born to the place where it can be analysed, modelled, and served. The only arithmetic that matters here is the cloud bill — otherwise it's architecture and judgment. For a tech lead the lesson is blunt and repeated: <strong>most AI projects don't fail on the model, they block on the plumbing.</strong> A model is a function of its data, and the platform is what guarantees that data keeps arriving, correct and on time. Where <a class=\"wikilink\" data-module=\"03\" href=\"#/module/03\">Working with Data: Sources, Quality &#x26; Feature Engineering</a> was about <em>one dataset for one model</em>, this module is about the <em>infrastructure that feeds everything</em> — and how to scope, cost, and sell it without being burned by a runaway cloud bill.</p>",
+   "prev": "11",
+   "next": "13",
+   "sectionCount": 8,
+   "quizCount": 8,
+   "exerciseCount": 2
+  },
+  {
+   "id": "13",
+   "title": "MLOps & Productionization",
+   "weeks": [
+    26,
+    27
+   ],
+   "part": "IV — Data & Production Platform",
+   "partIndex": 4,
+   "addon": false,
+   "pitchHtml": "<p>A model that wins on a validation set is a science result, not a product. MLOps is the discipline of turning that result into something that runs reliably, costs a predictable amount, and keeps working after the data shifts under it. This module is the <strong>leader's view</strong> of that discipline: not how to write the Dockerfile or the FastAPI handler — the ML Engineer Path does that — but what to <strong>budget, staff, monitor, and refuse to promise</strong>. The recurring question of this path takes a specific shape here: the value of a model is realised only in production, and the <em>run cost and reliability tax</em> of keeping it there is the part clients (and inexperienced teams) systematically forget to price.</p>",
+   "prev": "12",
+   "next": "14",
+   "sectionCount": 8,
+   "quizCount": 8,
+   "exerciseCount": 2
+  },
+  {
+   "id": "14",
+   "title": "Data Governance, Privacy & Pseudonymisation",
+   "weeks": null,
+   "part": "V — Governance, Risk & Responsible AI",
+   "partIndex": 5,
+   "addon": false,
+   "pitchHtml": "<p>Every AI &#x26; Data mission you lead in Europe runs on data, and most of that data is <em>about people</em> — which puts it squarely under the <strong>RGPD</strong> (the French name for the GDPR, Regulation 2016/679) and the watch of the <strong>CNIL</strong>, France's data-protection regulator. This module is the leader's working knowledge of doing AI lawfully: what counts as personal data, the principles you cannot skip, the single distinction that decides whether a dataset is even in scope (<strong>anonymisation vs pseudonymisation</strong>), and the governance operating model a pole must run so that compliance <em>enables</em> delivery instead of blocking it. No maths here — this is law, process, and judgment. You are not your client's lawyer; your job is to know enough to scope the work, spot the red flags, and partner with the DPO and legal counsel who carry the legal call.</p>",
+   "prev": null,
+   "next": null,
+   "sectionCount": 8,
+   "quizCount": 8,
+   "exerciseCount": 2
+  },
+  {
+   "id": "15",
+   "title": "Responsible AI: Interpretability, Fairness, Safety & the EU AI Act",
+   "weeks": null,
+   "part": "V — Governance, Risk & Responsible AI",
+   "partIndex": 5,
+   "addon": false,
+   "pitchHtml": "<p>\"Responsible AI\" used to be a slide near the end of the deck — values, a code of ethics, something the client nodded at and ignored. As of 2026 it is an <strong>operational and legal requirement</strong> with deadlines and fines attached. A model that can't be explained, that treats two groups unequally, that hallucinates or can be jailbroken, or that can't tell you when it doesn't know, is now not just a reputational risk — for a growing class of use cases it's an <strong>unlawful</strong> one. This module is the tech lead's working knowledge of four hard things you must operationalise — interpretability, fairness, robustness/safety, uncertainty — and the regulation that now forces them: the <strong>EU AI Act</strong>. The maths behind each lives in the AI Scientist path; here you get the intuition, the decision frameworks, and what you actually build and sell. The recurring stance: <strong>responsible AI is a design constraint you price in from day one, not a cleanup you bolt on at the end.</strong></p>",
+   "prev": null,
+   "next": null,
+   "sectionCount": 8,
+   "quizCount": 8,
+   "exerciseCount": 2
+  },
+  {
+   "id": "16",
+   "title": "Scoping, Estimating & Delivering AI & Data Missions",
+   "weeks": [
+    30,
+    31
+   ],
+   "part": "VI — Leadership & Commercial Offer",
+   "partIndex": 6,
+   "addon": false,
+   "pitchHtml": "<p>You now know the landscape, the methods, the platform, and the law. This module is where you turn all of it into a <strong>single client engagement that lands on time, on budget, and provably worked</strong> — and where you don't lose your shirt doing it. It is the practitioner-leader's delivery playbook: how to qualify a real opportunity from AI theatre, scope an outcome instead of a technology, estimate work whose hardest parts are genuinely unknowable up front, price and stage it so risk is shared, control the cost of compute and tokens before the bill shocks anyone, and run the delivery in a way that survives the iterative, uncertain nature of ML. The recurring question of this path here becomes brutally concrete: <strong>what exactly are you committing to, what does it cost to deliver, and what must you refuse to promise?</strong> The leadership and team foundations sit in <span class=\"vault-ref\" title=\"In the Obsidian vault: 24 - ML Systems Engineering &#x26; Technical Leadership\">ML Systems Engineering &#x26; Technical Leadership</span> (AI Scientist Path); this module extends them from \"lead a team\" into \"scope, price, and run a paid mission.\"</p>",
+   "prev": "15",
+   "next": "17",
+   "sectionCount": 8,
+   "quizCount": 8,
+   "exerciseCount": 2
+  },
+  {
+   "id": "17",
+   "title": "Building the AI & Data Offer & Leading the Pole",
+   "weeks": [
+    32,
+    33
+   ],
+   "part": "VI — Leadership & Commercial Offer",
+   "partIndex": 6,
+   "addon": false,
+   "pitchHtml": "<p>This is the capstone — where the whole path pays off. Every prior module ended with \"Client Mission Patterns\"; this one assembles them into a coherent <strong>commercial offer</strong> and the <strong>pole that delivers it</strong>. The job changes here: not \"should we use ML for this problem?\" (module 01) but \"what do we sell, to whom, at what price, with what team, and how do we run it at a margin?\" You stop thinking like a builder and start thinking like the owner of a small business inside (or alongside) a larger one — with a catalogue, a P&#x26;L, a hiring plan, a security posture, and a roadmap. The leadership foundation (team roles, complexity budget, stakeholder translation) lives in <span class=\"vault-ref\" title=\"In the Obsidian vault: 24 - ML Systems Engineering &#x26; Technical Leadership\">ML Systems Engineering &#x26; Technical Leadership</span> (AI Scientist Path); this module extends it into the <em>commercial and operating</em> dimension that path doesn't cover.</p>",
+   "prev": "16",
+   "next": null,
+   "sectionCount": 8,
+   "quizCount": 8,
+   "exerciseCount": 2
+  },
+  {
+   "id": "18",
+   "title": "Time Series & Forecasting in Practice",
+   "weeks": [
+    34,
+    35
+   ],
+   "part": "II — Core ML in Practice",
+   "partIndex": 2,
+   "addon": true,
+   "pitchHtml": "<p>Forecasting is one of the most <em>sellable</em> capabilities a pole can offer — demand, sales, cash, capacity, headcount, energy load — and one of the easiest to get embarrassingly wrong, because time breaks the usual ML assumptions. <a class=\"wikilink\" data-module=\"04\" href=\"#/module/04\">Classical ML &#x26; Forecasting in Practice</a> introduces forecasting as one tool among many; <strong>this module is its dedicated treatment</strong>: what makes time series special, the classical → ML → deep-learning ladder, how to evaluate a forecaster <em>honestly</em> (the part teams fool themselves on), and how to scope a forecasting mission so you sell a decision-grade range, not a fragile point estimate. The value-vs-complexity lesson is sharper here than almost anywhere: <strong>simple methods and ensembles routinely beat deep learning on real series</strong>, and the discipline that matters most — respecting time order in validation — costs nothing but attention.</p>",
+   "prev": null,
+   "next": "19",
+   "sectionCount": 8,
+   "quizCount": 8,
+   "exerciseCount": 3
+  },
+  {
+   "id": "19",
+   "title": "Automated Machine Learning (AutoML)",
+   "weeks": [
+    36,
+    37
+   ],
+   "part": "II — Core ML in Practice",
+   "partIndex": 2,
+   "addon": true,
+   "pitchHtml": "<p>AutoML is the set of tools that automate the <em>mechanical</em> parts of building a model — trying preprocessors, picking algorithms, tuning their knobs, and stacking the survivors into an ensemble. For a tech lead, it is less an algorithm than a <strong>leverage and staffing decision</strong>: a well-aimed AutoML run produces a strong baseline in an afternoon that a data scientist would take a week to match by hand, which changes who you need to hire and what you can promise on a tight timeline. But it automates the <em>easy 20%</em> of a project and leaves the hard 80% — framing the problem, fixing the data, deploying and governing the result — exactly where it was. The value/complexity question for this module is sharp: <strong>AutoML lowers the cost of the modelling step, so it only pays off when the modelling step was your real bottleneck</strong> — and it never is, when the data or the framing is the problem.</p>",
+   "prev": "18",
+   "next": "20",
+   "sectionCount": 8,
+   "quizCount": 8,
+   "exerciseCount": 2
+  },
+  {
+   "id": "20",
+   "title": "Reinforcement Learning & Bandits in Practice",
+   "weeks": [
+    38,
+    39
+   ],
+   "part": "III — Deep Learning & Modern AI",
+   "partIndex": 3,
+   "addon": true,
+   "pitchHtml": "<p>Reinforcement learning (RL) is the part of AI that learns by <strong>trial and error</strong>: an agent takes actions, gets rewards, and adjusts to earn more reward over time. It is genuinely powerful — it is how game-playing systems beat humans, how robots learn control, and how LLMs are tuned to be helpful (RLHF). It is also, for the overwhelming majority of business problems, <strong>the wrong tool</strong> — expensive to set up, hard to evaluate, dangerous to debug, and almost always beaten by either supervised learning or its lighter cousin, the <strong>bandit</strong>. This module gives you the vocabulary to recognise the rare genuine fit, the judgment to de-escalate everything else, and a working command of bandits — the \"RL lite\" that actually earns its keep in recommendation, content, and pricing. The throughline, stated once and repeated on purpose: <strong>RL is powerful but usually overkill — reach for a bandit or supervised learning unless the problem truly needs sequential decisions.</strong></p>",
+   "prev": "19",
+   "next": null,
+   "sectionCount": 8,
+   "quizCount": 8,
+   "exerciseCount": 3
+  }
+ ],
+ "parts": [
+  {
+   "index": 1,
+   "label": "I — Foundations & Framing"
+  },
+  {
+   "index": 2,
+   "label": "II — Core ML in Practice"
+  },
+  {
+   "index": 3,
+   "label": "III — Deep Learning & Modern AI"
+  },
+  {
+   "index": 4,
+   "label": "IV — Data & Production Platform"
+  },
+  {
+   "index": 5,
+   "label": "V — Governance, Risk & Responsible AI"
+  },
+  {
+   "index": 6,
+   "label": "VI — Leadership & Commercial Offer"
+  }
+ ],
+ "home": {
+  "pitchHtml": "<p>A practical, breadth-first curriculum for the person who has to <strong>build an AI &#x26; Data pole and a commercial offer</strong> — not derive the algorithms, but know <em>what exists, when to use it, what it costs, and how to scope, sell, and lead it</em>. Mathematical intuition is kept; proofs are not. Every module ends with concrete client mission patterns.\nTime budget: <strong>5-7 hours/week</strong> | Duration: <strong>~39 weeks</strong> | Philosophy: <strong>Sell outcomes, not models. Buy the commodity, build the differentiator.</strong></p>",
+  "fitHtml": "<p>There are three parallel paths in this vault. They answer different questions — pick by the job you're doing.</p>\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n<table><thead><tr><th align=\"left\">Path</th><th align=\"left\">Question it answers</th><th align=\"left\">Who it's for</th><th align=\"center\">Maths</th></tr></thead><tbody><tr><td align=\"left\"><span class=\"vault-ref\" title=\"In the Obsidian vault: 00 - Index AIS\">AI Scientist</span></td><td align=\"left\"><em>Why</em> does it work, derived from first principles</td><td align=\"left\">research-grade depth</td><td align=\"center\">Heavy</td></tr><tr><td align=\"left\"><span class=\"vault-ref\" title=\"In the Obsidian vault: 00 - Index MLE\">ML Engineer</span></td><td align=\"left\"><em>How</em> do I build, ship &#x26; run one model in production</td><td align=\"left\">hands-on builder</td><td align=\"center\">Light</td></tr><tr><td align=\"left\"><strong>Tech Lead AI &#x26; Data</strong> (this path)</td><td align=\"left\"><strong><em>What</em> exists, <em>when</em> to use it, <em>what</em> it costs, <em>how</em> to scope/sell/lead it</strong></td><td align=\"left\">pole lead &#x26; commercial offer</td><td align=\"center\">Intuition only</td></tr></tbody></table>\n<p>When a module needs deeper maths, it links into the <strong>AI Scientist</strong> path. When it needs deeper code, it links into the <strong>ML Engineer</strong> path. This path is the map; those two are the territory.</p>",
+  "howToHtml": "<ol>\n<li><strong>Read by need, not strictly in order.</strong> Unlike the AI Scientist path, this one is a reference map. If you're scoping a RAG mission next week, jump to <a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a> and <a class=\"wikilink\" data-module=\"16\" href=\"#/module/16\">Scoping, Estimating &#x26; Delivering AI &#x26; Data Missions</a>. The Previous/Next chain gives a sensible default order, not a prerequisite lock.</li>\n<li><strong>Foundations first if you're new.</strong> Part I (<a class=\"wikilink\" data-module=\"01\" href=\"#/module/01\">AI &#x26; Data Landscape &#x26; Tech-Lead Mindset</a>, <a class=\"wikilink\" data-module=\"02\" href=\"#/module/02\">Math &#x26; Stats Intuition for Leaders</a>) gives the vocabulary and judgment the rest assumes.</li>\n<li><strong>Use the \"Client Mission Patterns\" sections to build your offer.</strong> Every module ends with concrete mission archetypes (problem → deliverable → typical scope → who buys it). Collected, they <em>are</em> your service catalogue draft — <a class=\"wikilink\" data-module=\"17\" href=\"#/module/17\">Building the AI &#x26; Data Offer &#x26; Leading the Pole</a> assembles them.</li>\n<li><strong>Use the \"Practical Artifacts\" as reusable assets.</strong> Each module ships decision checklists, red flags, and scoping prompts you can lift directly into proposals and discovery calls.</li>\n<li><strong>Read \"When Is This Overkill?\" before recommending anything.</strong> The job is judgment, not enthusiasm. Default to the simplest thing that clears the bar.</li>\n<li><strong>Go deeper only when a mission demands it.</strong> Follow the \"deeper math → AI Scientist\" / \"deeper code → ML Engineer\" pointers when a specific engagement needs them — not pre-emptively.</li>\n</ol>",
+  "principlesHtml": "<h3>The Value/Complexity Budget</h3>\n<p>Adapted from the AI Scientist path's \"Complexity Budget\", reframed for a P&#x26;L. Every capability you add to the offer carries a tax — build cost, run cost (compute, licences, people), maintenance, explainability, and risk. For each opportunity:</p>\n<ol>\n<li><strong>Name the business outcome</strong> in the client's terms (€ saved, hours removed, revenue unlocked, risk reduced).</li>\n<li><strong>Start with the cheapest thing that could work</strong> — a rule, a spreadsheet, an off-the-shelf API.</li>\n<li><strong>Escalate only when the value gap justifies the tax</strong> — and be able to say why in one sentence.</li>\n</ol>\n<h3>Sell Outcomes, Not Models</h3>\n<p>Clients buy resolved problems, not architectures. Frame every mission around the outcome and the proof it worked, then choose the lightest technology that delivers it.</p>\n<h3>Buy the Commodity, Build the Differentiator</h3>\n<p>Foundation models, vector stores, and pipelines are commodities — rent them. Spend your build budget only where it creates defensible client value (proprietary data, domain workflow, integration, trust).</p>",
+  "referencesHtml": "<table><thead><tr><th align=\"left\">Reference</th><th align=\"left\">Use</th><th align=\"left\">Access</th></tr></thead><tbody><tr><td align=\"left\"><strong>EU AI Act</strong> (Regulation 2024/1689) — official text</td><td align=\"left\">Risk tiers, obligations, timelines</td><td align=\"left\">EUR-Lex (free)</td></tr><tr><td align=\"left\"><strong>RGPD / GDPR</strong> (Regulation 2016/679) — official text</td><td align=\"left\">Lawful basis, pseudonymisation, data subject rights</td><td align=\"left\">EUR-Lex (free)</td></tr><tr><td align=\"left\"><strong>CNIL</strong> — AI &#x26; GDPR guidance</td><td align=\"left\">French regulator's practical sheets</td><td align=\"left\">cnil.fr (free)</td></tr><tr><td align=\"left\">Huyen — <em>Designing Machine Learning Systems</em> / <em>AI Engineering</em></td><td align=\"left\">System &#x26; application design</td><td align=\"left\">Paid</td></tr><tr><td align=\"left\">Kleppmann — <em>Designing Data-Intensive Applications</em></td><td align=\"left\">Data platform foundations</td><td align=\"left\">Paid</td></tr><tr><td align=\"left\"><em>a16z / state-of-AI</em> annual reports &#x26; model-pricing pages</td><td align=\"left\">2026 cost &#x26; vendor landscape</td><td align=\"left\">Free (date everything)</td></tr><tr><td align=\"left\">AI Scientist path (<span class=\"vault-ref\" title=\"In the Obsidian vault: 00 - Index AIS\">Index AIS</span>)</td><td align=\"left\">The maths behind any module</td><td align=\"left\">This vault</td></tr><tr><td align=\"left\">ML Engineer path (<span class=\"vault-ref\" title=\"In the Obsidian vault: 00 - Index MLE\">Index MLE</span>)</td><td align=\"left\">The production code behind any module</td><td align=\"left\">This vault</td></tr></tbody></table>\n<blockquote>\n<p><strong>Note on freshness.</strong> Vendor names, model prices, and tool capabilities move fastest. Each module quarantines them in a dated \"Tools &#x26; Vendor Landscape\" table (\"as of 2026\") — treat those tables as the perishable part and re-check before quoting a client.</p>\n</blockquote>",
+  "quickWinsHtml": "<p>If you need to be useful <em>this week</em> before working through the path:</p>\n<ol>\n<li><strong>Frame the field</strong> — read <a class=\"wikilink\" data-module=\"01\" href=\"#/module/01\">AI &#x26; Data Landscape &#x26; Tech-Lead Mindset</a> to get the \"ML vs rules vs LLM\" decision and the value/complexity framing.</li>\n<li><strong>Scope a real mission</strong> — the discovery checklist and estimation approach in <a class=\"wikilink\" data-module=\"16\" href=\"#/module/16\">Scoping, Estimating &#x26; Delivering AI &#x26; Data Missions</a> are immediately usable on your next opportunity.</li>\n<li><strong>Don't get burned on data</strong> — skim the RGPD red flags in <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a> before anyone touches client data.</li>\n</ol>"
+ }
+}

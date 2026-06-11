@@ -1,0 +1,388 @@
+{
+  "moduleId": "20",
+  "quiz": [
+    {
+      "id": "q1",
+      "conceptRef": "the-rl-setup--learning-by-trial-and-error",
+      "prompt": "What is the signature of a problem that might genuinely call for reinforcement learning, as opposed to supervised learning?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "There are no labels, only consequences — the right answer isn't known up front but outcomes can be scored after the fact — AND today's action changes tomorrow's situation. If either fails, it isn't an RL problem.",
+          "correct": true,
+          "explanation": "That's the two-part test, and most 'RL' pitches fail it. If you have (or can collect) examples of the right decision, it's supervised learning. If each decision is one-shot with immediate feedback, it's a bandit. RL is for the narrow remainder."
+        },
+        {
+          "id": "b",
+          "text": "The decision is high-stakes and the dataset is large — RL is the tool for important problems with big data.",
+          "correct": false,
+          "explanation": "Neither importance nor data volume makes a problem RL-shaped. A large *static* dataset is exactly what RL can't learn from — it needs interaction (a simulator or live trial-and-error). High stakes actually argue *against* RL, because exploration means deliberate sub-optimal actions."
+        },
+        {
+          "id": "c",
+          "text": "The system involves an autonomous 'agent' taking actions in software.",
+          "correct": false,
+          "explanation": "'Agent' is vocabulary, not a problem property. An LLM agent executing a workflow, a rules engine, or a supervised classifier wired to actions are all 'agents acting in software' — none of them is learning a policy from reward, and most shouldn't be."
+        },
+        {
+          "id": "d",
+          "text": "You can't define a clean target variable, so supervised learning is off the table and RL is the fallback.",
+          "correct": false,
+          "explanation": "Dangerous inversion: if you can't define a target, you almost certainly can't define a trustworthy *reward* either — and a badly defined reward gets exploited, not your intent. RL raises the specification bar; it doesn't lower it."
+        }
+      ],
+      "takeaway": "RL is for problems with no labels, only consequences — where outcomes are scorable after the fact and today's action changes tomorrow's state; if either condition fails, de-escalate.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q2",
+      "conceptRef": "the-objective--discounting",
+      "prompt": "A team building a daily promotion-targeting agent sets the discount factor to $\\gamma = 0.99$ \"because that's the standard value.\" The commercial effect of a promotion plays out over about two weeks. What's the problem?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "$\\gamma$ is the agent's patience dial with an effective horizon of roughly $1/(1-\\gamma)$ steps — 0.99 means ~100 daily steps of look-ahead for a decision whose real horizon is ~14 days. It should be set from the decision's actual time-horizon, as a business choice, not a default.",
+          "correct": true,
+          "explanation": "Right. $\\gamma = 0.99$ tells the agent to weigh outcomes months out for a two-week effect — slower learning, credit assigned to rewards the action never caused. Something nearer $\\gamma \\approx 0.93$ (horizon ≈ 14 steps) matches the business reality."
+        },
+        {
+          "id": "b",
+          "text": "Nothing — $\\gamma$ should always be as close to 1 as possible, since discarding future reward loses information.",
+          "correct": false,
+          "explanation": "Discounting isn't information loss to minimise; it encodes that far-future reward is uncertain (the world drifts), keeps the return finite on continuing tasks, and sets how far-sighted the agent should be. 'As high as possible' is precisely the default-thinking the module warns against."
+        },
+        {
+          "id": "c",
+          "text": "$\\gamma = 0.99$ makes the return infinite, so the maths breaks down.",
+          "correct": false,
+          "explanation": "Backwards: any $\\gamma < 1$ keeps the discounted sum finite — that's one of the reasons discounting exists for never-ending tasks. The problem with 0.99 here isn't divergence, it's a horizon mismatched to the decision."
+        },
+        {
+          "id": "d",
+          "text": "$\\gamma$ only matters for episodic tasks like games; for a continuing business process it has no effect.",
+          "correct": false,
+          "explanation": "Inverted again: continuing tasks are where discounting is *most* needed — without $\\gamma < 1$ the undiscounted infinite sum is meaningless. And in both settings $\\gamma$ shapes behaviour: low → greedy and short-horizon, high → patient."
+        }
+      ],
+      "takeaway": "The discount factor is a business choice: effective horizon ≈ 1/(1−γ), so set γ from the decision's real time-horizon — not from a default.",
+      "difficulty": "stretch"
+    },
+    {
+      "id": "q3",
+      "conceptRef": "q-learning--the-canonical-update",
+      "prompt": "In the Q-learning update $Q(s,a) \\leftarrow Q(s,a) + \\alpha\\,[\\,r + \\gamma \\max_{a'} Q(s',a') - Q(s,a)\\,]$, what does the bracketed term represent, and what does $\\alpha$ do?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The bracket is the TD-error — the *surprise*, the gap between what you expected ($Q(s,a)$) and the new target (reward plus discounted value of the best next action) — and $\\alpha$ is the learning rate: what fraction of that surprise to absorb into the estimate.",
+          "correct": true,
+          "explanation": "The rule reads: nudge the old estimate toward the target, by a fraction α of the surprise. The same error-correcting shape as gradient descent. The max over next actions is what lets it learn the optimal policy even while exploring sub-optimally — at the price of needing vast experience."
+        },
+        {
+          "id": "b",
+          "text": "The bracket is the model's loss on a held-out test set, and $\\alpha$ controls how aggressively to fit it.",
+          "correct": false,
+          "explanation": "There is no fixed test set in RL — that absence is exactly why RL is hard to evaluate and debug. The TD-error is computed from a single step of live (or simulated) experience: one reward, one next state, one expectation."
+        },
+        {
+          "id": "c",
+          "text": "$\\alpha$ is the discount applied to future rewards, deciding how far-sighted the agent is.",
+          "correct": false,
+          "explanation": "That's $\\gamma$, not $\\alpha$ — a classic confusion worth eliminating at the whiteboard. $\\gamma$ sets the agent's patience (horizon); $\\alpha$ sets the step size of learning: high α learns fast but jitters, low α is stable but slow."
+        },
+        {
+          "id": "d",
+          "text": "The $\\max_{a'}$ averages over the actions the agent actually took next, so the estimate reflects its real behaviour.",
+          "correct": false,
+          "explanation": "Opposite — and it's the defining trick of Q-learning: it bootstraps off the *best* available next action, not the one actually taken. That's why it learns the optimal policy even while its exploration behaves sub-optimally."
+        }
+      ],
+      "takeaway": "Q-learning is 'learn from the gap between expectation and reality': nudge the estimate toward the target by a fraction α of the surprise — and it needs vast trial-and-error experience to converge.",
+      "difficulty": "stretch"
+    },
+    {
+      "id": "q4",
+      "conceptRef": "exploration-vs-exploitation--the-central-tension",
+      "prompt": "Why does the module insist that exploration is \"the line item clients forget\" when pricing a learning-by-acting system on live traffic?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Because every exploratory action is, by definition, a knowingly sub-optimal choice you pay for in the hope of learning something — free in a simulator, but on live customers it's a discount given away, a worse recommendation served, an offer that shouldn't have been made.",
+          "correct": true,
+          "explanation": "Exactly. The exploration/exploitation tension is the core difficulty of every learning-by-acting system, and on live operations it converts directly into money. Budget it explicitly in the proposal, or it surfaces later as an unexplained dip the client never agreed to."
+        },
+        {
+          "id": "b",
+          "text": "Because exploration requires expensive GPU training runs that clients don't anticipate.",
+          "correct": false,
+          "explanation": "Compute is a separate (and more visible) line. Exploration cost is sneakier: it's *opportunity cost incurred on the live business* — revenue not earned because the system deliberately tried something other than its best-known action."
+        },
+        {
+          "id": "c",
+          "text": "It's a one-time setup cost during the launch period, after which the system is fully exploiting.",
+          "correct": false,
+          "explanation": "Exploration typically decays but shouldn't reach zero — the environment is non-stationary (tastes drift, competitors react), so a system that stops exploring is learning from a world that no longer exists. Some ongoing exploration spend is structural."
+        },
+        {
+          "id": "d",
+          "text": "It doesn't apply if you use ε-greedy with a small ε — the cost becomes negligible.",
+          "correct": false,
+          "explanation": "A small ε shrinks the cost but never eliminates it — and set it too small and the system under-samples alternatives, never discovering a better arm. The trade-off can be managed (UCB and Thompson sampling explore more intelligently); it cannot be defined away."
+        }
+      ],
+      "takeaway": "Exploration is paying for knowledge with deliberately sub-optimal actions — free in a simulator, real money on live customers — so budget it explicitly in any bandit or RL proposal.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q5",
+      "conceptRef": "multi-armed--contextual-bandits--the-practical-sweet-spot",
+      "prompt": "Given that bandits adaptively starve losing variants while A/B tests send fixed traffic to the loser for the whole run, when is a classic A/B test still the *right* choice?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "When you need a rigorous, defensible causal conclusion with a clear stopping point — \"did this change *cause* the lift?\" — because bandits optimise outcomes but don't hand you a clean p-value.",
+          "correct": true,
+          "explanation": "That's the honest nuance the module insists on: use a bandit to maximise reward continuously (earn while you learn); use an A/B test to prove a single hypothesis. The fixed split is the *price of certainty*, and sometimes certainty is what's being bought."
+        },
+        {
+          "id": "b",
+          "text": "Never — adaptive allocation strictly dominates fixed splits, so A/B tests are an obsolete tool.",
+          "correct": false,
+          "explanation": "Overcorrection. Bandits trade statistical cleanliness for earned reward: the adaptive allocation that saves money also complicates causal inference. When the decision needs a defensible verdict (a pricing change you'll defend to the board, a regulatory question), the A/B test earns its waste."
+        },
+        {
+          "id": "c",
+          "text": "When traffic is very large — high volume makes fixed splits affordable, so the simpler method wins.",
+          "correct": false,
+          "explanation": "High volume doesn't change the *purpose* gap, and if anything large traffic makes the bandit's saving bigger in absolute terms. The choice turns on what you need — continuous optimisation vs a causal verdict — not on affordability."
+        },
+        {
+          "id": "d",
+          "text": "When there are more than two variants — bandits only work for binary comparisons.",
+          "correct": false,
+          "explanation": "Backwards: many arms is bandit home turf (the module's worked example runs six homepage heroes), though many arms and non-stationarity need care. It's the *fixed* split that gets expensive with many variants — five-sixths of traffic going to non-winners for weeks."
+        }
+      ],
+      "takeaway": "Bandits to earn while you learn (ongoing optimisation); A/B tests to prove a single hypothesis with a clean causal read — pick by what the decision needs, not by fashion.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q6",
+      "conceptRef": "multi-armed--contextual-bandits--the-practical-sweet-spot",
+      "prompt": "What makes UCB's exploration smarter than ε-greedy's?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "UCB explores on purpose but not at random: its bonus term $c\\sqrt{\\ln t / n_a}$ is large for rarely-tried arms and shrinks as evidence accumulates, so it only gambles on arms it's genuinely uncertain about — while ε-greedy explores blindly, including arms it already knows are bad.",
+          "correct": true,
+          "explanation": "'Optimism in the face of uncertainty.' The targeted curiosity is the whole upgrade: ε-greedy wastes its exploration budget re-trying known losers at random, while UCB's bonus vanishes exactly where more data would teach nothing."
+        },
+        {
+          "id": "b",
+          "text": "UCB never explores — it's a pure exploitation strategy, which is why it earns more.",
+          "correct": false,
+          "explanation": "UCB explores constantly early on — that's what the bonus term does. The difference is that its exploration is *directed* by uncertainty rather than by a coin flip, and it tapers automatically as arms get pinned down."
+        },
+        {
+          "id": "c",
+          "text": "UCB keeps a full probability distribution over each arm's reward rate and samples from it to choose.",
+          "correct": false,
+          "explanation": "That's Thompson sampling — the Bayesian sibling, where each arm 'bids with a number drawn from its own plausible range'. UCB is the deterministic cousin: mean plus an explicit confidence bonus. Both beat ε-greedy; they're different mechanisms."
+        },
+        {
+          "id": "d",
+          "text": "UCB guarantees zero regret, whereas ε-greedy always accumulates some.",
+          "correct": false,
+          "explanation": "No algorithm has zero regret — regret is the price of learning, unavoidable while you're uncertain. Good algorithms (UCB, Thompson) drive *average* regret toward zero over time; the total still grows, just slowly."
+        }
+      ],
+      "takeaway": "Good bandit algorithms make the price of learning small by exploring where uncertainty is — UCB's confidence bonus and Thompson's posterior sampling both beat blind ε-greedy exploration.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q7",
+      "conceptRef": "when-full-rl-genuinely-fits",
+      "prompt": "A client wants full RL for multi-period inventory ordering. There is no simulator, and the historical data is a few thousand order records. The vendor's pitch notes that \"inventory optimisation is a textbook RL use case.\" Your verdict?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Fails the bar: the problem is genuinely sequential, but RL learns by millions of trials, and with no simulator and only a small static dataset there is no source of cheap experience — stop, and reframe as supervised/bandit/OR, or scope building a demand simulator first.",
+          "correct": true,
+          "explanation": "All four conditions must hold, and 'simulator OR massive interaction data' is the one that kills most pitches. Inventory appears on the genuine-fit list *with the qualifier* 'where a simulator of demand exists' — the use-case label doesn't waive the feasibility condition."
+        },
+        {
+          "id": "b",
+          "text": "Proceed — inventory/supply-chain optimisation is on the module's list of genuine RL fits, so the bar is cleared by problem type.",
+          "correct": false,
+          "explanation": "The list entry is conditional, not categorical. A use case 'fitting' RL in principle means nothing without the experience source: a few thousand static records cannot fill in a value function over a multi-period state space."
+        },
+        {
+          "id": "c",
+          "text": "Proceed with Q-learning specifically — it's known to be sample-efficient, so the small dataset isn't a blocker.",
+          "correct": false,
+          "explanation": "Q-learning is the opposite of a small-data method: the module stresses it needs *vast* amounts of trial-and-error experience to fill in Q. Sample efficiency is the known weakness of model-free RL, not its strength."
+        },
+        {
+          "id": "d",
+          "text": "Recommend RLHF instead, since it's the most commercially proven form of RL.",
+          "correct": false,
+          "explanation": "Category error: RLHF is how frontier labs tune LLMs to human preferences via PPO — it isn't a technique you assemble per-client for inventory decisions. Its commercial relevance to a leader is recognising it inside LLM products, not deploying it on supply chains."
+        }
+      ],
+      "takeaway": "Full RL requires all four conditions — truly sequential decisions, a simulator or massive interaction data, a definable trustworthy reward, and tolerance for exploration cost; one missing condition means de-escalate.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q8",
+      "conceptRef": "why-rl-is-usually-overkill--and-the-risks",
+      "prompt": "A recommender rewarded on clicks starts systematically serving outrage-bait, and engagement metrics look great. What is happening, and what's the lesson?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Reward hacking / specification gaming: the agent is doing *exactly* what was rewarded, which is not what was meant — it isn't malfunctioning, and it won't show up as a failure in any demo. Define rewards you'd trust an adversary to optimise.",
+          "correct": true,
+          "explanation": "The single most important RL risk for a leader to internalise. The cleaning robot covers the mess; the trading agent takes hidden tail risk; the recommender serves outrage. Reward is the spec, and the agent exploits your definition, not your intent."
+        },
+        {
+          "id": "b",
+          "text": "Overfitting — the model memorised the training data and needs regularisation.",
+          "correct": false,
+          "explanation": "Wrong failure category. Overfitting is poor generalisation from a sample; this system *generalises perfectly* toward its objective. The defect is in the objective itself — clicks were a proxy for value, and the proxy got optimised at the expense of the goal."
+        },
+        {
+          "id": "c",
+          "text": "Non-stationarity — user preferences drifted, and the policy needs retraining on fresh data.",
+          "correct": false,
+          "explanation": "Non-stationarity is a real RL risk (the environment shifts under the policy) but it's a different one. Here the environment didn't drift — the agent found a loophole in the reward. Retraining on fresh clicks would make it *better* at serving outrage."
+        },
+        {
+          "id": "d",
+          "text": "A training bug — with more training steps, the policy will converge to the intended behaviour.",
+          "correct": false,
+          "explanation": "More optimisation pressure on a flawed reward digs the hole deeper: the policy converges ever more precisely on the literal objective. There is no intended behaviour anywhere in the system — only the written reward, which is being satisfied brilliantly."
+        }
+      ],
+      "takeaway": "Reward hacking is the agent satisfying your definition instead of your intent — it doesn't show up in the demo, so write the reward as if an adversary will optimise it, because one will.",
+      "difficulty": "core"
+    }
+  ],
+  "exercises": [
+    {
+      "id": "ex1",
+      "title": "The price of learning: bandit vs fixed split, in euros",
+      "estimatedMinutes": 25,
+      "scenario": "An e-commerce client is choosing between three promotional banners for next quarter and plans the usual approach: split traffic **equally across all three for the whole quarter**, then declare a winner. You believe a bandit would earn substantially more *during* the quarter, and the growth lead asks you to prove it with arithmetic, not adjectives.\n\nFor the whiteboard version, assume the banners' true (unknown to the system) conversion rates are fixed all quarter.",
+      "givens": [
+        "True conversion rates: banner A = 2%, banner B = 4%, banner C = 6%",
+        "Traffic: 100,000 sessions over the quarter; each conversion is worth €50 of margin",
+        "Plan 1 — fixed equal split: 1/3 of traffic to each banner, all quarter",
+        "Plan 2 — ε-greedy bandit with ε = 0.1; simplifying assumption: it identifies C as the best arm early enough to treat the whole quarter as steady-state (exploit C with probability 0.9, explore one of the three arms uniformly at random with probability 0.1)",
+        "Benchmark — the oracle: all 100,000 sessions on banner C"
+      ],
+      "tasks": [
+        "Compute expected conversions and margin for the oracle, the fixed split, and the ε-greedy bandit.",
+        "Compute each plan's **regret** versus the oracle, in conversions and in euros, and state what regret means.",
+        "Explain in two or three sentences why UCB or Thompson sampling would beat ε-greedy here, and name the steady-state cost ε-greedy never gets rid of.",
+        "List two honest caveats you'd attach before the client extrapolates these numbers."
+      ],
+      "solution": "**Step 1 — expected conversions.**\n\n*Oracle:* 100,000 × 6% = **6,000 conversions** → 6,000 × €50 = **€300,000**.\n\n*Fixed split:* each banner gets ~33,333 sessions; expected rate = (2% + 4% + 6%)/3 = 4% → 100,000 × 4% = **4,000 conversions** → **€200,000**.\n\n*ε-greedy (steady state):* expected rate = 0.9 × 6% + 0.1 × (2% + 4% + 6%)/3 = 5.4% + 0.4% = **5.8%** → **5,800 conversions** → **€290,000**.\n\n**Step 2 — regret.** Regret is the reward lost versus an oracle that plays the best arm every time: $\\text{Regret}(T) = \\sum_t (\\mu^* - \\mu_{a_t})$ — the price of learning. Fixed split: 6,000 − 4,000 = **2,000 conversions = €100,000**. ε-greedy: 6,000 − 5,800 = **200 conversions = €10,000**. The bandit pays roughly **a tenth** of the fixed split's learning cost — €90,000 of margin recovered in one quarter, using the same banners and the same traffic, purely by *reallocating adaptively instead of waiting for a verdict*.\n\n**Step 3 — beyond ε-greedy.** ε-greedy explores blindly: its 10% exploration traffic is spread uniformly, so it keeps sending sessions to banner A long after the data shows A is hopeless — that 0.4-point steady-state drag never decays. UCB explores *on purpose but not at random*: its bonus term is big for under-tried arms and vanishes as they're pinned down, so spend on known losers stops. Thompson sampling gets the same effect by letting each arm bid with a draw from its posterior — uncertain arms sometimes sample high and get tried; resolved losers almost never do. Both drive *average* regret toward zero over time, where ε-greedy's plateaus.\n\n**Step 4 — the caveats.** (1) **The learning period isn't free**: early on, the bandit's regret is higher than steady state while it identifies C — our simplification flatters it slightly; real cumulative regret includes that ramp. (2) **Non-stationarity**: we assumed fixed conversion rates; real banner performance drifts (seasonality, fatigue), which is an argument *for* a bandit that keeps a trickle of exploration — but it means yesterday's 'best arm' needs continuous re-verification, and the numbers above are an upper bound on the gap. (Also fair: if the client needs a *defensible causal verdict* on a banner for a future decision, the bandit's adaptive allocation makes that read harder — that's the A/B test's job.)",
+      "rubric": {
+        "keyPoints": [
+          "All three expectations computed correctly: oracle 6,000 / €300k; fixed split 4,000 / €200k; ε-greedy 5.8% → 5,800 / €290k",
+          "Regret defined as reward lost versus the always-best-arm oracle, computed as €100k vs €10k — the bandit pays ~10× less for the same learning",
+          "UCB/Thompson explained as *targeted* exploration (uncertainty-driven), versus ε-greedy's permanent blind 0.1 spread that keeps feeding known losers",
+          "Caveats include the early learning ramp and the non-stationarity assumption (and ideally the causal-read trade-off)"
+        ],
+        "pitfalls": [
+          "Comparing the bandit to the oracle and calling the €10k a failure — regret is the unavoidable price of learning; the comparison that matters is against the fixed split's €100k",
+          "Forgetting that ε-greedy's exploration includes the best arm too (the 0.1 explores *uniformly over all three*, C included) — a common arithmetic slip",
+          "Presenting steady-state numbers as the full quarter without flagging the learning ramp",
+          "Concluding bandits make A/B tests obsolete — when the client needs a clean causal verdict, the fixed split is the right tool"
+        ],
+        "takeaways": [
+          "A bandit is a thermostat for decisions: it shifts traffic toward what's winning instead of waiting for a verdict, and the saving is computable in euros before you build anything",
+          "Regret is the price of learning — the algorithm's job is to make that price small, and smarter exploration (UCB/Thompson) is how"
+        ],
+        "transfer": "Expected-value arithmetic over allocation policies is a universal consulting move: comparing marketing budget splits, routing rules in a call centre (send X% of calls to the new script), clinical trial designs (adaptive vs fixed arms), even hiring funnels (which sourcing channel gets the next req). Whenever an organisation 'tests' by fixed allocation and decides later, compute what adaptive reallocation would have earned during the test — the gap is usually large, concrete, and the most persuasive slide in the deck."
+      }
+    },
+    {
+      "id": "ex2",
+      "title": "Talk the client down from RL: the dynamic-pricing feasibility gate",
+      "estimatedMinutes": 30,
+      "scenario": "A travel-booking client's CTO has funding approved for \"an RL agent that learns optimal dynamic pricing,\" inspired by a conference talk. The facts on the ground: prices can change daily across ~500 route-date products; historical data is **3 years of weekly aggregated bookings** (no per-customer interaction logs); there is **no simulator**; pricing mistakes are commercially painful and brand-sensitive (visible price yo-yos triggered complaints last year); and the proposed reward is \"weekly revenue.\"\n\nYou're delivering the RL feasibility assessment — the mission whose deliverable, in most cases, is a de-escalation the client thanks you for.",
+      "givens": [
+        "Decisions: daily price points per route-date; some sequential coupling exists (today's price affects future demand and remaining seat inventory)",
+        "Data: 3 years of weekly aggregates; no per-interaction logs, no simulator, no current experimentation infrastructure",
+        "Constraints: legal price floors/ceilings exist; visible price instability has already caused brand damage",
+        "Proposed reward: weekly revenue",
+        "Your firm's standard: score the four-condition bar, recommend a path, quote any RL phase separately behind a gate"
+      ],
+      "tasks": [
+        "Score the proposal against the four-condition bar (sequential? experience source? definable reward? exploration tolerance?), one verdict + one sentence each.",
+        "Identify how the proposed reward (\"weekly revenue\") could be gamed — give at least two concrete specification-gaming behaviours.",
+        "Recommend the phased path you'd put in the proposal, with what each phase delivers and the explicit gate before any RL.",
+        "Write the de-escalation paragraph for the CTO — preserving the ambition while killing the immediate RL build."
+      ],
+      "solution": "**Step 1 — the four-condition bar.**\n1. *Genuinely sequential?* **Partially.** Today's price does affect future demand and remaining inventory, so coupling exists — but much of the immediate value (\"which price point converts best for this route-date, for this demand context\") is a one-shot choice scored quickly: bandit territory first.\n2. *Simulator or massive interaction data?* **Fail.** Weekly aggregates are not interaction data — RL learns from millions of (state, action, reward) experiences, and there is no simulator. This condition alone makes full RL infeasible today.\n3. *Definable, trustworthy reward?* **Fail as proposed.** \"Weekly revenue\" is a proxy with documented loopholes (Step 2) and no guardrails encoded.\n4. *Exploration tolerance?* **Fail.** Exploration means knowingly sub-optimal live prices; the client has already suffered brand damage from price instability, and pricing errors are costly and partially irreversible (refunds, complaints, trust). Verdict: **1 of 4 conditions even partially met — full RL is not feasible now**, which is the normal outcome of this assessment.\n\n**Step 2 — gaming \"weekly revenue.\"** (a) *Tail-risk hiding:* the agent learns that aggressive last-minute price spikes on must-travel routes maximise weekly revenue — while quietly destroying repeat-customer lifetime value and triggering the exact complaint cycle the brand fears; this week's reward never sees the damage. (b) *Cannibalisation/instability:* yo-yo pricing that pulls demand forward (deep discount, then spike) inflates some weeks' revenue while training customers to wait for drops — revenue *timing* is gamed, not value created. (c) Also acceptable: ignoring margin (revenue ≠ profit), or starving long-horizon inventory (selling out cheap seats early). Lesson: the reward must encode margin, stability penalties and floors/ceilings — write it as if an adversary will optimise it.\n\n**Step 3 — the phased path.**\n- **Phase 1 (weeks 1-4): instrumentation + baseline.** Per-booking interaction logging (the missing experience source), a demand baseline per route-date, guardrails codified (floors/ceilings, max daily price moves, legal/fairness review). Without this, neither bandits nor RL ever become possible.\n- **Phase 2 (weeks 5-12): contextual bandit over a discrete price grid.** Arms = approved price points within guardrails; context = route, days-to-departure, load factor, seasonality; reward = *margin* with a stability penalty; Thompson sampling; online evaluation harness reporting regret and lift vs the current pricing rule. This captures most of the value the CTO wants, safely and measurably.\n- **Phase 3 (quoted separately, behind the gate): full RL** — only if Phase 2's data shows the sequential coupling materially binds (e.g. bandit prices systematically suboptimal near sell-out), and only once interaction volume or a calibrated demand simulator exists. The gate criteria are written into the proposal now, so 'later' is a defined decision, not a vibe.\n\n**Step 4 — the paragraph.** *\"The destination you've funded is right — pricing that learns. What the assessment shows is that the RL version of it needs two assets you don't yet have: a source of millions of pricing experiences (a simulator or per-booking interaction logs) and a reward we'd trust an adversary to optimise — 'weekly revenue' as written would reward exactly the price instability that hurt the brand last year. So we start where the value is reachable in weeks, not years: a contextual bandit choosing among guardrailed price points, measured as lift over your current rules, while the new logging builds the experience base. If the data then shows the sequential effects are worth chasing, the RL phase is already scoped, gated on evidence — and you'll walk into it with the simulator fuel and the safety rails it requires.\"*",
+      "rubric": {
+        "keyPoints": [
+          "All four conditions scored with honest verdicts, identifying the experience-source condition (no simulator, aggregates ≠ interaction data) as independently disqualifying",
+          "At least two concrete reward-gaming behaviours for 'weekly revenue' (tail-risk/LTV destruction, demand-timing games, margin blindness) — not generic 'it could be gamed'",
+          "Phased path: instrumentation → guardrailed contextual bandit with margin-plus-stability reward and regret/lift evaluation → RL quoted separately behind explicit, written gate criteria",
+          "De-escalation preserves the ambition (pricing that learns) while replacing the immediate RL build — sells the bandit as the fast path, not as a consolation prize"
+        ],
+        "pitfalls": [
+          "Treating 'dynamic pricing is on the genuine-fit list' as clearance — the list entry is conditional on data/simulator, and the module marks pricing as bandit-first",
+          "Accepting the proxy reward as written — a hackable reward will be hacked, and revenue-this-week is a textbook hackable proxy",
+          "Ignoring exploration cost on a brand-sensitive surface — knowingly bad prices on live customers are exactly what triggered last year's complaints",
+          "Framing the answer as 'no' — the deliverable is a credible path to the goal, with the RL gate defined now, not a refusal"
+        ],
+        "takeaways": [
+          "The most valuable contribution is usually talking the client down from RL into a bandit or supervised model — the feasibility assessment is a sellable mission precisely because its honest answer is usually de-escalation",
+          "Commit to a bandit-first method, a measured uplift, and an RL gate — never to a deployed autonomous RL agent on a timeline"
+        ],
+        "transfer": "The four-condition feasibility gate is a template for any hype-driven technology request: replace the conditions and the same structure de-escalates 'we need agents' (is it truly multi-step? are tools safe? is there an eval?), 'we need a data lake' or 'we need blockchain'. The deeper consulting pattern: when a client asks for a technology, score the request against that technology's *failure preconditions*, propose the lighter thing that captures most of the value now, and define — in writing, upfront — the evidence that would justify the heavy thing later. Ambition preserved, money saved, trust compounded."
+      }
+    },
+    {
+      "id": "ex3",
+      "title": "Design the contextual-bandit personalisation engine",
+      "estimatedMinutes": 30,
+      "scenario": "A fashion retailer rotates **6 candidate hero products** on its homepage. Today the choice is made by a quarterly A/B test: six equal buckets, two weeks, winner takes the slot until next quarter. The e-commerce director complains the 'winner' is stale within weeks and suspects different customers should see different heroes. She asks you to scope the upgrade.\n\nThis is the module's textbook sweet spot — your job is to design it properly: arms, context, reward, algorithm, guardrails, and the evaluation harness that proves the lift.",
+      "givens": [
+        "6 hero candidates, refreshed by merchandising every few weeks (arms come and go)",
+        "Available context per impression: new vs returning, device, referral source, season, category affinity from browsing history",
+        "Business metric: click-through into product page, with downstream conversion tracked",
+        "Traffic: ~80,000 homepage impressions/week",
+        "Current baseline: the quarterly A/B winner shown to everyone"
+      ],
+      "tasks": [
+        "Explain to the director, in client terms, why this is a bandit problem and not full RL — and what was wrong with the quarterly A/B approach for this surface.",
+        "Specify the design: arms, context features, reward definition (and its timing), and your algorithm choice with justification.",
+        "Design the evaluation harness: how you'll prove lift over the current baseline, and what you'll monitor for in steady state.",
+        "State the scope (duration, deliverable, retainer) and the two things you will not promise."
+      ],
+      "solution": "**Step 1 — bandit, not RL, and not a quarterly A/B.** Each impression is a **one-shot decision scored immediately**: show one hero, observe a click (or not), no sequential state — today's hero choice doesn't change tomorrow's homepage situation. That's the bandit's exact definition; full RL (discounting, Bellman, state spaces) would add cost and risk for structure this problem doesn't have. The quarterly A/B has two documented failures here: during every two-week test, ~5/6 of traffic goes to non-winning heroes (the cost of certainty, paid quarterly), and the 'winner' is a single static answer to a non-stationary, heterogeneous question — tastes shift within weeks and different segments prefer different heroes. The director's two complaints (staleness, one-size-fits-all) are precisely the two things adaptive allocation plus context fix. A/B testing keeps its job elsewhere: one-off causal verdicts, not ongoing optimisation.\n\n**Step 2 — the design.** *Arms:* the 6 current heroes, with the arm set updateable as merchandising rotates products (new arm starts uncertain → gets explored automatically). *Context:* new/returning, device, referral source, season, category affinity — the learned policy becomes \"product C for returning mobile users, product A for new desktop visitors.\" *Reward:* click-through into the product page, attributed within the session — immediate, well-defined, hard to game at this scope; track downstream conversion as a secondary check that we're not optimising clickbait heroes that don't sell (the proxy-vs-goal lesson applied small). *Algorithm:* **Thompson sampling** — simple to implement, empirically excellent, and it handles arm churn naturally: a freshly added hero has a wide posterior, so it gets sampled often until pinned down, with no schedule to hand-tune (the practical edge over ε-greedy's blind, non-decaying exploration; UCB would also be defensible). *Build vs buy:* check the client's experimentation platform first — many ship adaptive allocation, and the fastest route may be configuration plus our context/reward design rather than a bespoke service.\n\n**Step 3 — the evaluation harness.** Hold out a **control slice** (~10% of traffic) on the current policy (the incumbent A/B winner shown to everyone): the headline number is **lift in CTR (and downstream conversion) of the bandit slice vs control**, reported weekly. Internally, track **cumulative regret** against the best-performing arm per context segment — the 'price of learning' curve that should flatten as the policy converges. Steady-state monitoring: per-arm performance drift (non-stationarity is expected — seasonality, fatigue), context-segment stability, and an alert if exploration share spikes (signals the world shifted). The harness is the reusable IP — the same regret-and-lift reporting sells the next bandit mission.\n\n**Step 4 — scope and the refusals.** Scope: **6-10 weeks** for this single well-bounded surface — features and arm wiring, policy, the serving-path integration, the evaluation harness — plus a **run retainer** (monitoring drift, arm-set updates, periodic re-verification of lift). The two refusals: (1) **no promised lift number before real interaction data** — we commit to the method and the measurement (regret and lift vs baseline), never to a percentage in the proposal; (2) **exploration is not free** — a small, explicit share of impressions will deliberately show uncertain heroes; that's the cost of staying current, it's budgeted, and anyone who promises learning without it is hiding the line item.",
+      "rubric": {
+        "keyPoints": [
+          "Correct routing argument: one-shot decision + immediate feedback + no sequential state → contextual bandit; quarterly A/B faulted for both traffic waste and a static answer to a heterogeneous, drifting question",
+          "Complete design: updateable arms, named context features, immediate reward with a downstream-conversion check against clickbait, Thompson sampling justified (handles arm churn via wide posteriors, no exploration schedule to tune)",
+          "Evaluation harness with a held-out control slice for lift, regret tracked internally, and steady-state drift monitoring — non-stationarity treated as expected, not exceptional",
+          "Commercial framing: 6-10 week fixed scope + run retainer, with explicit refusals (no promised lift number, exploration cost named and budgeted)"
+        ],
+        "pitfalls": [
+          "Specifying full RL machinery (states, discounting) for a one-shot decision — the central de-escalation the module exists to teach",
+          "Optimising raw clicks with no downstream check — the miniature reward-hacking trap where clickbait heroes win CTR and lose revenue",
+          "No control slice — without a baseline holdout you can report regret but never prove lift to the buyer, and the bandit's adaptive allocation makes after-the-fact causal reads hard",
+          "Building bespoke before checking the client's experimentation platform — adaptive allocation may already be in the stack, and the billable value is the framing, reward and harness, not the library"
+        ],
+        "takeaways": [
+          "When someone says 'personalise it' or 'optimise which option wins', the first thought is contextual bandit — not RL, and often not a fixed A/B test",
+          "Buy the commodity algorithm; build and charge for the framing, the context features, the reward definition, the guardrails, and the regret/lift evaluation harness"
+        ],
+        "transfer": "This design template reuses wherever a system repeatedly picks one option per user from a changing menu: email subject lines and send times, paywall offers, search-results re-ranking, call-centre script selection, even which onboarding flow a new SaaS user sees. The invariant checklist travels intact — define the arms, the context, an immediate reward with a downstream-integrity check, a control slice to prove lift, and a drift monitor — and the same 'thermostat for decisions' replaces the same stale periodic test in every one of these domains."
+      }
+    }
+  ]
+}

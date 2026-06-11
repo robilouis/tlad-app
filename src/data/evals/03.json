@@ -1,0 +1,347 @@
+{
+ "moduleId": "03",
+ "quiz": [
+  {
+   "id": "q1",
+   "conceptRef": "data-sources--types",
+   "prompt": "<p>A prospect says: \"We have tons of data — ten thousand scanned PDFs of supplier contracts, plus access to a purchased market dataset.\" How should a tech lead size this up?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Volume is rarely the issue — type and provenance determine the bill: scanned PDFs are unstructured (the expensive lane, needing parsing and labelling), while the bought third-party data is a commodity everyone else can also rent.",
+     "correct": true,
+     "explanation": "Exactly. Ten million clean structured rows are a gift; ten thousand mixed-quality scanned PDFs are a project. And third-party data fills gaps fast but builds no moat — the defensible value lives in first-party data made usable."
+    },
+    {
+     "id": "b",
+     "text": "Tons of data is the green light — with that much raw material, modelling can start immediately.",
+     "correct": false,
+     "explanation": "\"We have tons of data\" is a named red flag precisely because volume isn't the question. Unstructured PDFs need OCR, parsing, and labelling before any model sees them — the structure axis, not the row count, sets the cost."
+    },
+    {
+     "id": "c",
+     "text": "The purchased dataset is the more valuable asset, since it was professionally curated and the PDFs are messy.",
+     "correct": false,
+     "explanation": "Backwards on the provenance axis: the vendor dataset is clean but undifferentiated — everyone else has it too. The messy first-party contracts are where a durable, proprietary asset can be built; the mission that makes them usable is the more valuable one."
+    },
+    {
+     "id": "d",
+     "text": "Both sources should be rejected — unstructured and third-party data are too risky for a first mission.",
+     "correct": false,
+     "explanation": "Neither axis is a disqualifier; they're cost-and-risk drivers to scope around. Unstructured first-party data is the expensive lane, not a forbidden one — the lead's job is to price it honestly, and to check the licence terms on the bought data."
+    }
+   ],
+   "takeaway": "Locate every dataset on two axes — structure and provenance — because type and provenance, not volume, determine the cost, the risk, and where the defensible value lives.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q2",
+   "conceptRef": "the-six-data-quality-dimensions",
+   "prompt": "<p>A profiling pass finds that 30% of a sensor column is null — and the nulls occur exactly when the sensor is broken. The data scientist proposes filling the gaps with the column mean. What's the leader-level objection?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "The missingness isn't random — \"missing\" silently means \"broken\" — so a naive fill teaches the model the opposite of reality; ask <em>why</em> values are missing before deciding how to handle them.",
+     "correct": true,
+     "explanation": "This is the dangerous dimension: completeness when missingness is systematic. Filling with the mean stamps a 'normal' reading onto exactly the moments that were abnormal, erasing the signal (and possibly the target) the model most needs."
+    },
+    {
+     "id": "b",
+     "text": "Mean-filling is fine — 70% completeness is above the standard quality threshold for modelling.",
+     "correct": false,
+     "explanation": "There is no standard threshold: 'good enough' is judged relative to the use case and the cost of being wrong, not an abstract score. And the issue here isn't the <em>rate</em> of missingness at all — it's that the gaps are systematic, which no fill rate fixes."
+    },
+    {
+     "id": "c",
+     "text": "The column should be dropped — any column with nulls introduces too much noise.",
+     "correct": false,
+     "explanation": "Over-correction. The pattern of missingness may itself be informative (a 'sensor down' indicator), and dropping every imperfect column would gut most real datasets. The decision needs the <em>why</em> first; only then choose drop, flag, or fill."
+    },
+    {
+     "id": "d",
+     "text": "Switch to a model that tolerates missing values internally, so no decision about the nulls is needed.",
+     "correct": false,
+     "explanation": "Tolerating missing values is a mechanical convenience, not an answer to systematic missingness — the model will still learn from a world where 'broken' moments are silently encoded. The semantic question ('what does missing mean here?') can't be delegated to an algorithm."
+    }
+   ],
+   "takeaway": "Always ask why a value is missing before deciding how to handle it — when missingness is systematic, a naive fill teaches the model the opposite of reality.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q3",
+   "conceptRef": "data-profiling--eda-at-the-leader-level",
+   "prompt": "<p>Profiling a fraud dataset shows a 99:1 class-imbalance ratio. What does this single number immediately tell the mission lead?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Accuracy is a useless metric here — a \"predict everyone is fine\" model scores 99% — so the evaluation must be imbalance-aware, and that reshapes the scope before any model is trained.",
+     "correct": true,
+     "explanation": "Right. The imbalance ratio turns 'the data's a bit skewed' into a figure that sets the mission: it rules out accuracy as the success measure, changes the metric conversation, and warns you about base-rate effects in every claim about the model."
+    },
+    {
+     "id": "b",
+     "text": "The dataset is unusable — 99:1 imbalance is too severe for any model to learn from.",
+     "correct": false,
+     "explanation": "Severe imbalance is normal for fraud, churn, and failures — it's a planning input, not a disqualifier. The implication is about how you evaluate and frame the problem, not whether it can be done."
+    },
+    {
+     "id": "c",
+     "text": "More fraud examples should be synthetically generated until the classes are balanced, after which standard accuracy applies.",
+     "correct": false,
+     "explanation": "Resampling tricks are a modelling tactic, not a leader-level conclusion — and they don't make accuracy honest, because production traffic stays 99:1. The real-world base rate, not the training mix, governs what the metric means in deployment."
+    },
+    {
+     "id": "d",
+     "text": "Nothing yet — class balance is a modelling detail the data scientist handles later.",
+     "correct": false,
+     "explanation": "Target balance is on the pre-promise profiling checklist precisely because it changes the scope: 1% fraud is a different mission from 40% churn. Discovering it 'later' means the promise was made blind."
+    }
+   ],
+   "takeaway": "Profile the target balance before promising anything — a 99:1 ratio tells you accuracy is meaningless and the mission needs imbalance-aware evaluation from day one.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q4",
+   "conceptRef": "the-cost-of-bad-data--the-80-rule",
+   "prompt": "<p>Drafting a proposal for a first ML mission, a colleague budgets two weeks of data preparation and eight weeks of modelling, because \"the model is the deliverable.\" What does the 80% rule say?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Invert the split: acquisition, cleaning, labelling, and validation routinely consume around 80% of a first mission — quoting only the modelling (the part that demos well) is the most common way to lose money and trust.",
+     "correct": true,
+     "explanation": "The model itself is often a few well-understood days. Price the mission as data work plus a modelling step, make the 80% a visible billable line, and estimate it from evidence: profile a sample, count sources and joins, size labelling separately, and quote a range."
+    },
+    {
+     "id": "b",
+     "text": "The split is fine if the client confirms their data is clean — client assurances remove the need for the data line.",
+     "correct": false,
+     "explanation": "\"We have clean data\" is what every client believes until profiling says otherwise (the telco's 'five years of clean data' turned out to be 14 usable months). The fix is a short, evidence-producing assessment — not taking optimism on credit."
+    },
+    {
+     "id": "c",
+     "text": "Quote the modelling work only and absorb the cleaning silently — clients won't pay for data preparation.",
+     "correct": false,
+     "explanation": "\"We'll clean it as we go\" is the named path to unbillable scope creep. Clients pay for data work when it's framed as the foundation it is — hiding it just means delivering it for free or failing to deliver at all."
+    },
+    {
+     "id": "d",
+     "text": "The 80/20 is a law — every proposal should mechanically allocate exactly 80% of hours to data.",
+     "correct": false,
+     "explanation": "It's a heuristic, not a law: the honest move is sampling the data, counting sources and joins, sizing labelling on its own line, and quoting a contingency range with a checkpoint — not pasting a fixed ratio into every estimate."
+    }
+   ],
+   "takeaway": "On a first ML mission the data work is the project — make the ~80% line visible and billable, and rest the estimate on a profiled sample, not optimism.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q5",
+   "conceptRef": "feature-engineering--why-it-often-beats-a-fancier-model",
+   "prompt": "<p>A churn model on raw columns is underperforming. One team member wants to switch to a deep neural network; another wants to add features like \"days since last purchase\" and \"ratio of weekend to weekday spend.\" Who has the leader-level argument, and why?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "The feature engineer — good features inject domain knowledge the model can't discover on its own from limited data, and a good feature set with a simple model usually beats raw features with a sophisticated one, at lower cost.",
+     "correct": true,
+     "explanation": "This is the module's core claim: feature work is the cheap, high-leverage half of most classical-ML missions, and it's where the client's domain experts add value the algorithm can't. The fancier model would need vastly more data to infer what one good ratio encodes directly."
+    },
+    {
+     "id": "b",
+     "text": "The deep-learning advocate — neural networks learn their own features, which is exactly what makes them superior on tabular data.",
+     "correct": false,
+     "explanation": "Automatic feature learning shines on unstructured data (images, audio, text) with huge volumes. On limited tabular data, the network can't conjure 'days since last purchase' from thin air — and it costs more, explains less, and trains slower than the feature-plus-simple-model route."
+    },
+    {
+     "id": "c",
+     "text": "Neither — underperformance means the dataset is exhausted and the mission should end.",
+     "correct": false,
+     "explanation": "Premature. Raw columns underperforming is the <em>expected</em> starting state — the craft of exposing the signal (aggregations, ratios, recency features) hasn't been applied yet. Declaring defeat before feature work skips the highest-ROI step in the playbook."
+    },
+    {
+     "id": "d",
+     "text": "Both equally — features and architecture contribute the same lift, so do whichever the team prefers.",
+     "correct": false,
+     "explanation": "They're not symmetric in cost or expected payoff: on structured problems the wins are frequently in the features, which are cheaper, faster, and more explainable to a client. Preference isn't the criterion — leverage per euro is."
+    }
+   ],
+   "takeaway": "Feature engineering encodes human domain insight directly into the inputs — which is why it so often beats a fancier model, at a fraction of the cost and opacity.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q6",
+   "conceptRef": "labels--the-often-forgotten-half-of-supervised-learning",
+   "prompt": "<p>Before funding a full annotation budget for a review-toxicity classifier, two trained annotators pilot-label a batch and disagree on 30% of items. The team proposes pushing ahead — \"the model will average out the noise.\" What should the lead conclude?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Inter-annotator agreement is the practical ceiling on achievable accuracy — if humans agree only ~70% of the time, no model reliably exceeds that, so fix the annotation guideline and re-pilot before spending the budget.",
+     "correct": true,
+     "explanation": "A model can't be more reliable than the labels it learns from. The fix is rarely a better model: it's a clearer guideline and a second pass on ambiguous cases — measured <em>before</em> committing to full annotation, exactly what the pilot is for."
+    },
+    {
+     "id": "b",
+     "text": "Proceed — with enough labelled examples, disagreement between annotators washes out statistically.",
+     "correct": false,
+     "explanation": "Volume doesn't repair a fuzzy label definition: if the humans can't agree on what 'toxic' means, the dataset encodes that confusion at any scale. Chasing 90% model accuracy against 70% human agreement is chasing noise."
+    },
+    {
+     "id": "c",
+     "text": "Replace the human annotators with an auto-labelling model to remove subjective disagreement.",
+     "correct": false,
+     "explanation": "Weak/auto-labelling is cheaper but carries systematic, correlated errors — and it doesn't resolve the underlying ambiguity, it just hides it behind one opinionated labeller. The disagreement is information about the <em>task definition</em>, not an annotator defect."
+    },
+    {
+     "id": "d",
+     "text": "Raw agreement of 70% is acceptable as long as it beats 50/50 chance.",
+     "correct": false,
+     "explanation": "Raw agreement flatters you when one class dominates — two annotators guessing on a 95%-non-toxic corpus agree ~90% of the time by luck alone. That's why Cohen's kappa subtracts chance agreement; and as a field reading, the kappa behind a 30% raw disagreement on skewed data is likely in 'your guideline is the problem' territory."
+    }
+   ],
+   "takeaway": "Pilot-label with two people and measure agreement before funding annotation — the labels' consistency, not the model, sets the accuracy ceiling.",
+   "difficulty": "stretch"
+  },
+  {
+   "id": "q7",
+   "conceptRef": "data-leakage--the-1-silent-killer",
+   "prompt": "<p>A readmission model posts 98% validation accuracy, driven mostly by one feature: <code>discharge_disposition</code>, which includes a code recorded when the patient was transferred <em>because they were readmitted</em>. What's going on, and what's the honest next step?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Target leakage — the feature is a record of the outcome, unavailable at prediction time; remove it, expect accuracy to fall to a realistic level, and ship the honest number.",
+     "correct": true,
+     "explanation": "The model is reading the answer off the back of the card. In the module's example, removing the leaking feature dropped accuracy from 98% to ~70% — and that lower figure is the only one that exists in production, so it's the only one safe to put in a proposal."
+    },
+    {
+     "id": "b",
+     "text": "A breakthrough — a single highly predictive feature is the goal of feature engineering; celebrate and deploy.",
+     "correct": false,
+     "explanation": "A single 'too good' feature with near-perfect accuracy is the tell-tale sign of target leakage, not a triumph. The defining question — 'would we know this value at the moment of prediction?' — fails here: the code only exists after the readmission."
+    },
+    {
+     "id": "c",
+     "text": "Overfitting — the model memorised noise; regularisation and more data will bring the score in line.",
+     "correct": false,
+     "explanation": "Wrong diagnosis. Overfitting shows up as a train/validation gap; here the <em>validation</em> score itself is inflated because the answer is encoded in a feature. Regularisation can't fix a dataset that contains the outcome — the feature must go."
+    },
+    {
+     "id": "d",
+     "text": "Keep the feature but lower its weight, preserving some of its predictive power without fully trusting it.",
+     "correct": false,
+     "explanation": "Half-leaking is still leaking: any weight on a feature that doesn't exist at prediction time inflates the offline score and evaporates live. There's no dial that makes future information legitimately available in the present."
+    }
+   ],
+   "takeaway": "Ask of every feature: \"would we know this at the moment of prediction?\" — a suspiciously high score is a bug report, and the number that survives the leakage review is the only one safe to promise.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q8",
+   "conceptRef": "data-leakage--the-1-silent-killer",
+   "prompt": "<p>A model validated beautifully offline but disappoints in production. Investigation shows the \"average prior purchase value\" feature was computed over a 90-day window in the training notebook but a 30-day window in the live pipeline. Which leakage form is this, and what's the structural defence?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Train-serve skew — features built differently in training vs production; the defence is mirroring training transformations exactly in serving, which is the core argument for a feature store once several models share features.",
+     "correct": true,
+     "explanation": "\"Offline great, online disappointing\" is the skew signature. The transformation that builds a feature offline must be the same one that builds it live; for a first mission a documented, version-controlled script suffices — the feature store earns its keep when reuse and real-time serving arrive."
+    },
+    {
+     "id": "b",
+     "text": "Temporal leakage — the 90-day window let the model see the future; switching both to 30 days fixes it.",
+     "correct": false,
+     "explanation": "Temporal leakage is using <em>future</em> information to predict the past (e.g. random-shuffling time-ordered data). A longer historical window isn't the future — the defect here is purely that training and serving disagree, whichever window is chosen."
+    },
+    {
+     "id": "c",
+     "text": "Train/test contamination — the test rows influenced training statistics; refit the scaler on the training split only.",
+     "correct": false,
+     "explanation": "Contamination is a different form (e.g. scaling fit on all data, duplicates across splits) and it inflates <em>validation</em> scores. This model's validation was internally consistent — the break happened between the offline world and the live pipeline."
+    },
+    {
+     "id": "d",
+     "text": "Not leakage at all — a 60-day window difference is a tuning detail unlikely to explain a production gap.",
+     "correct": false,
+     "explanation": "It's one of the four named forms a lead must be able to probe for. The model learned patterns against one feature definition and is being fed another: the inputs at serving time are literally different numbers, so offline performance was measured on a system that doesn't exist in production."
+    }
+   ],
+   "takeaway": "Know the four leakage forms by their signatures — target leakage (too-good feature), contamination (validation ≫ production), train-serve skew (offline great, online poor), temporal (backtest beautiful, live poor) — each has a specific defence.",
+   "difficulty": "stretch"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "title": "The profiling pass that rewrites the proposal",
+   "estimatedMinutes": 30,
+   "scenario": "<p>An insurer wants a model to predict which filed claims will end in litigation, so legal can intervene early. The sponsor's brief: <em>\"Eight years of complete claims history, roughly 200,000 claims, about 3% end in litigation. We'd like a proposal by Friday.\"</em></p>\n<p>You negotiate a two-day profiling pass first. It finds:</p>\n<ul>\n<li>The <code>litigation_flag</code> is reliable only since a case-management system was introduced <strong>3 years ago</strong>; before that it was backfilled inconsistently.</li>\n<li>A <code>legal_reserve_amount</code> column (money set aside for legal costs) is populated for 96% of litigated claims — and is set by an adjuster <strong>after</strong> a claim starts smelling litigious.</li>\n<li>A 2023 migration renamed claim-type codes; the same physical claim type has different codes before and after.</li>\n<li>40% of <code>adjuster_notes</code> are empty — almost all from one regional office that logs notes in a separate tool.</li>\n</ul>\n<p>Turn the findings into a revised scope, an honest risk register, and the conversation with the sponsor.</p>",
+   "givens": [
+    "Claimed: 8 years × ~200k claims, ~3% litigation rate (≈ 32:1 imbalance)",
+    "Reliable labels: only the last ~3 years (≈ 75k claims, ≈ 2,250 litigated)",
+    "<code>legal_reserve_amount</code>: populated after litigation risk emerges — fails the prediction-time test",
+    "Claim-type codes changed meaning at the 2023 migration; <code>adjuster_notes</code> 40% empty, missingness concentrated in one office"
+   ],
+   "tasks": [
+    "For each of the four findings, name the data-quality or leakage concept it instantiates and the action it forces (drop / fix / normalise / scope down).",
+    "Restate the honest dataset: how many usable claims and labels, and what the 32:1 imbalance implies for how success will be measured.",
+    "Rewrite the mission scope as you'd put it in the proposal: phases, what is billable data work, and what you now refuse to promise.",
+    "Draft the 3-4 sentence summary you'd give the sponsor explaining why the scope changed — without making the profiling pass sound like a failure."
+   ],
+   "solution": "<p><strong>Step 1 — findings to concepts and actions.</strong></p>\n<ol>\n<li><strong>Label reliability cliff (3 years, not 8)</strong> → this is the <em>labels</em> problem plus a coverage/regime issue from profiling: the prior five years can't be trusted as ground truth. <em>Action: scope down</em> to ~3 years of labelled data; optionally use older claims for unsupervised exploration only.</li>\n<li><strong><code>legal_reserve_amount</code></strong> → <strong>target leakage</strong>: the value is set <em>after</em> the outcome starts revealing itself, so it fails \"would we know this at the moment of prediction?\". Its 96% coverage of litigated claims is the 'too good' tell. <em>Action: drop it from features</em> (and audit for siblings — any field updated during the legal process).</li>\n<li><strong>Code migration cliff</strong> → a <em>consistency</em> failure across time: the same field means different things before and after. <em>Action: build and validate a normalisation mapping</em> — billable data work, and a reminder to split by time and check drift.</li>\n<li><strong>Missing <code>adjuster_notes</code> from one office</strong> → <em>completeness with systematic missingness</em>: the gaps aren't random, they're organisational. A model trained as-is learns 'office X claims have no notes' as a spurious signal. <em>Action: either integrate the second tool (effort!), add an explicit 'notes-unavailable' indicator, or exclude notes features for now — decided by cost vs. lift.</em></li>\n</ol>\n<p><strong>Step 2 — the honest dataset.</strong> ~75,000 claims with trustworthy labels, of which ~2,250 are litigated — a <strong>32:1 imbalance</strong>. Consequences: accuracy is a useless success measure (a 'no litigation ever' model scores ~97%); evaluation must be imbalance-aware (recall/precision on the litigated class, at a threshold matched to legal's intervention capacity); and with only ~2,250 positive examples, feature ambitions must stay disciplined.</p>\n<p><strong>Step 3 — the revised scope.</strong> <em>Phase 1 (billable data work, ~60-70% of the engagement):</em> label audit and definition sign-off; leakage review of every candidate feature against the prediction-time test; claim-type normalisation across the migration; missingness handling decision for notes; a documented, time-split train/test protocol. <em>Phase 2:</em> baseline model, then iterate — with success defined against the current process (how does legal triage today?). <em>Refuse to promise:</em> any accuracy/recall number before Phase 1 completes; use of the pre-2023 'free' five years as if labelled; a timeline that assumes notes integration is trivial.</p>\n<p><strong>Step 4 — the sponsor summary.</strong> <em>\"The two-day review was cheap insurance: it found that the dependable part of your history is the last three years, that one column would have let the model cheat by reading the legal team's own reaction, and that a system migration quietly changed what your claim codes mean. None of this stops the mission — it tells us exactly what to build first, and it's why the number we eventually quote you will be one the model can actually repeat in production.\"</em></p>",
+   "rubric": {
+    "keyPoints": [
+     "<code>legal_reserve_amount</code> identified as target leakage via the prediction-time question, with the instruction to hunt for sibling fields, not just drop one column",
+     "Label cliff handled honestly: usable data restated as ~3 years / ~75k claims / ~2,250 positives, not the headline 8 years",
+     "32:1 imbalance translated into evaluation consequences (accuracy useless; recall/precision at a capacity-matched threshold)",
+     "Revised scope makes the data work a visible, billable phase and withholds any performance promise until after it"
+    ],
+    "pitfalls": [
+     "Treating the reserve column as a great feature because of its predictive power — the 'too good' feature is the leak",
+     "Quietly keeping the 8-year framing in the proposal because it sounds better — the unusable labels will surface eventually, on your name",
+     "Mean-filling or ignoring the systematically missing notes — the missingness encodes an organisational fact the model will exploit spuriously",
+     "Framing the profiling findings to the sponsor as bad news rather than as the de-risking deliverable they paid for"
+    ],
+    "takeaways": [
+     "The output of leader-level profiling is not a chart deck — it's a revised scope and a revised price, delivered before any promise is made",
+     "Run every candidate feature past \"would we know this at the moment of prediction?\" — it's the cheapest leak detector that exists"
+    ],
+    "transfer": "This audit-before-commitment pattern is the same discipline as technical due diligence on an acquisition (the data room always looks cleaner than the codebase), a structural survey before buying a building, or a security assessment before signing an integration. The general form: when the asset's owner describes the asset, sample it yourself, expect the description to be optimistic in predictable ways (age, consistency, hidden process changes), and convert findings into scope and price rather than blame."
+   }
+  },
+  {
+   "id": "ex2",
+   "title": "Scope the labelling mission — with a kappa pilot",
+   "estimatedMinutes": 30,
+   "scenario": "<p>A B2B software client wants a model that classifies inbound support tickets as <strong>\"churn-risk signal\" vs \"routine\"</strong>, feeding the customer-success team's outreach list. No such label exists. The client suggests a shortcut: <em>\"Just label a ticket churn-risk if the customer actually churned within 90 days — we have that data already.\"</em></p>\n<p>You insist on a manual pilot first. Two senior CS managers label the same <strong>200 tickets</strong>. Results: they agree on 168 tickets. Annotator A marked 25% of tickets churn-risk; annotator B marked 20%.</p>\n<p>A full training set needs ~8,000 labelled tickets, and a labelling vendor quotes <strong>€0.55 per ticket per annotator pass</strong>.</p>",
+   "givens": [
+    "Pilot: 200 double-labelled tickets, 168 agreements (<span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>p</mi><mi>o</mi></msub><mo>=</mo><mn>0.84</mn></mrow><annotation encoding=\"application/x-tex\">p_o = 0.84</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">p</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1514em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">o</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.84</span></span></span></span>)",
+    "Annotator A: 25% positive; annotator B: 20% positive (use these to compute chance agreement <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>p</mi><mi>e</mi></msub></mrow><annotation encoding=\"application/x-tex\">p_e</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">p</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1514em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">e</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span>)",
+    "Target: ~8,000 labelled tickets; vendor price €0.55 per ticket per pass",
+    "Client's proposed shortcut: derive the label from actual churn within 90 days"
+   ],
+   "tasks": [
+    "Compute Cohen's kappa for the pilot (<span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>κ</mi><mo>=</mo><mo stretchy=\"false\">(</mo><msub><mi>p</mi><mi>o</mi></msub><mo>−</mo><msub><mi>p</mi><mi>e</mi></msub><mo stretchy=\"false\">)</mo><mi mathvariant=\"normal\">/</mi><mo stretchy=\"false\">(</mo><mn>1</mn><mo>−</mo><msub><mi>p</mi><mi>e</mi></msub><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">\\kappa = (p_o - p_e)/(1 - p_e)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mord mathnormal\">κ</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mopen\">(</span><span class=\"mord\"><span class=\"mord mathnormal\">p</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1514em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">o</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">p</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1514em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">e</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mclose\">)</span><span class=\"mord\">/</span><span class=\"mopen\">(</span><span class=\"mord\">1</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">p</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1514em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">e</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mclose\">)</span></span></span></span>) and interpret it against the field thresholds.",
+    "Evaluate the client's \"use actual churn\" shortcut: what kind of label is it, and what are the two distinct problems with it?",
+    "Recommend a labelling plan: guideline work, passes, and budget — with the arithmetic.",
+    "State what the kappa result implies as a ceiling for the model, and how you'd communicate that expectation to the client."
+   ],
+   "solution": "<p><strong>Step 1 — Cohen's kappa.</strong></p>\n<p>Observed agreement: <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>p</mi><mi>o</mi></msub><mo>=</mo><mn>168</mn><mi mathvariant=\"normal\">/</mi><mn>200</mn><mo>=</mo><mn>0.84</mn></mrow><annotation encoding=\"application/x-tex\">p_o = 168/200 = 0.84</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">p</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1514em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">o</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">168/200</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.84</span></span></span></span>.</p>\n<p>Chance agreement: both say positive: <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mn>0.25</mn><mo>×</mo><mn>0.20</mn><mo>=</mo><mn>0.05</mn></mrow><annotation encoding=\"application/x-tex\">0.25 \\times 0.20 = 0.05</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.7278em;vertical-align:-0.0833em;\"></span><span class=\"mord\">0.25</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">×</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.20</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.05</span></span></span></span>; both say negative: <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mn>0.75</mn><mo>×</mo><mn>0.80</mn><mo>=</mo><mn>0.60</mn></mrow><annotation encoding=\"application/x-tex\">0.75 \\times 0.80 = 0.60</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.7278em;vertical-align:-0.0833em;\"></span><span class=\"mord\">0.75</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">×</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.80</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.60</span></span></span></span>; so <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>p</mi><mi>e</mi></msub><mo>=</mo><mn>0.05</mn><mo>+</mo><mn>0.60</mn><mo>=</mo><mn>0.65</mn></mrow><annotation encoding=\"application/x-tex\">p_e = 0.05 + 0.60 = 0.65</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">p</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1514em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">e</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.7278em;vertical-align:-0.0833em;\"></span><span class=\"mord\">0.05</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.60</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.65</span></span></span></span>.</p>\n<p><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>κ</mi><mo>=</mo><mfrac><mrow><mn>0.84</mn><mo>−</mo><mn>0.65</mn></mrow><mrow><mn>1</mn><mo>−</mo><mn>0.65</mn></mrow></mfrac><mo>=</mo><mfrac><mn>0.19</mn><mn>0.35</mn></mfrac><mo>≈</mo><mn>0.54</mn></mrow><annotation encoding=\"application/x-tex\">\\kappa = \\frac{0.84 - 0.65}{1 - 0.65} = \\frac{0.19}{0.35} \\approx 0.54</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mord mathnormal\">κ</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.2484em;vertical-align:-0.4033em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.8451em;\"><span style=\"top:-2.655em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">1</span><span class=\"mbin mtight\">−</span><span class=\"mord mtight\">0.65</span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.394em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">0.84</span><span class=\"mbin mtight\">−</span><span class=\"mord mtight\">0.65</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.4033em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.1901em;vertical-align:-0.345em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.8451em;\"><span style=\"top:-2.655em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">0.35</span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.394em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">0.19</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.345em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">≈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.54</span></span></span></span></p>\n<p>Reading: raw agreement of 84% <em>sounds</em> strong, but most of it is the chance freebie from the dominant 'routine' class. <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>κ</mi><mo>≈</mo><mn>0.54</mn></mrow><annotation encoding=\"application/x-tex\">\\kappa \\approx 0.54</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4831em;\"></span><span class=\"mord mathnormal\">κ</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">≈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.54</span></span></span></span> sits below the 0.6-0.8 'usable' band — the guideline, not the annotators, is the likely problem. Don't fund 8,000 labels on this definition yet.</p>\n<p><strong>Step 2 — the client's shortcut.</strong> \"Churned within 90 days\" is an <strong>existing-signal label</strong> — cheapest source, but here it's wrong twice over. <em>(a) It's a proxy:</em> the task is to spot tickets that <em>signal</em> churn risk, but many churns have causes invisible in tickets (price, champion left) and many alarming tickets are saved by good outreach — optimising the proxy is not optimising 'ticket worth acting on'. <em>(b) It's borderline leaky/self-defeating in deployment:</em> the model's whole purpose is to trigger interventions that <em>prevent</em> churn; training on realised churn bakes in the old, intervention-free world. The honest use of the churn signal is as a <em>sanity check</em> correlated with the human label, not as the label.</p>\n<p><strong>Step 3 — the plan and budget.</strong> (1) Run a disagreement review on the 32 conflicting tickets; tighten the guideline (definitions, edge cases, examples). (2) Re-pilot ~200 fresh tickets double-labelled: 200 × 2 × €0.55 = <strong>€220</strong> — trivial insurance. Proceed only if <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>κ</mi></mrow><annotation encoding=\"application/x-tex\">\\kappa</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mord mathnormal\">κ</span></span></span></span> reaches ~0.7+. (3) Production labelling: single pass on 8,000 tickets (8,000 × €0.55 = <strong>€4,400</strong>), plus a <strong>10% double-labelled overlap</strong> for ongoing agreement monitoring (800 × €0.55 = <strong>€440</strong>). Budget ≈ <strong>€5,060 + guideline/QA time</strong> — and per the module, this is its own line item, not hidden inside 'data cleaning'.</p>\n<p><strong>Step 4 — the ceiling conversation.</strong> Inter-annotator agreement is the practical ceiling on model reliability: if two senior humans currently agree imperfectly (<span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>κ</mi><mo>≈</mo><mn>0.54</mn></mrow><annotation encoding=\"application/x-tex\">\\kappa \\approx 0.54</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4831em;\"></span><span class=\"mord mathnormal\">κ</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">≈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.54</span></span></span></span>), no model trained on these labels will be more dependable than that — which is exactly why steps 1-2 come before the spend. Client sentence: <em>\"Before we buy 8,000 labels, we're making sure two of your own experts agree on what 'churn-risk' means — because the model can only ever be as consistent as the definition it learns from, and right now that definition is the bottleneck, not the technology.\"</em></p>",
+   "rubric": {
+    "keyPoints": [
+     "Kappa computed correctly (<span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>p</mi><mi>e</mi></msub><mo>=</mo><mn>0.65</mn></mrow><annotation encoding=\"application/x-tex\">p_e = 0.65</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">p</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1514em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">e</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.65</span></span></span></span>, <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>κ</mi><mo>≈</mo><mn>0.54</mn></mrow><annotation encoding=\"application/x-tex\">\\kappa \\approx 0.54</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4831em;\"></span><span class=\"mord mathnormal\">κ</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">≈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.54</span></span></span></span>) and interpreted: high raw agreement is mostly the majority-class freebie; 0.54 means fix the guideline before scaling",
+     "Shortcut label diagnosed as a proxy (ticket-signal ≠ realised churn) with the intervention/feedback problem noted — not just 'proxies are bad'",
+     "Plan sequences guideline revision → cheap re-pilot → metered production labelling with an overlap for QA, with correct arithmetic (≈ €5k)",
+     "Agreement framed as the model's accuracy ceiling, and communicated as a definition problem, not a people problem"
+    ],
+    "pitfalls": [
+     "Accepting 84% raw agreement as 'good' without correcting for chance — the exact flattery kappa exists to remove",
+     "Funding the full 8,000 labels before the guideline is fixed — locking the ambiguity into the dataset at 40× the pilot cost",
+     "Adopting the churn-outcome shortcut because it's free — cheapest label source, but a proxy for the wrong target here",
+     "Chasing model accuracy above the agreement ceiling later — that gap is label noise, not a modelling deficiency"
+    ],
+    "takeaways": [
+     "Labels are a product with their own cost curve and quality metric — pilot, measure agreement, fix the guideline, then spend",
+     "When the easy label exists, ask whether it's the real target or a proxy; the difference decides whether the model optimises the right thing"
+    ],
+    "transfer": "The pilot-and-agreement pattern generalises to any human-judgment pipeline: grading rubrics before hiring exam markers, medical second-reader studies before trusting radiology labels, content-moderation policy calibration, and even requirements workshops (if two stakeholders can't agree what counts as a 'critical' bug, no triage automation will satisfy either). The portable rule: before scaling any judgment, measure whether two informed humans make it the same way — and treat their disagreement as a specification bug to fix upstream."
+   }
+  }
+ ]
+}

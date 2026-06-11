@@ -1,0 +1,510 @@
+{
+ "id": "14",
+ "title": "Data Governance, Privacy & Pseudonymisation",
+ "weeks": null,
+ "part": "V — Governance, Risk & Responsible AI",
+ "partIndex": 5,
+ "addon": false,
+ "pitchHtml": "<p>Every AI &#x26; Data mission you lead in Europe runs on data, and most of that data is <em>about people</em> — which puts it squarely under the <strong>RGPD</strong> (the French name for the GDPR, Regulation 2016/679) and the watch of the <strong>CNIL</strong>, France's data-protection regulator. This module is the leader's working knowledge of doing AI lawfully: what counts as personal data, the principles you cannot skip, the single distinction that decides whether a dataset is even in scope (<strong>anonymisation vs pseudonymisation</strong>), and the governance operating model a pole must run so that compliance <em>enables</em> delivery instead of blocking it. No maths here — this is law, process, and judgment. You are not your client's lawyer; your job is to know enough to scope the work, spot the red flags, and partner with the DPO and legal counsel who carry the legal call.</p>",
+ "prev": null,
+ "next": null,
+ "sectionCount": 8,
+ "quizCount": 8,
+ "exerciseCount": 2,
+ "sections": [
+  {
+   "id": "learning-objectives",
+   "kind": "objectives",
+   "title": "Learning Objectives",
+   "blocks": [
+    {
+     "type": "checklist",
+     "checklistId": "14/learning-objectives/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Decide whether a dataset is <strong>personal data</strong>, <strong>pseudonymised</strong> (still in scope), or <strong>truly anonymised</strong> (out of scope) — and why it matters commercially"
+      },
+      {
+       "id": "1",
+       "html": "Pick a <strong>lawful basis</strong> (consent vs legitimate interest) and apply the core RGPD principles to an AI project"
+      },
+      {
+       "id": "2",
+       "html": "Judge when an AI initiative <strong>triggers a DPIA</strong> and scope the work to produce one"
+      },
+      {
+       "id": "3",
+       "html": "Map privacy-engineering techniques (masking, tokenisation, hashing, k-anonymity, differential privacy) to <strong>re-identification risk</strong> and the right use"
+      },
+      {
+       "id": "4",
+       "html": "Stand up a <strong>data governance operating model</strong> — ownership, the DPO relationship, classification, catalog &#x26; lineage, access control, retention"
+      },
+      {
+       "id": "5",
+       "html": "Name the <strong>AI-specific</strong> privacy risks (PII in prompts and training data, model memorisation, right-to-erasure vs a trained model, third-party LLM terms, residency)"
+      },
+      {
+       "id": "6",
+       "html": "Scope and price a governance/compliance mission with a concrete deliverable and an honest \"what NOT to promise\""
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "key-concepts",
+   "kind": "concepts",
+   "title": "Key Concepts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "rgpdgdpr-essentials-for-ai",
+     "number": 1,
+     "title": "RGPD/GDPR Essentials for AI",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The RGPD governs the processing of <strong>personal data</strong> — <em>any information relating to an identified or identifiable natural person</em>. That definition is broad on purpose: a name or email obviously qualifies, but so does an IP address, a device ID, a cookie, a customer number, a photo, a voice clip, or a combination of fields that <em>together</em> single someone out (a postcode + birth date + job title can be as identifying as a name). A <strong>data subject</strong> is the person the data is about; a <strong>data controller</strong> decides why and how data is processed (usually your client); a <strong>processor</strong> processes it on the controller's instructions (often you, or a cloud/LLM vendor). Getting these roles right determines who signs what.</p>\n<p>A special, stricter tier — <strong>special-category data</strong> (Article 9: health, biometrics used for ID, ethnicity, religion, sexual orientation, political opinions, trade-union membership) — is <em>prohibited to process by default</em> and needs an explicit exception. Any AI touching this data raises the bar sharply.</p>\n<p>Six principles run through every decision. Treat them as a checklist you can recite:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Principle</th><th align=\"left\">What it demands</th><th align=\"left\">The AI failure mode it prevents</th></tr></thead><tbody><tr><td align=\"left\"><strong>Lawful basis</strong></td><td align=\"left\">You need a legal ground <em>before</em> processing (Concept 2)</td><td align=\"left\">\"We had the data, so we used it for ML\" — no basis = unlawful</td></tr><tr><td align=\"left\"><strong>Purpose limitation</strong></td><td align=\"left\">Data collected for purpose A can't be silently reused for purpose B</td><td align=\"left\">Training a model on data gathered for billing or support</td></tr><tr><td align=\"left\"><strong>Data minimisation</strong></td><td align=\"left\">Collect/keep only what the purpose needs</td><td align=\"left\">Hoovering every column \"in case it's useful for a model\"</td></tr><tr><td align=\"left\"><strong>Storage limitation</strong></td><td align=\"left\">Keep personal data only as long as needed, then delete</td><td align=\"left\">Indefinite training corpora and \"we never delete logs\"</td></tr><tr><td align=\"left\"><strong>Accuracy</strong></td><td align=\"left\">Keep it correct and up to date</td><td align=\"left\">A model trained on stale, wrong records — and acting on them</td></tr><tr><td align=\"left\"><strong>Integrity &#x26; confidentiality</strong></td><td align=\"left\">Secure it (access control, encryption)</td><td align=\"left\">Open buckets, over-broad access, plaintext PII</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>Plus two cross-cutting obligations: <strong>accountability</strong> (you must be able to <em>demonstrate</em> compliance — documentation, records, the DPIA) and <strong>privacy by design and by default</strong> (build protection in from the start, not bolted on at the end). For a tech lead, \"privacy by design\" is the operative phrase: it means governance belongs in the <em>scoping</em> conversation, not the final-week checklist.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>The RGPD is not a feature you add at the end; it's a constraint on the <em>whole pipeline</em>, from collection to deletion. The cheapest compliant system is the one designed compliant — retrofitting lawful basis, minimisation, and deletion onto a built system is where projects bleed time and trust. Bake it in at <a class=\"wikilink\" data-module=\"03\" href=\"#/module/03\">Working with Data: Sources, Quality &#x26; Feature Engineering</a> and <a class=\"wikilink\" data-module=\"12\" href=\"#/module/12\">Data Engineering &#x26; Platforms</a> time.</p>"
+      }
+     ]
+    },
+    {
+     "id": "lawful-basis-consent-vs-legitimate-interest",
+     "number": 2,
+     "title": "Lawful Basis: Consent vs Legitimate Interest",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>You may not process personal data without one of six lawful bases. Three matter most in AI/data work:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Lawful basis</th><th align=\"left\">Use it when</th><th align=\"left\">Catch for AI</th></tr></thead><tbody><tr><td align=\"left\"><strong>Consent</strong></td><td align=\"left\">The person has freely, specifically, and unambiguously agreed</td><td align=\"left\">Must be opt-in, granular, and <em>revocable</em> — and withdrawal must actually stop processing</td></tr><tr><td align=\"left\"><strong>Contract</strong></td><td align=\"left\">Processing is needed to deliver a service the person signed up for</td><td align=\"left\">Doesn't stretch to \"train our models\" unless that's genuinely part of the service</td></tr><tr><td align=\"left\"><strong>Legitimate interest</strong></td><td align=\"left\">Your (or a third party's) interest isn't overridden by the person's rights</td><td align=\"left\">Requires a documented <strong>balancing test (LIA)</strong>; rarely covers special-category data or intrusive profiling</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>Two traps a leader must flag early. First, <strong>consent is fragile</strong>: if it's bundled, pre-ticked, or a condition of service, it isn't valid — and because it's revocable, a system built on consent must be built to <em>stop</em> on withdrawal. Second, <strong>legitimate interest is not a free pass</strong>: it needs a written balancing test weighing your interest against the data subject's reasonable expectations, and it gets weaker the more surprising or intrusive the processing (large-scale profiling, scraping, repurposing for ML the person never anticipated). The lawful basis is a <em>gate before the project</em>, not a footnote — and it is one of the first things to confirm with the client's DPO.</p>"
+      }
+     ]
+    },
+    {
+     "id": "data-subject-rights",
+     "number": 3,
+     "title": "Data-Subject Rights",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The RGPD gives individuals enforceable rights, and a compliant AI system has to be <em>built</em> to honour them — usually within one month of a request. The ones that bite hardest for AI/data:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Right</th><th align=\"left\">What the person can demand</th><th align=\"left\">What your system must support</th></tr></thead><tbody><tr><td align=\"left\"><strong>Access</strong></td><td align=\"left\">A copy of their data + what you do with it</td><td align=\"left\">Find every record about one person across all stores</td></tr><tr><td align=\"left\"><strong>Rectification</strong></td><td align=\"left\">Correction of wrong data</td><td align=\"left\">Update propagated everywhere it was copied</td></tr><tr><td align=\"left\"><strong>Erasure (\"right to be forgotten\")</strong></td><td align=\"left\">Deletion of their data</td><td align=\"left\">Delete across pipelines, backups, <em>and</em> derived datasets</td></tr><tr><td align=\"left\"><strong>Portability</strong></td><td align=\"left\">Their data in a machine-readable format</td><td align=\"left\">Export in a structured, common format</td></tr><tr><td align=\"left\"><strong>Object / restrict</strong></td><td align=\"left\">Stop or pause certain processing</td><td align=\"left\">Honour opt-outs, including from profiling</td></tr><tr><td align=\"left\"><strong>Not be subject to solely automated decisions</strong> (Art. 22)</td><td align=\"left\">A human review of significant automated decisions</td><td align=\"left\">Human-in-the-loop on high-impact decisions</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The two that are technically hard — and that you should raise in scoping — are <strong>access</strong> and <strong>erasure</strong>: both require you to <em>locate every copy of one person's data</em> across warehouses, lakes, logs, backups, and any datasets derived from them. A pipeline that fans data out into a dozen tables and three caches without lineage cannot answer an erasure request honestly. (Article 22's human-review right also threads directly into <a class=\"wikilink\" data-module=\"15\" href=\"#/module/15\">Responsible AI: Interpretability, Fairness, Safety &#x26; the EU AI Act</a> — automated decisions with legal or similarly significant effects are governed on both fronts.)</p>"
+      }
+     ]
+    },
+    {
+     "id": "the-dpia-when-an-ai-project-triggers-one",
+     "number": 4,
+     "title": "The DPIA: When an AI Project Triggers One",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>A <strong>Data Protection Impact Assessment (DPIA / <em>AIPD</em> in French)</strong> is a documented analysis of the privacy risks of a processing activity and how you'll mitigate them. It is <strong>mandatory</strong> when processing is \"likely to result in a high risk\" to people's rights — and the CNIL publishes a list of operations that require one. AI projects hit the triggers constantly.</p>\n<p>You almost certainly need a DPIA when <em>two or more</em> of these apply (and often with just one):</p>\n<ul>\n<li><strong>Large-scale</strong> processing of personal data</li>\n<li><strong>Special-category</strong> data (health, biometrics) or highly personal data</li>\n<li><strong>Systematic profiling / scoring</strong> of people (credit, churn, fraud, HR, performance)</li>\n<li><strong>Automated decisions</strong> with legal or significant effects on people</li>\n<li><strong>Systematic monitoring</strong> (CCTV with analytics, employee monitoring, public-space tracking)</li>\n<li><strong>Innovative technology</strong> used in a new way (much GenAI/LLM deployment counts)</li>\n<li><strong>Matching or combining</strong> datasets from different sources</li>\n<li><strong>Vulnerable</strong> data subjects (children, patients, employees)</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>If your AI project profiles people at scale, touches health/biometric data, makes or supports consequential decisions about individuals, or deploys novel technology on personal data, assume a DPIA is required and budget for it. It's not red tape you bolt on at the end — done early, it's a <em>de-risking and design tool</em> that surfaces exactly the minimisation, retention, and access decisions you'd want to make anyway. The CNIL even publishes free software (PIA tool) to run one.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "worked-example",
+       "title": "a churn-prediction model for a French telco",
+       "html": "<p>A client wants a model that scores every subscriber's likelihood to churn and feeds a retention team. Walk the governance before a line of modelling code:</p>\n<ol>\n<li><strong>Personal data?</strong> Yes — subscriber records, usage, contract, support history, all tied to identified customers.</li>\n<li><strong>Lawful basis?</strong> Likely <strong>legitimate interest</strong> (retaining customers), but it needs a documented balancing test, and customers must be informed and able to object. The DPO confirms the call.</li>\n<li><strong>DPIA?</strong> <strong>Yes.</strong> Two triggers fire: <em>large-scale</em> processing and <em>systematic profiling/scoring</em> of individuals. Budget 1-2 weeks to produce it with the DPO.</li>\n<li><strong>Principles in practice.</strong> <em>Minimisation</em> — drop fields with no predictive value and no business need (do you really need precise location, or special-category proxies?). <em>Purpose limitation</em> — this data was collected for service delivery; using it for churn scoring is arguably compatible, but document the reasoning. <em>Storage limitation</em> — set a retention window for the training set and the scores.</li>\n<li><strong>Pseudonymise the training set.</strong> The data scientist does not need names and phone numbers to learn churn patterns — replace direct identifiers with tokens so the modelling environment holds pseudonymised data (Concept 5). This <em>reduces</em> risk but, crucially, the data is <strong>still personal data</strong> and still in RGPD scope.</li>\n<li><strong>Automated decision?</strong> If a low score auto-triggers a hard action (e.g. cancellation), Article 22 bites — keep a human in the loop. If it merely <em>prioritises</em> a human's call list, the risk is far lower.</li>\n</ol>\n<p>The lesson: the governance work reshapes the project (fewer fields, a retention window, pseudonymisation, a human gate) <em>before</em> and <em>during</em> the build — and most of it is good engineering anyway.</p>"
+      }
+     ]
+    },
+    {
+     "id": "anonymisation-vs-pseudonymisation--the-central-distinction",
+     "number": 5,
+     "title": "Anonymisation vs Pseudonymisation — the Central Distinction",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>This is the single most important — and most misunderstood — distinction in the whole module. It decides whether the RGPD applies <em>at all</em>.</p>\n<ul>\n<li><strong>Pseudonymisation</strong> replaces direct identifiers (name, email, ID) with a token or key, but the data <em>can still be linked back</em> to a person using additional information held separately (the mapping table, a key, or quasi-identifiers). The RGPD explicitly names it as a security and minimisation <em>measure</em> — but pseudonymised data is <strong>still personal data and fully in scope</strong>. You get reduced risk, not a free pass.</li>\n<li><strong>Anonymisation</strong> is irreversible: the data can <em>no longer</em> be related to an identifiable person by <em>anyone</em>, by <em>any means reasonably likely to be used</em> (including combining with other datasets). Truly anonymous data is <strong>out of RGPD scope</strong> entirely — you can use it freely. The catch: genuine, durable anonymisation is <em>hard</em>. Rich datasets are notoriously re-identifiable by linking quasi-identifiers, so the CNIL holds a high bar — if re-identification is reasonably possible, it's still personal data, whatever you called the column.</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "pseudonymisation is a lock, anonymisation is a shredder",
+       "html": "<p>Pseudonymising is putting your data behind a lock and holding the key elsewhere: safer, reversible, <em>still personal data, still RGPD-governed</em>. Anonymising is shredding the link to the person so thoroughly that nobody can reconstruct it — only then does the RGPD stop applying. When in doubt, assume you have pseudonymised (not anonymised) data and keep it in scope. Claiming \"it's anonymised\" when it's merely pseudonymised is one of the most common — and most expensive — compliance errors.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>The techniques, as intuition</strong> (you scope and choose these; engineers implement them):</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Technique</th><th align=\"left\">What it does (intuition)</th><th align=\"left\">Re-identification risk</th><th align=\"left\">Still personal data?</th><th align=\"left\">Typical use</th></tr></thead><tbody><tr><td align=\"left\"><strong>Masking / redaction</strong></td><td align=\"left\">Hide or X-out part of a field (<code>****1234</code>)</td><td align=\"left\">Low for the masked field, but rest may still identify</td><td align=\"left\"><strong>Yes</strong> (usually)</td><td align=\"left\">Showing data to support staff; logs; demos</td></tr><tr><td align=\"left\"><strong>Tokenisation</strong></td><td align=\"left\">Swap an identifier for a random token; mapping kept in a secure vault</td><td align=\"left\">Reversible <em>with</em> the vault → pseudonymisation</td><td align=\"left\"><strong>Yes</strong></td><td align=\"left\">Letting analysts/modellers work without raw IDs</td></tr><tr><td align=\"left\"><strong>Hashing (+ salt)</strong></td><td align=\"left\">One-way function turns an ID into a fixed string; a <strong>salt</strong> stops dictionary attacks</td><td align=\"left\">Low if salted &#x26; unlinkable, but a hash of a known value is still a stable identifier → often pseudonymisation</td><td align=\"left\"><strong>Usually yes</strong></td><td align=\"left\">Joining datasets on a common key without sharing raw IDs</td></tr><tr><td align=\"left\"><strong>k-anonymity</strong></td><td align=\"left\">Generalise/suppress quasi-identifiers so each record is indistinguishable from at least <em>k−1</em> others</td><td align=\"left\">Lower as <em>k</em> rises, but vulnerable to linkage/attribute attacks</td><td align=\"left\"><strong>Depends</strong> — often still pseudonymised</td><td align=\"left\">Releasing aggregate or coarsened datasets</td></tr><tr><td align=\"left\"><strong>Differential privacy</strong></td><td align=\"left\">Add calibrated mathematical <em>noise</em> so no single individual measurably changes the output</td><td align=\"left\">Lowest — strong, provable guarantee at the dataset/query level</td><td align=\"left\">Can approach <strong>anonymous</strong> for outputs (tune the privacy budget)</td><td align=\"left\">Aggregate statistics, private analytics, privacy-preserving training</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>You scope and choose these by name; two carry a standard formula a leader should recognise on a whiteboard. <strong>Quasi-identifiers</strong> are the fields that aren't direct IDs but still single someone out <em>in combination</em> — age, ZIP/postcode, gender, job title, admission date. The <strong>sensitive attribute</strong> is the thing you're trying to protect (diagnosis, salary, churn flag).</p>\n<p><strong>k-anonymity.</strong> Generalise or suppress quasi-identifiers until every combination of them (every <em>equivalence class</em>) is shared by at least <em>k</em> records:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\forall\\, r \\in D,\\quad \\big|\\{\\, r' \\in D : QI(r') = QI(r)\\,\\}\\big| \\ge k",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mi mathvariant=\"normal\">∀</mi><mtext> </mtext><mi>r</mi><mo>∈</mo><mi>D</mi><mo separator=\"true\">,</mo><mspace width=\"1em\"/><mo fence=\"false\" stretchy=\"true\" minsize=\"1.2em\" maxsize=\"1.2em\">∣</mo><mo stretchy=\"false\">{</mo><mtext> </mtext><msup><mi>r</mi><mo mathvariant=\"normal\" lspace=\"0em\" rspace=\"0em\">′</mo></msup><mo>∈</mo><mi>D</mi><mo>:</mo><mi>Q</mi><mi>I</mi><mo stretchy=\"false\">(</mo><msup><mi>r</mi><mo mathvariant=\"normal\" lspace=\"0em\" rspace=\"0em\">′</mo></msup><mo stretchy=\"false\">)</mo><mo>=</mo><mi>Q</mi><mi>I</mi><mo stretchy=\"false\">(</mo><mi>r</mi><mo stretchy=\"false\">)</mo><mtext> </mtext><mo stretchy=\"false\">}</mo><mo fence=\"false\" stretchy=\"true\" minsize=\"1.2em\" maxsize=\"1.2em\">∣</mo><mo>≥</mo><mi>k</mi></mrow><annotation encoding=\"application/x-tex\">\\forall\\, r \\in D,\\quad \\big|\\{\\, r&#x27; \\in D : QI(r&#x27;) = QI(r)\\,\\}\\big| \\ge k</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.7335em;vertical-align:-0.0391em;\"></span><span class=\"mord\">∀</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0278em;\">r</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">∈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.2em;vertical-align:-0.35em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0278em;\">D</span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:1em;\"></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\"><span class=\"delimsizing mult\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.85em;\"><span style=\"top:-2.85em;\"><span class=\"pstrut\" style=\"height:3.2em;\"></span><span style=\"width:0.333em;height:1.2em;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"0.333em\" height=\"1.2em\" viewBox=\"0 0 333 1200\"><path d=\"M145 15 v585 v0 v585 c2.667,10,9.667,15,21,15\nc10,0,16.667,-5,20,-15 v-585 v0 v-585 c-2.667,-10,-9.667,-15,-21,-15\nc-10,0,-16.667,5,-20,15z M188 15 H145 v585 v0 v585 h43z\"/></svg></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.35em;\"><span></span></span></span></span></span></span><span class=\"mopen\">{</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0278em;\">r</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.8019em;\"><span style=\"top:-3.113em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">′</span></span></span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">∈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0278em;\">D</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">:</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.0519em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\">Q</span><span class=\"mord mathnormal\" style=\"margin-right:0.0785em;\">I</span><span class=\"mopen\">(</span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0278em;\">r</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.8019em;\"><span style=\"top:-3.113em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">′</span></span></span></span></span></span></span></span></span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.2em;vertical-align:-0.35em;\"></span><span class=\"mord mathnormal\">Q</span><span class=\"mord mathnormal\" style=\"margin-right:0.0785em;\">I</span><span class=\"mopen\">(</span><span class=\"mord mathnormal\" style=\"margin-right:0.0278em;\">r</span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mclose\">}</span><span class=\"mord\"><span class=\"delimsizing mult\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.85em;\"><span style=\"top:-2.85em;\"><span class=\"pstrut\" style=\"height:3.2em;\"></span><span style=\"width:0.333em;height:1.2em;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"0.333em\" height=\"1.2em\" viewBox=\"0 0 333 1200\"><path d=\"M145 15 v585 v0 v585 c2.667,10,9.667,15,21,15\nc10,0,16.667,-5,20,-15 v-585 v0 v-585 c-2.667,-10,-9.667,-15,-21,-15\nc-10,0,-16.667,5,-20,15z M188 15 H145 v585 v0 v585 h43z\"/></svg></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.35em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">≥</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0315em;\">k</span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>In plain terms: for every record <em>r</em> in the dataset <em>D</em>, at least <em>k</em> records (including <em>r</em> itself) carry the <strong>same quasi-identifier values</strong> <em>QI</em> — so each record is indistinguishable from at least <em>k − 1</em> others. <strong>Use case:</strong> releasing or sharing a coarsened micro-dataset (e.g. a hospital extract for research) where you must prevent singling anyone out. Larger <em>k</em> → more privacy, less utility (you generalise away more detail).</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>You can't single anyone out of a crowd of <em>k</em> — if at least <em>k</em> people share every visible attribute, pointing at \"the 34-year-old in 75011\" lands on <em>k</em> people, not one. The dial is <em>k</em>: turn it up and the crowd grows (safer) but the data blurs (less useful).</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><em>Tiny worked example.</em> Raw rows <code>{age 34, ZIP 75011}</code>, <code>{age 37, ZIP 75019}</code>, <code>{age 41, ZIP 92100}</code> are each unique → <em>k = 1</em> (everyone singled out). Generalise <code>age → band</code> and <code>ZIP → region</code>: <code>{30–39, Paris}</code>, <code>{30–39, Paris}</code>, <code>{40–49, Île-de-France}</code>. Now the first two share a combo (a group of 2) but the third is still alone. Coarsen the third into <code>{40–49, Paris}</code>'s band or merge bands until <strong>every</strong> combination has <strong>≥ k rows</strong> (for <em>k = 2</em>, keep generalising until no combination is unique).</p>\n<p><strong>l-diversity and t-closeness — fixing k-anonymity's weakness.</strong> A <em>k</em>-group still leaks if everyone in it shares the same sensitive value (a \"homogeneity attack\": all 5 people in your <em>k = 5</em> crowd have the same diagnosis → you learn it without singling anyone out). <strong>l-diversity</strong> requires each equivalence class to contain at least <strong>l well-represented values</strong> of the sensitive attribute. <strong>t-closeness</strong> goes further: the distribution of the sensitive attribute <em>within</em> each class must be within distance <strong>t</strong> of its distribution in the full dataset, so a class reveals little beyond what the whole table already does.</p>\n<p><strong>Differential privacy (ε).</strong> A randomised mechanism <em>M</em> is <strong>ε-differentially private</strong> if, for any two datasets <em>D</em> and <em>D′</em> differing by a single person's record, and any set of outputs <em>S</em>:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "P[M(D) \\in S] \\le e^{\\varepsilon}\\, P[M(D') \\in S]",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mi>P</mi><mo stretchy=\"false\">[</mo><mi>M</mi><mo stretchy=\"false\">(</mo><mi>D</mi><mo stretchy=\"false\">)</mo><mo>∈</mo><mi>S</mi><mo stretchy=\"false\">]</mo><mo>≤</mo><msup><mi>e</mi><mi>ε</mi></msup><mtext> </mtext><mi>P</mi><mo stretchy=\"false\">[</mo><mi>M</mi><mo stretchy=\"false\">(</mo><msup><mi>D</mi><mo mathvariant=\"normal\" lspace=\"0em\" rspace=\"0em\">′</mo></msup><mo stretchy=\"false\">)</mo><mo>∈</mo><mi>S</mi><mo stretchy=\"false\">]</mo></mrow><annotation encoding=\"application/x-tex\">P[M(D) \\in S] \\le e^{\\varepsilon}\\, P[M(D&#x27;) \\in S]</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mopen\">[</span><span class=\"mord mathnormal\" style=\"margin-right:0.109em;\">M</span><span class=\"mopen\">(</span><span class=\"mord mathnormal\" style=\"margin-right:0.0278em;\">D</span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">∈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0576em;\">S</span><span class=\"mclose\">]</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">≤</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.0519em;vertical-align:-0.25em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">e</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.7144em;\"><span style=\"top:-3.113em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">ε</span></span></span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mopen\">[</span><span class=\"mord mathnormal\" style=\"margin-right:0.109em;\">M</span><span class=\"mopen\">(</span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0278em;\">D</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.8019em;\"><span style=\"top:-3.113em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">′</span></span></span></span></span></span></span></span></span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">∈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0576em;\">S</span><span class=\"mclose\">]</span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>In plain terms: adding or removing <strong>one individual</strong> changes the probability of <em>any</em> output by at most a factor of <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msup><mi>e</mi><mi>ε</mi></msup></mrow><annotation encoding=\"application/x-tex\">e^{\\varepsilon}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6644em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">e</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6644em;\"><span style=\"top:-3.063em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">ε</span></span></span></span></span></span></span></span></span></span></span></span>. <strong>ε is the privacy budget</strong>: smaller ε → the two probabilities must be nearer-equal → more noise, stronger privacy, less utility; larger ε → less noise, weaker guarantee, more utility. <strong>Use case:</strong> publishing statistics, dashboards, or analytics over sensitive data, and privacy-preserving model training. Unlike k-anonymity, the guarantee is <strong>mathematical and composable</strong> and holds <em>whatever</em> auxiliary data an attacker has.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Adding calibrated noise gives any individual <strong>plausible deniability</strong>: because the output is essentially the same whether or not you're in the data, no one can point to a result and prove you contributed it — so you can't be singled out from the output, while the aggregate stays useful. (The maths of <em>how</em> the noise is calibrated lives in the research path — <a class=\"wikilink\" data-module=\"15\" href=\"#/module/15\">Responsible AI: Interpretability, Fairness, Safety &#x26; the EU AI Act</a> points onward; here you tune ε and recognise the guarantee.)</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>A practical sequencing rule: <strong>pseudonymise as early as possible</strong> (ideally before personal data reaches the analytics/modelling/LLM environment), keep the re-identification key tightly access-controlled and separate, and only claim <em>anonymisation</em> after a defensible assessment — ideally with the DPO's sign-off — that re-identification isn't reasonably possible.</p>"
+      }
+     ]
+    },
+    {
+     "id": "the-data-governance-operating-model",
+     "number": 6,
+     "title": "The Data Governance Operating Model",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Governance is the operating system that makes all of the above repeatable instead of heroic. A pole needs a lightweight but real version of this; you don't need every box on day one, but you need to know what each does.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Building block</th><th align=\"left\">What it is</th><th align=\"left\">Why a leader cares</th></tr></thead><tbody><tr><td align=\"left\"><strong>Data ownership / stewardship</strong></td><td align=\"left\">A named <strong>owner</strong> (accountable, business-side) and <strong>steward</strong> (day-to-day quality/definitions) per data domain</td><td align=\"left\">\"Who decides and who maintains\" — without it, nothing has an accountable home</td></tr><tr><td align=\"left\"><strong>DPO (Data Protection Officer)</strong></td><td align=\"left\">The privacy authority (mandatory for many orgs); independent, advises and monitors compliance, liaises with the CNIL</td><td align=\"left\">Your <strong>partner</strong>, not a gate to dodge — loop them in at scoping, not after</td></tr><tr><td align=\"left\"><strong>Data classification</strong></td><td align=\"left\">Tiering data by sensitivity (e.g. public / internal / confidential / personal / special-category)</td><td align=\"left\">Drives access, retention, and encryption rules automatically</td></tr><tr><td align=\"left\"><strong>Data catalog</strong></td><td align=\"left\">A searchable inventory: what data exists, where, what it means, who owns it, its sensitivity</td><td align=\"left\">You can't govern, minimise, or honour rights over data you can't find</td></tr><tr><td align=\"left\"><strong>Data lineage</strong></td><td align=\"left\">The map of where each field comes from and flows to</td><td align=\"left\">Makes erasure/access requests, impact analysis, and audits <em>possible</em></td></tr><tr><td align=\"left\"><strong>Access control (RBAC, least privilege)</strong></td><td align=\"left\">Grant the minimum access a role needs, by role not by person</td><td align=\"left\">The \"integrity &#x26; confidentiality\" principle, operationalised</td></tr><tr><td align=\"left\"><strong>Retention policy</strong></td><td align=\"left\">Defined lifetimes per data class, with automatic deletion</td><td align=\"left\">Operationalises storage limitation; kills \"we keep everything forever\"</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>How you work with the DPO.</strong> The DPO is independent and advises/monitors; they do <em>not</em> run the project and are not a rubber stamp. Engage them at <strong>scoping</strong> (lawful basis, DPIA trigger), at <strong>design</strong> (minimisation, retention, transfer mechanism), and before <strong>go-live</strong> (sign-off on the DPIA and records). Bring them options and a clear description of the processing, not a finished system to bless. They — with legal counsel — own the legal call; you own building the thing in a way they <em>can</em> sign off.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>The catalog and lineage are the unglamorous foundation that makes everything else cheap. Classification without a catalog is a spreadsheet nobody updates; an erasure right without lineage is a promise you can't keep; least-privilege without classification is guesswork. Sell and build them early — they pay for themselves the first time a data-subject request or an audit lands. This is the same lineage backbone that <a class=\"wikilink\" data-module=\"12\" href=\"#/module/12\">Data Engineering &#x26; Platforms</a> builds for reliability; here it earns its keep for <em>compliance</em>.</p>"
+      }
+     ]
+    },
+    {
+     "id": "cross-border-transfers-eu--us-etc",
+     "number": 7,
+     "title": "Cross-Border Transfers (EU → US etc.)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Personal data may flow freely within the EU/EEA. The moment it leaves — to a US cloud region, an offshore team, or a third-party API hosted abroad — you need a <strong>transfer mechanism</strong>, because the RGPD restricts sending personal data to countries without equivalent protection. At a leader level, you need to recognise <em>that a transfer is happening</em> (it often happens invisibly via a SaaS or LLM API) and that one of these must be in place:</p>\n<ul>\n<li><strong>Adequacy decision</strong> — the EU has ruled the destination country offers adequate protection (some countries qualify wholesale).</li>\n<li><strong>EU–US Data Privacy Framework</strong> — a specific mechanism for transfers to <em>certified</em> US organisations (the successor to the struck-down Privacy Shield; treat its durability as perishable and verify a given vendor's certification).</li>\n<li><strong>Standard Contractual Clauses (SCCs)</strong> — EU-approved contract terms, increasingly paired with a <strong>Transfer Impact Assessment</strong> checking the destination's surveillance laws.</li>\n<li><strong>Binding Corporate Rules (BCRs)</strong> — for transfers within a multinational group.</li>\n</ul>\n<p>The practical leadership move: <strong>prefer an EU/EEA data region</strong> when the vendor offers one (most major clouds and several LLM providers do), and only fall back to a transfer mechanism when you must — then make sure legal/DPO has papered it. \"Where does this data physically live, and does it leave the EU?\" is a scoping question, not an afterthought, and it directly shapes the hosted-vs-self-hosted call in <a class=\"wikilink\" data-module=\"09\" href=\"#/module/09\">Large Language Models in Practice</a>.</p>"
+      }
+     ]
+    },
+    {
+     "id": "ai-specific-privacy-risks",
+     "number": 8,
+     "title": "AI-Specific Privacy Risks",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>AI introduces failure modes classic data governance never had to think about. These are the ones to raise <em>before</em> building:</p>\n<ul>\n<li><strong>PII in training data.</strong> Models learn from whatever you feed them. If personal data is in the training set without a basis, minimisation, and a retention plan, the <em>training itself</em> is unlawful — and the problem is baked into the weights. Pseudonymise or strip PII before training wherever the task allows.</li>\n<li><strong>PII in prompts (the quiet leak).</strong> Every prompt sent to a hosted LLM is a data transfer. Pasting a customer email, a CV, or a medical note into a third-party API ships personal data outside your perimeter — often across a border. Redact/pseudonymise <em>before</em> the text leaves your systems, and check the provider's data terms.</li>\n<li><strong>Model memorisation &#x26; leakage.</strong> Large models can memorise and later regurgitate rare training examples verbatim — a real risk that personal or confidential data trained-in can resurface in outputs. The more sensitive the training data, the more this matters; it's a direct argument for minimisation and for techniques like differential privacy in training.</li>\n<li><strong>The right to erasure vs a trained model.</strong> This is the hard one with no clean answer. A person exercises their right to be forgotten — you can delete their row from the database, but <strong>the model trained on it has already absorbed the patterns</strong>, and you can't surgically un-train one record cheaply. Mitigations a leader should know: don't train on raw identifiable data in the first place; keep training sets and retention windows tight; retrain/refresh on schedules; and treat \"we can delete from sources and derived data, and retrain without you on the next cycle\" as the honest, documentable position. (Emerging \"machine unlearning\" research exists — don't promise it as a solved capability.)</li>\n<li><strong>Third-party LLM API data terms.</strong> Whether a provider trains on your data, retains it, where it's processed, and the no-train/EU-region options vary by vendor and by tier — and they change. This is a procurement-and-governance checklist item, not a detail: tie it explicitly to the model-selection decision in <a class=\"wikilink\" data-module=\"09\" href=\"#/module/09\">Large Language Models in Practice</a> (no-train clause, retention window, EU region, processor agreement / DPA).</li>\n<li><strong>Data residency.</strong> Regulated clients (health, finance, public sector) may <em>require</em> data to stay in France or the EU. That constraint can force an EU region, a specific deployment, or self-hosting — settle it at scoping, not at go-live.</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "the LLM era moved the perimeter",
+       "html": "<p>Before, \"where does our data go?\" mostly meant your own databases. Now a single prompt can send personal data to a third party in another country in milliseconds. The two reflexes that keep you safe: <strong>pseudonymise/redact before data leaves your systems</strong>, and <strong>read the vendor's data terms before you send a single real record.</strong> The strongest control is often architectural — don't put the personal data where the risk is.</p>"
+      }
+     ]
+    },
+    {
+     "id": "governance-as-an-enabler-not-a-blocker",
+     "number": 9,
+     "title": "Governance as an Enabler, Not a Blocker",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The framing that wins clients: good governance is what lets a pole <em>say yes safely and fast</em>. A team with a catalog, a classification scheme, pseudonymisation patterns, and a standing DPIA process can take on a sensitive-data mission in days; a team without them either refuses (too risky) or charges in and gets burned. Reframe each control as an enabler:</p>\n<ul>\n<li><strong>Catalog &#x26; lineage</strong> → faster discovery and instant answers to access/erasure requests, instead of a fire drill each time.</li>\n<li><strong>Classification + RBAC</strong> → you can grant <em>exactly</em> the right access quickly, so analysts aren't blocked <em>and</em> nothing over-shares.</li>\n<li><strong>Pseudonymisation patterns</strong> → modelling and analytics can start on lower-risk data immediately, in parallel with legal sign-off.</li>\n<li><strong>A reusable DPIA template</strong> → a new sensitive use case clears governance in days, not months.</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Governance maturity is <em>delivery speed</em> on sensitive data. The pole that has done the boring foundational work moves faster and wins the regulated, high-value missions the competition can't safely touch. Sell governance as the thing that <em>unlocks</em> the AI roadmap — not as the brake on it.</p>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "client-mission-patterns--commercial-angle",
+   "kind": "missions",
+   "title": "Client Mission Patterns / Commercial Angle",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Governance missions sell to a specific buyer (CISO, DPO, CDO, COMEX) and pair naturally with delivery work — they de-risk the engagements in the rest of this path. Frame them as <em>enabling the AI roadmap</em>, never as pure cost.</p>\n<ul>\n<li>\n<p><strong>Data Governance Framework Setup</strong> — <em>Problem:</em> the client wants to do AI/data at scale but has no operating model — no owners, no catalog, no classification, ad-hoc access. <em>Deliverable:</em> a <strong>governance framework</strong>: a RACI of ownership/stewardship roles, a data-classification scheme, an access-control (RBAC/least-privilege) model, retention policies, and a catalog/lineage tooling recommendation with a rollout plan. <em>Scope:</em> 6-12 weeks. <em>Who buys:</em> CDO, CISO, DPO. <em>Why it sells:</em> it's the foundation every later mission depends on, and it's repeatable IP.</p>\n</li>\n<li>\n<p><strong>RGPD/GDPR Compliance Audit for an AI/Data Initiative</strong> — <em>Problem:</em> a project is live or about to launch and nobody is sure it's lawful. <em>Deliverable:</em> a <strong>gap assessment</strong> against the RGPD principles — lawful basis review, DPIA-trigger analysis (and the DPIA itself if needed), data-flow &#x26; transfer mapping, data-subject-rights readiness — with a prioritised, costed remediation plan. <em>Scope:</em> 3-6 weeks, fixed price. <em>Who buys:</em> DPO, legal, the project sponsor. <em>Why it sells:</em> low-risk door-opener; surfaces the remediation work you then deliver. <em>Don't promise:</em> a legal opinion — you produce findings; the DPO/legal counsel make the legal call.</p>\n</li>\n<li>\n<p><strong>Pseudonymisation / Anonymisation Strategy &#x26; Implementation</strong> — <em>Problem:</em> the client needs to use sensitive data for AI/analytics but can't expose raw PII to analysts, vendors, or LLMs. <em>Deliverable:</em> a <strong>strategy + reference implementation</strong> — which technique per data flow (tokenisation, hashing+salt, k-anonymity, masking; differential privacy where statistics are published), a documented re-identification-risk assessment, secure key/vault handling, and pipeline integration so pseudonymised data lands in the working environments. <em>Scope:</em> 4-10 weeks. <em>Who buys:</em> CDO, DPO, data platform lead. <em>Don't promise:</em> \"fully anonymised\" / \"out of RGPD scope\" without a defensible assessment signed off by the DPO — pseudonymised data is still personal data.</p>\n</li>\n<li>\n<p><strong>Data Catalog &#x26; Lineage Rollout</strong> — <em>Problem:</em> nobody knows what data exists, what it means, where it flows, or how to honour an erasure request. <em>Deliverable:</em> a <strong>deployed catalog with lineage</strong>: a populated inventory of key data assets, ownership and sensitivity tags, end-to-end lineage for priority pipelines, and onboarded stewards. <em>Scope:</em> 6-12 weeks (tool-dependent). <em>Who buys:</em> CDO, data platform lead. <em>Why it sells:</em> it's the precondition for both compliance <em>and</em> trustworthy analytics — pairs directly with <a class=\"wikilink\" data-module=\"12\" href=\"#/module/12\">Data Engineering &#x26; Platforms</a>.</p>\n</li>\n</ul>\n<p><strong>Buy-vs-build for the client:</strong> <em>buy</em> the tooling — catalog, lineage, and secrets/tokenisation platforms are mature commodities; building them is rarely justified. <em>Build</em> (with you) the <strong>operating model, the policies, the classification scheme, the pseudonymisation patterns, and the DPIA templates</strong> — the differentiator is the framework fitted to their data and risk, not the software. <strong>What to charge for:</strong> the framework, the audit, the strategy, and the implementation/integration — repeatable methodology plus hands-on rollout. <strong>What NOT to promise (ever):</strong> a legal opinion or a guarantee of compliance — you are <em>not their lawyer</em>; you partner with the <strong>DPO and legal counsel</strong>, who own the legal determination. Also never promise \"anonymised / out of scope\" without a documented risk assessment, \"erasure from a trained model\" as a solved capability, or that a given LLM vendor's terms are RGPD-safe without reading them.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "tools--vendor-landscape",
+   "kind": "tools",
+   "title": "Tools & Vendor Landscape",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p><em>As of 2026 — treat names/capabilities as perishable; re-check before quoting a client, and confirm legal mechanisms with the DPO/counsel.</em></p>"
+    },
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Tool / Category</th><th align=\"left\">Use here</th><th align=\"left\">OSS / Paid</th><th align=\"left\">Note (lock-in / caveat)</th></tr></thead><tbody><tr><td align=\"left\">Data catalog &#x26; governance (Collibra, Alation, Atlan, Microsoft Purview, OpenMetadata, DataHub)</td><td align=\"left\">Inventory, classification, ownership, lineage</td><td align=\"left\">Mixed (OSS + paid)</td><td align=\"left\">OpenMetadata/DataHub are OSS; enterprise suites add lineage/policy automation + lock-in</td></tr><tr><td align=\"left\">Lineage (built into the catalog above, or dbt/OpenLineage)</td><td align=\"left\">Track field-level data flow</td><td align=\"left\">Mixed</td><td align=\"left\">Lineage is only as good as your pipeline instrumentation</td></tr><tr><td align=\"left\">Tokenisation / secrets vaults (HashiCorp Vault, AWS KMS, cloud KMS, dedicated tokenisation services)</td><td align=\"left\">Pseudonymisation keys, encryption</td><td align=\"left\">Mixed</td><td align=\"left\">Keep the re-identification key separate and tightly controlled</td></tr><tr><td align=\"left\">PII detection &#x26; redaction (Microsoft Presidio, cloud DLP services)</td><td align=\"left\">Find/mask PII in text &#x26; data, incl. before prompts</td><td align=\"left\">OSS + paid</td><td align=\"left\">Detection is probabilistic — never assume 100% recall on free text</td></tr><tr><td align=\"left\">Differential privacy (OpenDP, Google DP libraries, Tumult Analytics)</td><td align=\"left\">Privacy-preserving statistics &#x26; training</td><td align=\"left\">OSS</td><td align=\"left\">Specialist work; tune the privacy budget — bring expertise</td></tr><tr><td align=\"left\">Consent / preference management (OneTrust, Didomi, and similar)</td><td align=\"left\">Capture, store, and honour consent</td><td align=\"left\">Paid</td><td align=\"left\">Consent is only valid if withdrawal <em>actually</em> stops processing</td></tr><tr><td align=\"left\">CNIL PIA software</td><td align=\"left\">Conduct a DPIA</td><td align=\"left\">Free (CNIL)</td><td align=\"left\">Free, regulator-published; a good default DPIA template</td></tr><tr><td align=\"left\">DPIA / RoPA templates (CNIL, EDPB)</td><td align=\"left\">Document compliance &#x26; records of processing</td><td align=\"left\">Free</td><td align=\"left\">Use the regulator's own templates as your baseline</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The tooling is mostly buy-or-OSS; the value you add is the operating model, the policies, and the privacy-engineering design fitted to the client. Quarantine perishable names here.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "when-is-this-overkill",
+   "kind": "overkill",
+   "title": "When Is This Overkill?",
+   "blocks": [
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Situation</th><th align=\"left\">Heavy governance is overkill — do this instead</th></tr></thead><tbody><tr><td align=\"left\">Data is <strong>genuinely, irreversibly anonymous</strong> (aggregates, no re-identification path)</td><td align=\"left\">Out of RGPD scope — use it freely (but <em>verify</em> the claim with the DPO)</td></tr><tr><td align=\"left\">A tiny project on <strong>non-personal</strong> data (sensor telemetry, public reference data)</td><td align=\"left\">Apply basic security; skip the personal-data machinery</td></tr><tr><td align=\"left\">A <strong>one-off internal analysis</strong> on already-governed, classified data</td><td align=\"left\">Reuse the existing classification/access; don't re-audit</td></tr><tr><td align=\"left\">You're tempted by a <strong>full enterprise catalog suite</strong> for a 5-table startup</td><td align=\"left\">Start with a spreadsheet inventory + naming conventions; tool up when it hurts</td></tr><tr><td align=\"left\">Reaching for <strong>differential privacy</strong> on internal, low-sensitivity data</td><td align=\"left\">Pseudonymisation + access control usually suffices; DP is for publishing/sharing</td></tr><tr><td align=\"left\">A DPIA for a <strong>low-risk, small-scale, non-profiling</strong> use</td><td align=\"left\">A lightweight risk note may do — but confirm the trigger with the DPO, don't guess</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The senior move is right-sizing: enough governance to be lawful and to move fast on sensitive data, not a compliance bureaucracy that stalls a low-risk project. But note the asymmetry — under-governing personal data carries regulatory and reputational risk that over-governing a spreadsheet never does. When unsure on a <em>personal-data</em> question, escalate to the DPO rather than self-certifying.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "resources",
+   "kind": "resources",
+   "title": "Resources",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>This module has no AI-Scientist / ML-Engineer analogue — the authoritative sources are the <strong>regulators and the law itself</strong>. Go to the primary text, not a blog summary.</p>"
+    }
+   ],
+   "subsections": [
+    {
+     "id": "primary--authoritative-sources-free",
+     "number": null,
+     "title": "Primary / Authoritative Sources (Free)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li><strong>RGPD / GDPR — official text</strong> (Regulation (EU) 2016/679) on <strong>EUR-Lex</strong> — the law itself; the source of truth for definitions, principles, lawful bases, and rights. Bookmark the articles on personal data (Art. 4), principles (Art. 5), lawful basis (Art. 6), special categories (Art. 9), DPIA (Art. 35), and automated decisions (Art. 22).</li>\n<li><strong>CNIL</strong> (cnil.fr) — France's regulator — practical sheets on <strong>AI &#x26; GDPR</strong>, the DPIA/AIPD guidance and <strong>free PIA software</strong>, and guidance on anonymisation vs pseudonymisation. The most practical, France-flavoured resource you have.</li>\n<li><strong>EDPB (European Data Protection Board)</strong> — guidelines and opinions (incl. on AI models and pseudonymisation) that harmonise interpretation across the EU.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "books--articles",
+     "number": null,
+     "title": "Books & Articles",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>IAPP materials and reputable practitioner guides on operationalising the GDPR — for the governance-operating-model patterns. <em>(Mixed)</em></li>\n<li>Vendor/regulator notes on differential privacy and re-identification (CNIL, academic linkage-attack case studies) — for the intuition behind why anonymisation is hard. <em>(Free)</em></li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "go-deeper",
+     "number": null,
+     "title": "Go Deeper",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>The <strong>AI Act side</strong> of governing AI systems (risk tiers, obligations, automated-decision transparency) → <strong><a class=\"wikilink\" data-module=\"15\" href=\"#/module/15\">Responsible AI: Interpretability, Fairness, Safety &#x26; the EU AI Act</a></strong>.</li>\n<li>Cross-link: where personal data is <em>born and cleaned</em> → <strong><a class=\"wikilink\" data-module=\"03\" href=\"#/module/03\">Working with Data: Sources, Quality &#x26; Feature Engineering</a></strong>; where it is <em>stored, moved, and lineage-tracked</em> → <strong><a class=\"wikilink\" data-module=\"12\" href=\"#/module/12\">Data Engineering &#x26; Platforms</a></strong>; LLM-specific data terms, residency, and the hosted-vs-self-hosted call → <strong><a class=\"wikilink\" data-module=\"09\" href=\"#/module/09\">Large Language Models in Practice</a></strong>.</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "note",
+       "title": "Note",
+       "html": "<p>Laws and transfer mechanisms move (the EU–US framework's history is a cautionary tale). Treat the <em>mechanism</em> names as perishable; the <em>principles</em> are stable. Always confirm the current legal position with the client's DPO and counsel — you scope and design, they decide the law.</p>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "practical-artifacts",
+   "kind": "artifacts",
+   "title": "Practical Artifacts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "decision-checklist--are-we-handling-this-data-lawfully",
+     "number": null,
+     "title": "Decision Checklist — \"Are we handling this data lawfully?\"",
+     "blocks": [
+      {
+       "type": "checklist",
+       "checklistId": "14/practical-artifacts/1",
+       "items": [
+        {
+         "id": "0",
+         "html": "Is any of this <strong>personal data</strong> (incl. IDs, IPs, combinations that single someone out)? Any <strong>special-category</strong> data?"
+        },
+        {
+         "id": "1",
+         "html": "Is the data <strong>pseudonymised</strong> (still in scope) or <strong>truly anonymised</strong> (out of scope) — and can we defend that claim?"
+        },
+        {
+         "id": "2",
+         "html": "Do we have a documented <strong>lawful basis</strong> (consent / contract / legitimate interest + balancing test)?"
+        },
+        {
+         "id": "3",
+         "html": "Does this trigger a <strong>DPIA</strong>? (large scale / profiling / special-category / automated decisions / novel tech)"
+        },
+        {
+         "id": "4",
+         "html": "Have we applied <strong>minimisation</strong> (only fields we need) and set a <strong>retention</strong> window?"
+        },
+        {
+         "id": "5",
+         "html": "Can we honour <strong>access and erasure</strong> — do we have the <strong>lineage</strong> to find every copy?"
+        },
+        {
+         "id": "6",
+         "html": "Does the data <strong>leave the EU</strong> (incl. via a SaaS/LLM API)? Is a transfer mechanism / EU region in place?"
+        },
+        {
+         "id": "7",
+         "html": "For any LLM: have we checked the <strong>provider's data terms</strong> (no-train, retention, region, DPA) and redacted PII <em>before</em> sending?"
+        },
+        {
+         "id": "8",
+         "html": "Has the <strong>DPO</strong> been engaged at scoping — and will they sign off the DPIA before go-live?"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "red-flags",
+     "number": null,
+     "title": "Red Flags",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"It's <strong>anonymised</strong>.\" (Usually it's pseudonymised — still personal data, still in scope.)</li>\n<li>\"We had the data, so we'll <strong>train on it</strong>.\" (No basis + no purpose-limitation check = unlawful.)</li>\n<li>\"We'll <strong>delete the row</strong> if someone asks.\" (And the model trained on it? And the backups? And the derived tables?)</li>\n<li>No <strong>catalog or lineage</strong> — \"we'll find all their data manually.\" (You can't; the erasure right will expose this.)</li>\n<li>Pasting real customer PII into a <strong>third-party LLM</strong> with no check on its data terms or region.</li>\n<li>A <strong>balancing test</strong> asserted but never written down; consent that's bundled, pre-ticked, or non-revocable.</li>\n<li>Treating the <strong>DPO as a rubber stamp</strong> at the end instead of a partner at the start.</li>\n<li>Promising the client a <strong>compliance guarantee</strong> or a legal opinion. (You are not their lawyer.)</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "scoping-prompts-ask-the-client--dpo",
+     "number": null,
+     "title": "Scoping Prompts (ask the client / DPO)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"Is any of this data <strong>about people</strong> — and does any of it touch health, biometrics, or other special categories?\"</li>\n<li>\"What's the <strong>lawful basis</strong> for using this data for <em>this</em> purpose, and who confirmed it?\"</li>\n<li>\"Where does the data <strong>physically live</strong>, and does it (or any prompt/API call) <strong>leave the EU</strong>?\"</li>\n<li>\"If a customer asks for <strong>all their data</strong> or to be <strong>forgotten</strong>, can you do it today — and across backups and derived datasets?\"</li>\n<li>\"Who <strong>owns</strong> each dataset, who's the <strong>steward</strong>, and is there a <strong>catalog</strong> we can search?\"</li>\n<li>\"Has a <strong>DPIA</strong> been done for this, and is the <strong>DPO</strong> in the loop?\"</li>\n<li>\"For any LLM/vendor: what do their <strong>data terms</strong> say about training, retention, and region — and have we read them?\"</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "self-assessment",
+   "kind": "self-assessment",
+   "title": "Self-Assessment",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Before moving on, you should be able to:</p>"
+    },
+    {
+     "type": "checklist",
+     "checklistId": "14/self-assessment/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Decide whether a dataset is personal, pseudonymised (in scope), or truly anonymised (out of scope) — and explain why to a stakeholder"
+      },
+      {
+       "id": "1",
+       "html": "Pick and justify a lawful basis, and apply the six RGPD principles to an AI project"
+      },
+      {
+       "id": "2",
+       "html": "Tell when an AI initiative triggers a DPIA, and scope the work to produce one with the DPO"
+      },
+      {
+       "id": "3",
+       "html": "Map masking / tokenisation / hashing+salt / k-anonymity / differential privacy to re-identification risk and the right use case"
+      },
+      {
+       "id": "4",
+       "html": "Stand up a governance operating model (ownership, classification, catalog &#x26; lineage, RBAC, retention) and work the DPO relationship correctly"
+      },
+      {
+       "id": "5",
+       "html": "Name the AI-specific privacy risks — PII in prompts and training data, memorisation, erasure-vs-trained-model, third-party terms, residency — and pitch governance as the enabler that wins regulated missions"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  }
+ ]
+}

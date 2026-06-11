@@ -1,0 +1,347 @@
+{
+  "moduleId": "08",
+  "quiz": [
+    {
+      "id": "q1",
+      "conceptRef": "the-classic-nlp-task-menu",
+      "prompt": "A client says: \"We want AI to read our contracts.\" What is the senior scoping move?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Decompose it into the classic tasks it hides — NER for parties/dates/amounts, classification for contract type, summarisation for the abstract — because each sub-task has a different bar for \"good\" and a different cost curve.",
+          "correct": true,
+          "explanation": "Exactly the module's intuition. The task menu is still the right *vocabulary* even though an LLM may solve most of it. The leader who can't name the tasks scopes one giant vague deliverable — and misses the deadline on the 20% of clauses that mattered."
+        },
+        {
+          "id": "b",
+          "text": "Scope it as a single \"AI reads contracts\" deliverable, since one LLM will handle all of it anyway.",
+          "correct": false,
+          "explanation": "This is the documented failure mode. Even if one model executes everything, the *scoping* must be decomposed: extraction accuracy, classification quality, and summary usefulness are measured differently and fail differently."
+        },
+        {
+          "id": "c",
+          "text": "Frame it as topic modelling — cluster the contracts to discover their themes first.",
+          "correct": false,
+          "explanation": "Topic modelling is for label-free exploration (\"what are people complaining about?\"). The client wants specific facts pulled out of known document types — that's extraction and classification, with defined targets, not unsupervised theme discovery."
+        },
+        {
+          "id": "d",
+          "text": "Decline until the client produces a few thousand labelled contracts for training.",
+          "correct": false,
+          "explanation": "The LLM era removed the cold-start problem: classification, extraction, and summarisation work zero-shot, so the prototype starts *without* labels. You need labels later, to optimise a high-volume slice — not to begin."
+        }
+      ],
+      "takeaway": "Every vague text request decomposes into named classic tasks — classification, NER, sentiment, topics, summarisation, translation — and naming them is half the scoping.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q2",
+      "conceptRef": "from-text-to-numbers-tokens-keywords-and-the-jump-to-meaning",
+      "prompt": "A PM budgets an LLM feature by *word* count and assumes the per-word cost is the same across English, Japanese, and code. What does she need to know about tokenisation?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Models bill and limit in *tokens* — sub-word pieces, roughly ¾ of a word in English but far more per character in languages like Japanese and for code — so her budget under-counts the non-English and code workloads.",
+          "correct": true,
+          "explanation": "Right. The two leader-level consequences of tokenisation: cost and context limits are counted in tokens, not words, and the words-to-tokens ratio varies sharply by language and content type. Budgets built on word counts skew exactly where she's assuming parity."
+        },
+        {
+          "id": "b",
+          "text": "Tokens and words are interchangeable for budgeting; the difference only matters to model researchers.",
+          "correct": false,
+          "explanation": "The difference is precisely a budgeting matter: bills and context windows are denominated in tokens. Treating them as words produces systematic underestimates — worst on the languages and code where tokens-per-word is highest."
+        },
+        {
+          "id": "c",
+          "text": "Tokenisation only affects training cost, not the per-call inference price.",
+          "correct": false,
+          "explanation": "Every API call is priced on the input and output tokens of *that call*. Tokenisation is how usage is metered at inference time — it's the unit on the invoice, not a training-time detail."
+        },
+        {
+          "id": "d",
+          "text": "Models split text into whole words, so unknown words like new product names make them fail.",
+          "correct": false,
+          "explanation": "Backwards — modern models split into *sub-word* pieces precisely so the vocabulary isn't infinite, which is why they handle never-before-seen words gracefully instead of choking. That's the second leader-level consequence of tokenisation."
+        }
+      ],
+      "takeaway": "Cost and context limits are counted in tokens, not words — about ¾ of a word in English, far more per character elsewhere — and sub-word pieces are why models handle unseen words gracefully.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q3",
+      "conceptRef": "from-text-to-numbers-tokens-keywords-and-the-jump-to-meaning",
+      "prompt": "Users searching \"how do I cancel my plan\" never find the help article \"Terminating your subscription.\" The search engine is a well-tuned TF-IDF/keyword system. What is the root cause?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Keyword representations have no notion that different words can mean the same thing — \"cancel/plan\" and \"terminating/subscription\" share no terms, so their similarity is zero despite identical meaning.",
+          "correct": true,
+          "explanation": "Exactly TF-IDF's fatal flaw for meaning: different words = different dimensions = zero similarity. Synonyms split the signal and paraphrases miss entirely. Embeddings were built to bridge precisely this gap."
+        },
+        {
+          "id": "b",
+          "text": "The TF-IDF weighting is mis-tuned — boosting rare terms more aggressively would surface the article.",
+          "correct": false,
+          "explanation": "No weighting scheme fixes a zero overlap: tuning changes how shared terms are scored, but these texts share no informative terms at all. The limitation is representational, not parametric."
+        },
+        {
+          "id": "c",
+          "text": "Levenshtein distance should be added — fuzzy matching would connect \"cancel\" to \"terminating.\"",
+          "correct": false,
+          "explanation": "Edit distance measures *surface* similarity — characters, not meaning. \"Cancel\" and \"terminating\" are far apart in spelling. Levenshtein is the right tool for typos, dedup, and fuzzy joins — not for synonyms or paraphrase."
+        },
+        {
+          "id": "d",
+          "text": "The corpus is too small for keyword search to work; with more articles, term statistics would improve.",
+          "correct": false,
+          "explanation": "More documents sharpen IDF statistics but cannot create term overlap where none exists. The query and the article would still share zero important keywords at any corpus size."
+        }
+      ],
+      "takeaway": "Keyword search asks \"do these share words?\"; embeddings ask \"do these mean the same thing?\" — and the cancel/terminate miss is the signature case for the jump to meaning.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q4",
+      "conceptRef": "embeddings--the-centrepiece",
+      "prompt": "Why does semantic similarity use *cosine* similarity — the angle between embedding vectors — rather than straight-line distance?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Dividing by the vectors' lengths cancels magnitude entirely, leaving only direction — so a one-line tweet and a long essay on the same topic still score as similar; length shouldn't dilute meaning.",
+          "correct": true,
+          "explanation": "Right. The normalisation in $\\cos(\\theta)=\\frac{A\\cdot B}{\\lVert A\\rVert\\,\\lVert B\\rVert}$ is the key move: direction encodes *what the text is about*, magnitude reflects things like length. Comparing angles makes \"find similar text\" robust to how long the texts are."
+        },
+        {
+          "id": "b",
+          "text": "Cosine is chosen because it's cheaper to compute than other distances at scale.",
+          "correct": false,
+          "explanation": "Cost isn't the rationale — dot products and distances are comparably cheap, and at scale the heavy lifting is delegated to a vector database's index either way. The reason is semantic: cancel magnitude, compare direction."
+        },
+        {
+          "id": "c",
+          "text": "Because each embedding dimension is an interpretable topic, and cosine counts how many topics two texts share.",
+          "correct": false,
+          "explanation": "Embedding dimensions are uninterpretable — no human reads \"dimension 412.\" What carries meaning is the *geometry between vectors*, not any individual coordinate. Cosine measures overall directional agreement, not topic counts."
+        },
+        {
+          "id": "d",
+          "text": "Cosine similarity measures how many keywords the two texts share, normalised by document length.",
+          "correct": false,
+          "explanation": "That describes a length-normalised keyword overlap — TF-IDF territory. Cosine over *embeddings* compares positions in meaning-space, which is exactly how texts sharing zero keywords can still score as highly similar."
+        }
+      ],
+      "takeaway": "Cosine compares the direction of meaning-vectors and cancels length — which is why a tweet and an essay about the same thing count as similar.",
+      "difficulty": "stretch"
+    },
+    {
+      "id": "q5",
+      "conceptRef": "embeddings--the-centrepiece",
+      "prompt": "You propose semantic search over a client's 4,000 help articles. The client assumes this means an expensive LLM project. What is the accurate cost-and-architecture picture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Embed the 4,000 articles once (a one-off batch job costing cents to a few euros), store the vectors, then embed each query and return the nearest articles — no LLM, no training, milliseconds and fractions of a cent per search.",
+          "correct": true,
+          "explanation": "This is the module's worked example, almost verbatim. Semantic search is the cheapest, highest-trust win in the NLP toolbox — and it's the literal first half of every RAG system, making it the natural on-ramp mission."
+        },
+        {
+          "id": "b",
+          "text": "Each search requires an LLM call to interpret the query, so cost scales with an LLM's per-token price.",
+          "correct": false,
+          "explanation": "No LLM is involved anywhere in semantic search. Queries are handled by a tiny embedding call plus a vector lookup. The LLM only enters if you later add answer *generation* on top — that's RAG, a separate (upsell) mission."
+        },
+        {
+          "id": "c",
+          "text": "An embedding model must first be fine-tuned on the client's corpus, which is where most of the budget goes.",
+          "correct": false,
+          "explanation": "Off-the-shelf embedding models are excellent, cheap, and fast — a commodity you rent, never the maths you build. Your value is *what you embed* (their corpus) and the workflow around it, not model training."
+        },
+        {
+          "id": "d",
+          "text": "It's accurate but slow — comparing a query to 4,000 vectors takes seconds, so it suits batch jobs, not a live search bar.",
+          "correct": false,
+          "explanation": "Vector lookups are milliseconds-fast; 4,000 vectors is tiny (it fits in memory). Even at millions of vectors, a vector database's approximate search keeps it real-time. Latency is a strength of this architecture, not a weakness."
+        }
+      ],
+      "takeaway": "Semantic search is embed-once, compare-per-query: no LLM, no training, near-zero run cost — the cheapest high-trust win in the toolbox and the first half of RAG.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q6",
+      "conceptRef": "when-a-small-model-beats-an-llm",
+      "prompt": "A bank routes 10 million compliance-relevant messages per month. The working prototype calls a frontier LLM per message. Which production concern is *least* of a reason to graduate to a small dedicated model?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The LLM's classification quality on nuanced, ambiguous messages.",
+          "correct": true,
+          "explanation": "Correct — nuance is where the LLM *shines*, so quality on weird cases is the reason to keep it in the loop for the long tail, not a reason to leave. The four axes that argue for the small model are cost at scale, latency, privacy/residency, and determinism."
+        },
+        {
+          "id": "b",
+          "text": "Per-call cost: at 10M items/month an LLM API can run into five or six figures monthly, versus a fraction on modest hardware.",
+          "correct": false,
+          "explanation": "This *is* a core reason to graduate — cost at scale is the first axis. A purpose-built classifier costs a tiny fraction per item, and at this volume the difference is the margin of the whole operation."
+        },
+        {
+          "id": "c",
+          "text": "Determinism: compliance routing wants the same label for the same input every time, auditable and testable.",
+          "correct": false,
+          "explanation": "This is a genuine graduation reason — an LLM can drift or phrase things differently between runs, while a classifier gives a fixed, repeatable, auditable output. For compliance decisions that's a hard requirement, not a preference."
+        },
+        {
+          "id": "d",
+          "text": "Privacy/residency: a self-hosted small model keeps regulated financial data inside the bank's perimeter.",
+          "correct": false,
+          "explanation": "Also a real axis — finance data often legally can't leave the building, which rules out external API calls entirely and makes the self-hosted specialist the only compliant option at any price."
+        }
+      ],
+      "takeaway": "At production scale, small dedicated models win on cost, latency, privacy, and determinism — while nuance and open-endedness remain the LLM's home turf.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q7",
+      "conceptRef": "when-a-small-model-beats-an-llm",
+      "prompt": "A team needs a high-volume ticket classifier but has zero labelled data. Hand-labelling 50,000 examples would take months. What is the mature 2026 pattern?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Use the LLM to label a few thousand examples, then train a small model on those labels — the LLM's quality baked into a model ~100× cheaper and faster to run.",
+          "correct": true,
+          "explanation": "The module's named pattern: the LLM designs the job; the small model does the shift work. Prototype with the LLM to prove value and generate labels, then graduate the stable, high-volume slice to the cheap specialist."
+        },
+        {
+          "id": "b",
+          "text": "Run the frontier LLM on every ticket indefinitely — labelling pipelines are obsolete in the LLM era.",
+          "correct": false,
+          "explanation": "What's obsolete is labelling as the *first* step. At high volume, per-call LLM economics still bite — \"just throw it all at an LLM\" for millions of items/month is a named red flag: a runaway bill and a latency problem."
+        },
+        {
+          "id": "c",
+          "text": "Pause the project for a months-long human labelling campaign before any model work starts.",
+          "correct": false,
+          "explanation": "That's the pre-LLM cold-start workflow the module says is gone. You no longer need labels to *begin* — and the LLM can generate the bootstrap labels in days, with humans reviewing a sample rather than authoring everything."
+        },
+        {
+          "id": "d",
+          "text": "Skip models entirely — embed the tickets and let cosine similarity assign the categories.",
+          "correct": false,
+          "explanation": "Embeddings-plus-similarity (or a tiny classifier on embeddings) can be part of the cheap path, but raw nearest-neighbour matching against what, exactly? With no labelled anchors it's clustering, not classification — you'd still need the LLM or humans to name and validate the categories."
+        }
+      ],
+      "takeaway": "Bootstrap labels with the LLM, then train the cheap specialist: the LLM designs the job, the small model does the shift work — that graduation is the margin.",
+      "difficulty": "stretch"
+    },
+    {
+      "id": "q8",
+      "conceptRef": "the-shift-from-bespoke-pipelines-to-llms--what-changed-what-survived",
+      "prompt": "Post-LLM, where should a client's NLP build budget go — and which old default did the LLM era make largely obsolete?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Obsolete: per-task labelling-and-training as the default *first* step. Build budget goes to what survived: embeddings + retrieval over proprietary data, cheap specialist models for the high-volume slice, the human-in-the-loop workflow, and evaluation.",
+          "correct": true,
+          "explanation": "Right. The LLM era moved the build line: training a sentiment classifier from scratch used to be differentiating work, now it's an API call. The defensible value is the client's corpus, retrieval over it, scale economics, workflow trust, and eval discipline."
+        },
+        {
+          "id": "b",
+          "text": "Obsolete: embeddings and vector search — a modern LLM understands meaning directly, so the retrieval layer is legacy.",
+          "correct": false,
+          "explanation": "Exactly backwards, and the module flags it: LLMs did *not* replace embeddings — modern systems lean on them harder than ever, because embeddings + vector search *are* the retrieval half of RAG. It's the durable primitive of the whole module."
+        },
+        {
+          "id": "c",
+          "text": "Obsolete: evaluation discipline — since LLMs work zero-shot, measurement matters less than shipping fast.",
+          "correct": false,
+          "explanation": "Evaluation explicitly survived: \"it demoed well\" is not \"it works at scale.\" Zero-shot makes prototypes cheap, which makes *measurement* the differentiator between a demo and a system you can bill for."
+        },
+        {
+          "id": "d",
+          "text": "Obsolete: small dedicated models — one general model now handles every task at every volume.",
+          "correct": false,
+          "explanation": "The economics of high-volume, well-defined, latency- or privacy-critical tasks didn't go away — they got *more* important as volume grew. The small specialist survived precisely because per-call LLM costs compound."
+        }
+      ],
+      "takeaway": "The LLM era moved the build line: per-task training is now a commodity, while embeddings, retrieval over proprietary data, cheap specialists, workflow, and evaluation are where the budget belongs.",
+      "difficulty": "core"
+    }
+  ],
+  "exercises": [
+    {
+      "id": "ex1",
+      "title": "From 50,000 reviews to a themes-and-sentiment study",
+      "estimatedMinutes": 25,
+      "scenario": "A consumer-electronics brand has **50,000 product reviews and survey verbatims** from the last 18 months and \"no idea what they're telling us.\" The CX director wants insight; an internal engineer proposes \"send every review to an LLM and ask it for the themes\"; a vendor proposes a six-month custom-classifier project with a labelling campaign. You're asked to propose the right 2026 approach and a realistic scope.",
+      "givens": [
+        "50,000 short texts, no labels, multiple product lines, 18 months of timestamps",
+        "CX wants: recurring themes, sentiment per theme, trends over time, and verbatim quotes to make it credible",
+        "Budget appetite: a few weeks, not a few months",
+        "The themes are unknown in advance — that's the point of the study"
+      ],
+      "tasks": [
+        "Name the classic task(s) this maps to, and explain why neither a supervised classifier nor an LLM-call-per-review is the right backbone.",
+        "Design the pipeline (embed → cluster → label → score → trend) with one sentence on where the LLM *does* earn its keep.",
+        "Scope it commercially: duration, deliverable format, and why this archetype is a good door-opener.",
+        "State the limits you'd flag: when this approach would *not* work."
+      ],
+      "solution": "**Step 1 — name the task.** This is **topic modelling/clustering** (group documents by theme *without* predefined labels) plus **sentiment** per theme. It's the odd task out on the menu: there are *no labels*, which is exactly what embeddings unlock. A supervised classifier is the wrong backbone because the themes are unknown — you'd have to invent the label set up front, which presumes the answer to the question being asked (and the vendor's labelling campaign would label categories nobody has validated). An LLM call per review is the wrong backbone too: 50,000 generative calls is cost and latency for nothing, and an LLM summarising piles of reviews gives you anecdotes, not a defensible structure — the discovery step is geometric, not generative.\n\n**Step 2 — the pipeline.** (1) **Embed** all 50,000 verbatims with a rented embedding model — a one-off batch job, cents to a few euros. (2) **Cluster** the vectors so reviews that mean similar things group together — the themes *emerge* from the data (battery complaints, courier damage, setup confusion…) rather than being imposed. (3) **Label the clusters** — here the LLM earns its keep: summarising each cluster's representative verbatims into a human-readable theme name and description, a few dozen calls instead of 50,000. (4) **Score sentiment per theme** — cheap scoring at volume (a small model or batched calls). (5) **Trend over time** using the timestamps: which themes grow, which fade, what spiked after the firmware release. Deliver each theme with its volume, sentiment, trend, and the verbatim quotes behind it — the quotes are what make executives trust the chart.\n\n**Step 3 — commercial scope.** 2-5 weeks, delivered as a dashboard or a one-off study with an executive readout. High perceived value, low technical risk, no integration into production systems — an excellent **door-opener**: it touches the client's real data, demonstrates the embed-and-compare primitive, and naturally leads to follow-on missions (routing the complaints you just discovered, semantic search over the same corpus, RAG).\n\n**Step 4 — the limits to flag.** This needs *volume* — on a corpus of a few dozen documents, clustering is meaningless (a named overkill case: just read them). Clusters are only as good as what people actually wrote about — silent churners don't appear in reviews (selection bias). Theme names are editorial, so a human pass over the cluster labels is part of the method, not an apology. And sentiment on sarcastic or mixed reviews is imperfect — report it as a per-theme aggregate with confidence, not as per-review truth.",
+      "rubric": {
+        "keyPoints": [
+          "Task named as topic modelling/clustering + sentiment, with the no-labels property identified as the reason embeddings (not a classifier, not per-review LLM calls) are the backbone",
+          "Pipeline in the right order — embed, cluster, LLM-label the clusters, score sentiment, trend over time — with the LLM used on dozens of clusters rather than 50k documents",
+          "Deliverable includes themes with volume, sentiment, trend, *and verbatim quotes*; scoped at 2-5 weeks as a door-opener",
+          "Limits flagged: needs corpus volume, selection bias in who writes reviews, human pass on theme names"
+        ],
+        "pitfalls": [
+          "Sending all 50,000 reviews through a generative LLM — cost and latency for a worse, less defensible structure",
+          "Letting a vendor define a label taxonomy up front for a discovery problem — it presumes the answer",
+          "Promising exact sentiment accuracy per review instead of aggregate per-theme signals",
+          "Running theme discovery on a corpus too small to cluster meaningfully (the 30-document red flag)"
+        ],
+        "takeaways": [
+          "When there are no labels and the categories are unknown, embed-and-cluster is the move — the themes come from the geometry, and the LLM's job shrinks to naming them",
+          "Themes + sentiment + trends + verbatims is a low-risk, high-perceived-value mission shape that opens the door to routing, search, and RAG follow-ons"
+        ],
+        "transfer": "Embed-and-cluster discovery generalises far beyond reviews: incident tickets (what actually breaks?), sales-call transcripts (what objections recur?), open survey questions, news monitoring, even clustering code stack-traces by root cause. The deeper pattern — use unsupervised structure to *discover* the categories before anyone commits to a taxonomy — is the antidote to a universal failure mode: building classification systems around categories that were guessed in a meeting rather than found in the data."
+      }
+    },
+    {
+      "id": "ex2",
+      "title": "Route the routing problem: LLM, small model, or both",
+      "estimatedMinutes": 30,
+      "scenario": "A telecom operator receives **1.2 million support emails per month**, triaged by hand into 14 queues. They want automation in production within a quarter. Constraints from the workshop: messages contain customer PII and, per their counsel's current reading, **should not leave the company's systems** in production; routing decisions must be **auditable and repeatable** for the regulator; the team has **no labelled data** today (the historical queue assignments exist but are known to be ~80% consistent at best). A board member read about LLMs and asks: \"Why not just send every email to a frontier model?\"",
+      "givens": [
+        "Volume: 1.2M emails/month, 14 target queues; production latency target: under ~200 ms per message",
+        "PII constraint: production traffic should stay in-perimeter; a small, reviewed sample may be processed externally during the build phase",
+        "Historical queue assignments exist (noisy, ~80% consistent); no clean labels",
+        "Rough economics for the comparison: frontier LLM ≈ \\$0.01 per email; self-hosted small classifier ≈ \\$0.0002 per email equivalent"
+      ],
+      "tasks": [
+        "Answer the board member: evaluate \"LLM per email in production\" against the four axes (cost at scale, latency, privacy, determinism) with the rough monthly arithmetic.",
+        "Design the build plan using the LLM-bootstraps-the-specialist pattern, given the noisy historical labels and the PII constraint.",
+        "Specify the production safety net: confidence thresholds, the human path, and how you'd measure \"good\" against the noisy 80% baseline.",
+        "Write the two-sentence summary you'd give the board."
+      ],
+      "solution": "**Step 1 — the four axes against the board's idea.** **Cost:** 1.2M × \\$0.01 ≈ **\\$12,000/month** (≈\\$144k/yr) for the frontier LLM versus 1.2M × \\$0.0002 ≈ **\\$240/month** for a self-hosted specialist — a ~50× gap that compounds forever. **Latency:** an LLM round-trip is hundreds of ms to seconds; the 200 ms in-the-loop target wants a small model answering in milliseconds. **Privacy:** counsel says production emails stay in-perimeter — an external API call per email is ruled out regardless of price. **Determinism:** the regulator wants the same email to get the same queue every time, testable and auditable — a classifier gives a fixed output; an LLM can drift. Verdict: the LLM is the wrong *production* engine here on all four axes — which does not make it useless; it makes it the *builder*.\n\n**Step 2 — LLM bootstraps the specialist.** (1) Take a stratified sample of a few thousand historical emails (PII-handled: the reviewed build-phase sample, minimised/pseudonymised where possible). (2) Use the LLM to **label** them against the 14 queues — zero-shot with the queue definitions in the prompt — and to flag emails where the historical assignment looks wrong; human SMEs adjudicate disagreements rather than labelling from scratch. This launders the noisy 80%-consistent history into a clean gold set in days, not months. (3) Train a small classifier (or a tiny model on top of embeddings) on those labels; it runs in-perimeter on modest hardware. (4) Hold out a clean test set, judged once, as the regression baseline.\n\n**Step 3 — the production safety net.** Confidence-threshold routing: high-confidence → auto-route; low-confidence → human triage queue (the clerks now handle exceptions, not everything). Track per-queue precision/recall — *against the adjudicated gold set, not the noisy history* — because beating an 80%-consistent baseline with a measured ~90% is a sellable improvement, while \"matching the history\" would just automate its inconsistency. Monitor the category mix weekly: a shifting distribution is the early warning that the world (or a product launch) changed. Keep a periodic LLM-assisted audit: sample low-confidence and disputed cases monthly to refresh labels and catch drift — the consultant designs the job, then keeps inspecting the clerk's work.\n\n**Step 4 — the board answer.** *\"We're using the frontier model where it's unbeatable — defining and labelling the task in days instead of a six-month labelling project — and then baking its judgement into a small in-house model that costs ~\\$240 a month instead of ~\\$12,000, answers in milliseconds, keeps customer data inside our walls, and gives the regulator the same answer twice. The expensive generalist designs the job; the cheap specialist does the shift work.\"*",
+      "rubric": {
+        "keyPoints": [
+          "All four axes applied with arithmetic: ~\\$12k vs ~\\$240 per month, ms vs sub-second latency, in-perimeter requirement ruling out external calls, determinism for auditability",
+          "Bootstrap plan uses the LLM to label/adjudicate a few thousand examples (handling the PII constraint in the build phase) rather than a months-long hand-labelling campaign",
+          "Noisy 80% history treated as a baseline to beat and a source to clean — not as ground truth to imitate",
+          "Production design includes confidence thresholds, a human exception queue, drift monitoring, and a held-out gold set as the regression baseline"
+        ],
+        "pitfalls": [
+          "Running a frontier LLM per email in production — the named \"runaway bill and latency problem\" red flag, and a privacy violation here",
+          "Training directly on the noisy historical labels, faithfully automating their 20% inconsistency",
+          "Skipping the human path — full auto-routing at any confidence level, with errors surfacing only as customer complaints",
+          "Promising an accuracy number before the gold set exists on the client's real emails"
+        ],
+        "takeaways": [
+          "Prototype with the LLM, graduate the high-volume well-defined slice to a cheap specialist — cost, latency, privacy, and determinism are the four axes that force the graduation",
+          "Labels are now cheap to bootstrap: the LLM + SME-adjudication loop replaces the labelling campaign as the path to a gold set"
+        ],
+        "transfer": "The expensive-generalist-trains-cheap-specialist pattern recurs everywhere unit economics matter: a senior engineer writes the runbook that junior staff (or scripts) execute; an expensive lab assay validates a cheap field test; a consultant designs a process the client's team then runs. And the four-axes test (cost at scale, latency, privacy, determinism) is a general filter for any \"just call the big API\" architecture — apply it to image moderation, fraud scoring, or translation and it yields the same build-vs-rent boundary."
+      }
+    }
+  ]
+}

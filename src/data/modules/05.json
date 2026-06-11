@@ -1,0 +1,516 @@
+{
+ "id": "05",
+ "title": "Model Evaluation, Validation & Experimentation",
+ "weeks": [
+  10,
+  11
+ ],
+ "part": "II — Core ML in Practice",
+ "partIndex": 2,
+ "addon": false,
+ "pitchHtml": "<p>A model that looks good in a notebook and a model that moves the client's needle are two different things — and the gap between them is where most AI missions quietly fail. This module is about <em>knowing whether a model is actually good, whether it's actually helping the business, and how to challenge an evaluation when a data scientist hands you one.</em> For a tech lead, evaluation is not a maths topic; it's a <strong>risk-management and trust-building</strong> topic. The single most valuable thing you can learn here is to read an eval critically — because the number on the slide is almost never the number that matters.</p>",
+ "prev": "04",
+ "next": "06",
+ "sectionCount": 8,
+ "quizCount": 8,
+ "exerciseCount": 3,
+ "sections": [
+  {
+   "id": "learning-objectives",
+   "kind": "objectives",
+   "title": "Learning Objectives",
+   "blocks": [
+    {
+     "type": "checklist",
+     "checklistId": "05/learning-objectives/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Pick an evaluation metric from the <strong>business problem</strong>, not the textbook default — and defend the choice in one sentence"
+      },
+      {
+       "id": "1",
+       "html": "Read a confusion matrix, precision/recall trade-off, and ROC vs PR curve well enough to challenge them in a review"
+      },
+      {
+       "id": "2",
+       "html": "Insist on a <strong>baseline</strong> and explain why an accuracy number is meaningless without one"
+      },
+      {
+       "id": "3",
+       "html": "Spot data leakage and a contaminated test set before they reach production"
+      },
+      {
+       "id": "4",
+       "html": "Decide when an <strong>A/B test</strong> is needed, scope one, and name the alternative when you can't run it"
+      },
+      {
+       "id": "5",
+       "html": "Map a model metric to the client's KPI and call out when a team is optimising a proxy"
+      },
+      {
+       "id": "6",
+       "html": "Run a critical eval review that separates a real result from a flattering one"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "key-concepts",
+   "kind": "concepts",
+   "title": "Key Concepts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "pick-the-metric-from-the-business-problem-not-the-textbook",
+     "number": 1,
+     "title": "Pick the Metric from the Business Problem, Not the Textbook",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The first and most consequential decision in any evaluation is <em>which number you optimise</em>. Get this wrong and a technically excellent model solves the wrong problem. The metric must encode what the client actually cares about — the cost of each kind of mistake.</p>\n<p><strong>Classification — and accuracy's trap.</strong> Accuracy is \"what fraction did we get right?\" It is the default, and it is a trap on <strong>imbalanced data</strong>. If 1% of transactions are fraud, a model that predicts \"never fraud\" is 99% accurate and 100% useless. Whenever one class is rare or one mistake is costlier than the other, accuracy lies.</p>\n<p>The honest vocabulary comes from the <strong>confusion matrix</strong> — four boxes, in plain language:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\"></th><th align=\"left\">Model says <strong>positive</strong></th><th align=\"left\">Model says <strong>negative</strong></th></tr></thead><tbody><tr><td align=\"left\"><strong>Actually positive</strong></td><td align=\"left\">True Positive (correct catch)</td><td align=\"left\">False Negative (<strong>missed it</strong>)</td></tr><tr><td align=\"left\"><strong>Actually negative</strong></td><td align=\"left\">False Positive (<strong>false alarm</strong>)</td><td align=\"left\">True Negative (correct pass)</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>Write those four counts as <strong>TP, FP, TN, FN</strong> and every classification metric is just a ratio of them:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\text{Accuracy}=\\frac{TP+TN}{TP+TN+FP+FN}\\qquad \\text{Precision}=\\frac{TP}{TP+FP}\\qquad \\text{Recall}=\\frac{TP}{TP+FN}\\qquad \\text{Specificity}=\\frac{TN}{TN+FP}",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mtext>Accuracy</mtext><mo>=</mo><mfrac><mrow><mi>T</mi><mi>P</mi><mo>+</mo><mi>T</mi><mi>N</mi></mrow><mrow><mi>T</mi><mi>P</mi><mo>+</mo><mi>T</mi><mi>N</mi><mo>+</mo><mi>F</mi><mi>P</mi><mo>+</mo><mi>F</mi><mi>N</mi></mrow></mfrac><mspace width=\"2em\"/><mtext>Precision</mtext><mo>=</mo><mfrac><mrow><mi>T</mi><mi>P</mi></mrow><mrow><mi>T</mi><mi>P</mi><mo>+</mo><mi>F</mi><mi>P</mi></mrow></mfrac><mspace width=\"2em\"/><mtext>Recall</mtext><mo>=</mo><mfrac><mrow><mi>T</mi><mi>P</mi></mrow><mrow><mi>T</mi><mi>P</mi><mo>+</mo><mi>F</mi><mi>N</mi></mrow></mfrac><mspace width=\"2em\"/><mtext>Specificity</mtext><mo>=</mo><mfrac><mrow><mi>T</mi><mi>N</mi></mrow><mrow><mi>T</mi><mi>N</mi><mo>+</mo><mi>F</mi><mi>P</mi></mrow></mfrac></mrow><annotation encoding=\"application/x-tex\">\\text{Accuracy}=\\frac{TP+TN}{TP+TN+FP+FN}\\qquad \\text{Precision}=\\frac{TP}{TP+FP}\\qquad \\text{Recall}=\\frac{TP}{TP+FN}\\qquad \\text{Specificity}=\\frac{TN}{TN+FP}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8778em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\">Accuracy</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.1297em;vertical-align:-0.7693em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3603em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span><span class=\"mord mathnormal\" style=\"margin-right:0.109em;\">N</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">F</span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">F</span><span class=\"mord mathnormal\" style=\"margin-right:0.109em;\">N</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span><span class=\"mord mathnormal\" style=\"margin-right:0.109em;\">N</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.7693em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:2em;\"></span><span class=\"mord text\"><span class=\"mord\">Precision</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.1297em;vertical-align:-0.7693em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3603em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">F</span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.7693em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:2em;\"></span><span class=\"mord text\"><span class=\"mord\">Recall</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.1297em;vertical-align:-0.7693em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3603em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">F</span><span class=\"mord mathnormal\" style=\"margin-right:0.109em;\">N</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.7693em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:2em;\"></span><span class=\"mord text\"><span class=\"mord\">Specificity</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.1297em;vertical-align:-0.7693em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3603em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span><span class=\"mord mathnormal\" style=\"margin-right:0.109em;\">N</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">F</span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span><span class=\"mord mathnormal\" style=\"margin-right:0.109em;\">N</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.7693em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>In words: <strong>accuracy</strong> is the share of all calls that were correct; <strong>precision</strong> is \"of the things we <em>flagged</em>, how many were real\"; <strong>recall</strong> (sensitivity) is \"of the things that <em>were</em> real, how many we caught\"; <strong>specificity</strong> is recall's mirror for the negative class. <em>Use:</em> accuracy when classes are balanced and both errors cost the same; precision when a false alarm is expensive; recall when a miss is expensive; specificity when correctly clearing the negatives matters (e.g. not flagging healthy patients). From those four boxes come the metrics that matter:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Metric</th><th align=\"left\">Plain-language question</th><th align=\"left\">Reach for it when</th></tr></thead><tbody><tr><td align=\"left\"><strong>Precision</strong></td><td align=\"left\">When we flag something, how often are we right?</td><td align=\"left\">False alarms are expensive (e.g. blocking good customers)</td></tr><tr><td align=\"left\"><strong>Recall (sensitivity)</strong></td><td align=\"left\">Of all the real cases, how many did we catch?</td><td align=\"left\">Misses are expensive (e.g. fraud, disease, churn)</td></tr><tr><td align=\"left\"><strong>F1</strong></td><td align=\"left\">A blend of precision and recall in one number</td><td align=\"left\">You need a single figure and both errors hurt</td></tr><tr><td align=\"left\"><strong>ROC-AUC</strong></td><td align=\"left\">Can the model rank a random positive above a random negative?</td><td align=\"left\">Classes are roughly balanced; you want a threshold-free score</td></tr><tr><td align=\"left\"><strong>PR-AUC</strong></td><td align=\"left\">Same ranking quality, but focused on the rare positive class</td><td align=\"left\"><strong>Imbalanced</strong> data — the one ROC-AUC flatters</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>F1</strong> collapses precision (P) and recall (R) into a single score by taking their <strong>harmonic mean</strong>:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "F1 = 2\\cdot\\frac{P\\cdot R}{P+R}",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mi>F</mi><mn>1</mn><mo>=</mo><mn>2</mn><mo>⋅</mo><mfrac><mrow><mi>P</mi><mo>⋅</mo><mi>R</mi></mrow><mrow><mi>P</mi><mo>+</mo><mi>R</mi></mrow></mfrac></mrow><annotation encoding=\"application/x-tex\">F1 = 2\\cdot\\frac{P\\cdot R}{P+R}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">F</span><span class=\"mord\">1</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">2</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">⋅</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.1297em;vertical-align:-0.7693em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3603em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0077em;\">R</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">⋅</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0077em;\">R</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.7693em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p><em>Use:</em> when you need one headline number and <em>both</em> errors hurt.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "why the harmonic mean, not the average",
+       "html": "<p>A plain average of P and R would let a model hide a disaster: precision 1.0 and recall 0.0 averages to a respectable 0.5. The harmonic mean refuses to be fooled — it is dragged toward the <em>smaller</em> of the two, so F1 only rises when <strong>both</strong> P and R are decent. It punishes imbalance between them, which is exactly what you want from a single \"is this model any good at the rare class?\" number. (F1 still ignores true negatives, so it's a poor fit when correctly clearing the negative class is what matters.)</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "precision vs recall is a dial, not a fact",
+       "html": "<p>A model outputs a <em>score</em> (a probability-like number); you choose a <strong>threshold</strong> above which you act. Slide the threshold down and you catch more real cases (recall up) but raise more false alarms (precision down). There is no universally \"right\" point — only the point that minimises <em>your client's</em> total cost. <strong>Threshold choice is a business decision, not a modelling one</strong>, and it should be made in a room with the people who live with the consequences.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>ROC-AUC, without the integral.</strong> Where precision/recall judge the model at <em>one</em> threshold, <strong>ROC-AUC</strong> scores its <em>ranking</em> across all of them at once — and it has a clean plain-language meaning:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\text{AUC} = P\\big(\\text{score}(\\text{random positive}) > \\text{score}(\\text{random negative})\\big)",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mtext>AUC</mtext><mo>=</mo><mi>P</mi><mo fence=\"false\" stretchy=\"true\" minsize=\"1.2em\" maxsize=\"1.2em\">(</mo><mtext>score</mtext><mo stretchy=\"false\">(</mo><mtext>random positive</mtext><mo stretchy=\"false\">)</mo><mo>&gt;</mo><mtext>score</mtext><mo stretchy=\"false\">(</mo><mtext>random negative</mtext><mo stretchy=\"false\">)</mo><mo fence=\"false\" stretchy=\"true\" minsize=\"1.2em\" maxsize=\"1.2em\">)</mo></mrow><annotation encoding=\"application/x-tex\">\\text{AUC} = P\\big(\\text{score}(\\text{random positive}) &gt; \\text{score}(\\text{random negative})\\big)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord text\"><span class=\"mord\">AUC</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.2em;vertical-align:-0.35em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mord\"><span class=\"delimsizing size1\">(</span></span><span class=\"mord text\"><span class=\"mord\">score</span></span><span class=\"mopen\">(</span><span class=\"mord text\"><span class=\"mord\">random positive</span></span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">&gt;</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.2em;vertical-align:-0.35em;\"></span><span class=\"mord text\"><span class=\"mord\">score</span></span><span class=\"mopen\">(</span><span class=\"mord text\"><span class=\"mord\">random negative</span></span><span class=\"mclose\">)</span><span class=\"mord\"><span class=\"delimsizing size1\">)</span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>That is: pick one real positive and one real negative at random; AUC is the probability the model gives the positive the higher score. 0.5 is a coin flip (no skill), 1.0 is a perfect ranker.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "why AUC is threshold-independent (and when it lies)",
+       "html": "<p>AUC depends only on the <em>order</em> the model puts cases in, never on where you draw the line, so it answers \"can this model tell positives from negatives at all?\" before any business threshold is chosen — handy for comparing models early. Its blind spot is <strong>imbalance</strong>: with 1% positives, the huge pile of true negatives makes the false-positive rate barely budge, so AUC can look excellent while the model is useless on the rare class. That's why on skewed data you switch to <strong>PR-AUC</strong>, which only looks at precision and recall and ignores the easy true negatives — it tells the uncomfortable truth ROC-AUC flatters away.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Cost-sensitive evaluation</strong> makes this explicit. Attach a euro figure to a false positive and a false negative, and the \"best\" model is the one with the lowest expected cost — which is frequently <em>not</em> the most accurate one. A fraud model that catches 90% of fraud while occasionally annoying a good customer can beat one that catches 70% with zero annoyance, <em>if</em> a missed fraud costs far more than a false alarm. The matrix only becomes a decision once money is on it.</p>\n<p><strong>Regression — what each error punishes.</strong> When you're predicting a number (demand, price, time), the metric choice is about <em>how you feel about big misses</em>:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Metric</th><th align=\"left\">What it measures</th><th align=\"left\">Punishes</th><th align=\"left\">Use when</th></tr></thead><tbody><tr><td align=\"left\"><strong>MAE</strong></td><td align=\"left\">Average size of the error, in real units</td><td align=\"left\">All errors equally</td><td align=\"left\">Errors scale linearly with cost; you want an interpretable \"off by X on average\"</td></tr><tr><td align=\"left\"><strong>RMSE</strong></td><td align=\"left\">Like MAE but squares errors first</td><td align=\"left\"><strong>Large</strong> errors disproportionately</td><td align=\"left\">One big miss is much worse than several small ones</td></tr><tr><td align=\"left\"><strong>MAPE</strong></td><td align=\"left\">Average error as a <strong>percentage</strong></td><td align=\"left\">Relative errors; explodes near zero</td><td align=\"left\">Stakeholders think in % and values are comfortably above zero</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>For <em>n</em> predictions <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mover accent=\"true\"><mi>y</mi><mo>^</mo></mover><mi>i</mi></msub></mrow><annotation encoding=\"application/x-tex\">\\hat{y}_i</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord accent\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6944em;\"><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span></span><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"accent-body\" style=\"left:-0.1944em;\"><span class=\"mord\">^</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1944em;\"><span></span></span></span></span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> against actuals <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>y</mi><mi>i</mi></msub></mrow><annotation encoding=\"application/x-tex\">y_i</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span>:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\text{RMSE}=\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}(y_i-\\hat{y}_i)^2}\\qquad \\text{MAE}=\\frac{1}{n}\\sum_{i=1}^{n}|y_i-\\hat{y}_i|\\qquad \\text{MAPE}=\\frac{100\\%}{n}\\sum_{i=1}^{n}\\left|\\frac{y_i-\\hat{y}_i}{y_i}\\right|",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mtext>RMSE</mtext><mo>=</mo><msqrt><mrow><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo stretchy=\"false\">(</mo><msub><mi>y</mi><mi>i</mi></msub><mo>−</mo><msub><mover accent=\"true\"><mi>y</mi><mo>^</mo></mover><mi>i</mi></msub><msup><mo stretchy=\"false\">)</mo><mn>2</mn></msup></mrow></msqrt><mspace width=\"2em\"/><mtext>MAE</mtext><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mi mathvariant=\"normal\">∣</mi><msub><mi>y</mi><mi>i</mi></msub><mo>−</mo><msub><mover accent=\"true\"><mi>y</mi><mo>^</mo></mover><mi>i</mi></msub><mi mathvariant=\"normal\">∣</mi><mspace width=\"2em\"/><mtext>MAPE</mtext><mo>=</mo><mfrac><mrow><mn>100</mn><mi mathvariant=\"normal\">%</mi></mrow><mi>n</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mrow><mo fence=\"true\">∣</mo><mfrac><mrow><msub><mi>y</mi><mi>i</mi></msub><mo>−</mo><msub><mover accent=\"true\"><mi>y</mi><mo>^</mo></mover><mi>i</mi></msub></mrow><msub><mi>y</mi><mi>i</mi></msub></mfrac><mo fence=\"true\">∣</mo></mrow></mrow><annotation encoding=\"application/x-tex\">\\text{RMSE}=\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}(y_i-\\hat{y}_i)^2}\\qquad \\text{MAE}=\\frac{1}{n}\\sum_{i=1}^{n}|y_i-\\hat{y}_i|\\qquad \\text{MAPE}=\\frac{100\\%}{n}\\sum_{i=1}^{n}\\left|\\frac{y_i-\\hat{y}_i}{y_i}\\right|</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord text\"><span class=\"mord\">RMSE</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:3.1568em;vertical-align:-1.2777em;\"></span><span class=\"mord sqrt\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.8791em;\"><span class=\"svg-align\" style=\"top:-5.1168em;\"><span class=\"pstrut\" style=\"height:5.1168em;\"></span><span class=\"mord\" style=\"padding-left:1.056em;\"><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3214em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">n</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\">1</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mop op-limits\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.6514em;\"><span style=\"top:-1.8723em;margin-left:0em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">i</span><span class=\"mrel mtight\">=</span><span class=\"mord mtight\">1</span></span></span></span><span style=\"top:-3.05em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span><span class=\"mop op-symbol large-op\">∑</span></span></span><span style=\"top:-4.3em;margin-left:0em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">n</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.2777em;\"><span></span></span></span></span></span><span class=\"mopen\">(</span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord accent\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6944em;\"><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span></span><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"accent-body\" style=\"left:-0.1944em;\"><span class=\"mord\">^</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1944em;\"><span></span></span></span></span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mclose\"><span class=\"mclose\">)</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.7401em;\"><span style=\"top:-2.989em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\">2</span></span></span></span></span></span></span></span></span></span><span style=\"top:-3.8391em;\"><span class=\"pstrut\" style=\"height:5.1168em;\"></span><span class=\"hide-tail\" style=\"min-width:0.742em;height:3.1968em;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"400em\" height=\"3.1968em\" viewBox=\"0 0 400000 3196\" preserveAspectRatio=\"xMinYMin slice\"><path d=\"M702 80H40000040\nH742v3062l-4 4-4 4c-.667.7 -2 1.5-4 2.5s-4.167 1.833-6.5 2.5-5.5 1-9.5 1\nh-12l-28-84c-16.667-52-96.667 -294.333-240-727l-212 -643 -85 170\nc-4-3.333-8.333-7.667-13 -13l-13-13l77-155 77-156c66 199.333 139 419.667\n219 661 l218 661zM702 80H400000v40H742z\"/></svg></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.2777em;\"><span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:2em;\"></span><span class=\"mord text\"><span class=\"mord\">MAE</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.9291em;vertical-align:-1.2777em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3214em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">n</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\">1</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mop op-limits\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.6514em;\"><span style=\"top:-1.8723em;margin-left:0em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">i</span><span class=\"mrel mtight\">=</span><span class=\"mord mtight\">1</span></span></span></span><span style=\"top:-3.05em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span><span class=\"mop op-symbol large-op\">∑</span></span></span><span style=\"top:-4.3em;margin-left:0em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">n</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.2777em;\"><span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\">∣</span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\"><span class=\"mord accent\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6944em;\"><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span></span><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"accent-body\" style=\"left:-0.1944em;\"><span class=\"mord\">^</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1944em;\"><span></span></span></span></span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mord\">∣</span><span class=\"mspace\" style=\"margin-right:2em;\"></span><span class=\"mord text\"><span class=\"mord\">MAPE</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.9291em;vertical-align:-1.2777em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.427em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">n</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\">100%</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mop op-limits\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.6514em;\"><span style=\"top:-1.8723em;margin-left:0em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">i</span><span class=\"mrel mtight\">=</span><span class=\"mord mtight\">1</span></span></span></span><span style=\"top:-3.05em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span><span class=\"mop op-symbol large-op\">∑</span></span></span><span style=\"top:-4.3em;margin-left:0em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">n</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.2777em;\"><span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"minner\"><span class=\"mopen\"><span class=\"delimsizing mult\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.45em;\"><span style=\"top:-3.45em;\"><span class=\"pstrut\" style=\"height:4.4em;\"></span><span style=\"width:0.333em;height:2.4em;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"0.333em\" height=\"2.4em\" viewBox=\"0 0 333 2400\"><path d=\"M145 15 v585 v1200 v585 c2.667,10,9.667,15,21,15\nc10,0,16.667,-5,20,-15 v-585 v-1200 v-585 c-2.667,-10,-9.667,-15,-21,-15\nc-10,0,-16.667,5,-20,15z M188 15 H145 v585 v1200 v585 h43z\"/></svg></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.95em;\"><span></span></span></span></span></span></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3714em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord accent\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6944em;\"><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span></span><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"accent-body\" style=\"left:-0.1944em;\"><span class=\"mord\">^</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1944em;\"><span></span></span></span></span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.8804em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mclose\"><span class=\"delimsizing mult\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.45em;\"><span style=\"top:-3.45em;\"><span class=\"pstrut\" style=\"height:4.4em;\"></span><span style=\"width:0.333em;height:2.4em;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"0.333em\" height=\"2.4em\" viewBox=\"0 0 333 2400\"><path d=\"M145 15 v585 v1200 v585 c2.667,10,9.667,15,21,15\nc10,0,16.667,-5,20,-15 v-585 v-1200 v-585 c-2.667,-10,-9.667,-15,-21,-15\nc-10,0,-16.667,5,-20,15z M188 15 H145 v585 v1200 v585 h43z\"/></svg></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.95em;\"><span></span></span></span></span></span></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>In words: <strong>MAE</strong> is the average miss in the unit you predicted (\"off by 12 units on average\"); <strong>RMSE</strong> is similar but squares each error before averaging; <strong>MAPE</strong> averages the error as a percentage of the actual value.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "why RMSE punishes big misses harder than MAE",
+       "html": "<p>Because RMSE <em>squares</em> every error before averaging, a single error of 10 contributes 100 while ten errors of 1 contribute only 10 in total — so one large miss dominates the score. MAE, summing raw absolute errors, treats that same big miss as merely ten small ones added up. Practical consequence: <strong>optimise RMSE when one catastrophic error (a stock-out, a wildly wrong price) is far worse than many small ones; optimise MAE when every unit of error costs the same.</strong> MAPE re-expresses error in percentage terms — intuitive for stakeholders, but it blows up as actuals approach zero and over-penalises under-forecasts, so keep it away from low-volume or near-zero series.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>A demand forecast judged on RMSE will work hard to avoid the occasional catastrophic stock-out; the same forecast judged on MAPE will care more about percentage accuracy on small-volume items. Same model, different \"best\" — <em>because the metric encodes a value judgement.</em> (Forecasting metrics in practice: <a class=\"wikilink\" data-module=\"04\" href=\"#/module/04\">Classical ML &#x26; Forecasting in Practice</a>.)</p>\n<p><strong>Ranking &#x26; recommendation, in a sentence.</strong> When the output is an ordered list (search results, recommended products), accuracy is the wrong lens entirely — what matters is <em>whether the good items are near the top</em>. The family to recognise is <strong>Precision@K / Recall@K</strong> (did we get the top-K right?) and <strong>NDCG</strong> (are the best items ranked highest?). You don't need the formulas; you need to ask \"ranked how, and judged at what cut-off?\"</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "note",
+       "title": "Note",
+       "html": "<p>Evaluation of <strong>LLM and generative</strong> outputs (no single ground truth, LLM-as-judge, hallucination/faithfulness scoring) is a different discipline and lives in <a class=\"wikilink\" data-module=\"09\" href=\"#/module/09\">Large Language Models in Practice</a>. Don't reach for accuracy/F1 there.</p>"
+      }
+     ]
+    },
+    {
+     "id": "always-have-a-baseline",
+     "number": 2,
+     "title": "Always Have a Baseline",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>A metric is a number with no meaning until you compare it to something. <strong>A model is \"good\" only relative to the alternative the client would otherwise use.</strong> \"Our churn model is 82% accurate\" is not a result — it's a number waiting for context.</p>\n<p>Three baselines you should demand before accepting any headline metric:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Baseline</th><th align=\"left\">What it is</th><th align=\"left\">What it tells you</th></tr></thead><tbody><tr><td align=\"left\"><strong>Naïve / trivial</strong></td><td align=\"left\">Always predict the majority class, the mean, or \"same as last week\"</td><td align=\"left\">The floor — beat this or the model is noise</td></tr><tr><td align=\"left\"><strong>Current process</strong></td><td align=\"left\">What the business does today (a rule, a human, a spreadsheet)</td><td align=\"left\">The <em>only</em> bar that matters commercially</td></tr><tr><td align=\"left\"><strong>Simplest model</strong></td><td align=\"left\">A logistic regression / a single rule</td><td align=\"left\">Whether the complex model earns its complexity</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "worked-example",
+       "title": "the 82% that meant nothing",
+       "html": "<p>A team proudly reports an 82%-accurate churn classifier. You ask one question: <em>what's the baseline rate?</em> It turns out only 18% of customers churn — so \"predict nobody churns\" is <strong>82% accurate too</strong>. The model has, so far, demonstrated <em>zero</em> skill. Reframed on the metric that matters (recall on churners, at a threshold tuned to the retention team's call capacity), the model catches 46% of churners versus the marketing team's current 31% from gut-feel targeting. <em>That</em> is the result: +15 points of recall against the real-world process — translatable into retained revenue. The 82% was a vanity number; the comparison to the current process was the business case.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The discipline: never present or accept a model metric in isolation. Always pair it with \"...versus <em>what</em>?\"</p>"
+      }
+     ]
+    },
+    {
+     "id": "validation-done-right",
+     "number": 3,
+     "title": "Validation Done Right",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Evaluation only means something if the model is judged on data it has <strong>never seen</strong>. The mechanics are simple to state and easy to get subtly wrong.</p>\n<p><strong>Train / validation / test — three jobs, not two.</strong></p>\n<ul>\n<li><strong>Training set</strong> — the model learns its parameters here.</li>\n<li><strong>Validation set</strong> — you tune choices here (which model, which threshold, which knobs). Used many times.</li>\n<li><strong>Test set</strong> — judged <strong>once</strong>, at the end, to estimate real-world performance. It is <strong>sacred</strong>: the moment you make a decision based on the test set, it stops being an unbiased estimate and silently becomes another validation set. Treat it like a sealed exam.</li>\n</ul>\n<p><strong>Cross-validation, intuitively.</strong> When data is scarce, holding out a single validation slice wastes data and gives a noisy estimate. Cross-validation rotates the held-out slice: split into <em>k</em> folds, train on <em>k</em>−1, validate on the remaining one, repeat <em>k</em> times, average. You get a more stable performance estimate <em>and</em> a sense of its variance — a model whose score swings wildly across folds is fragile, and that variance is itself a finding worth reporting.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "leakage is \"studying the exam in advance\"",
+       "html": "<p><strong>Data leakage</strong> is when information from the future, or from the answer, sneaks into training — so the model looks brilliant offline and collapses in production. The classic traps: scaling or imputing using statistics computed over the <em>whole</em> dataset before splitting; including a feature that's only known <em>after</em> the outcome (a \"paid_late_fee\" flag predicting \"will default\"); or — the cross-validation-specific killer — fitting any preprocessing step on all the data and <em>then</em> cross-validating, which leaks the validation folds into training every single round. The fix is a rule: <strong>fit every transformation inside the training fold only, then apply it outward.</strong> (Leakage is born upstream, in feature engineering — see <a class=\"wikilink\" data-module=\"03\" href=\"#/module/03\">Working with Data: Sources, Quality &#x26; Feature Engineering</a>.)</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>For a tech lead, the practical check is one question to the data scientist: <em>\"Walk me through your split — when was each transformation fit, and could any feature contain information you wouldn't have at prediction time?\"</em> If the answer is vague, the eval is suspect.</p>"
+      }
+     ]
+    },
+    {
+     "id": "offline--online",
+     "number": 4,
+     "title": "Offline ≠ Online",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>This is the trap that humbles experienced teams. <strong>Great offline metrics do not guarantee business impact.</strong> A model can ace the held-out test set and still fail in production, because the offline world differs from the live one in ways the test set can't capture:</p>\n<ul>\n<li><strong>Distribution shift</strong> — live traffic doesn't look like your historical data (new users, seasonality, a marketing campaign).</li>\n<li><strong>Feedback loops</strong> — the model's own actions change the world it then sees (recommend a product → it sells more → the data now says it's popular).</li>\n<li><strong>The metric isn't the outcome</strong> — a more \"accurate\" recommender can <em>reduce</em> revenue if its accuracy comes from recommending things people would have bought anyway.</li>\n<li><strong>Integration reality</strong> — latency, stale features, a UI that buries the output, users who ignore it.</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Offline evaluation answers <em>\"is the model technically capable?\"</em> Online evaluation answers <em>\"does deploying it actually change behaviour and outcomes?\"</em> They are different questions, and only the second pays the bills. Offline is a <strong>necessary filter</strong> (don't ship a model that fails offline), never a <strong>sufficient proof</strong>. The bridge between them is a controlled experiment on live traffic — which is the next concept.</p>"
+      }
+     ]
+    },
+    {
+     "id": "ab-testing-practically",
+     "number": 5,
+     "title": "A/B Testing, Practically",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>To know whether a model <em>causes</em> a better outcome, you compare it against the status quo on <strong>live traffic, at the same time, on comparable users</strong>. That's an <strong>A/B test</strong>: randomly split users into a control group (current experience) and a treatment group (the model), run both in parallel, and measure the difference in the metric that matters.</p>\n<p>The leader-relevant pieces, intuition only:</p>\n<ul>\n<li><strong>Hypothesis first.</strong> State what you expect to move, by how much, before you start (\"the new model lifts conversion by ≥1.5 points\"). No hypothesis, no experiment — just data-dredging.</li>\n<li><strong>Statistical power &#x26; sample size.</strong> To detect a <em>small</em> effect you need <em>many</em> users; to detect a <em>large</em> one, fewer. Power is the test's ability to notice a real effect when it exists. The practical consequence: <strong>smaller expected lifts need bigger samples and longer runs</strong>, and you should estimate roughly how long <em>before</em> launching — a low-traffic product may simply be unable to detect a 0.5% lift in any reasonable time, which itself is a decision-relevant finding.</li>\n</ul>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Pitfall</th><th align=\"left\">What goes wrong</th><th align=\"left\">The discipline</th></tr></thead><tbody><tr><td align=\"left\"><strong>Peeking</strong></td><td align=\"left\">Stopping the moment the result looks significant</td><td align=\"left\">Fix the duration/sample up front; don't stop early on a whim</td></tr><tr><td align=\"left\"><strong>Multiple comparisons</strong></td><td align=\"left\">Test 20 metrics, one looks \"significant\" by chance</td><td align=\"left\">Pre-declare the primary metric; treat the rest as exploratory</td></tr><tr><td align=\"left\"><strong>Novelty effect</strong></td><td align=\"left\">Users react to <em>newness</em>, not real value; the lift fades</td><td align=\"left\">Run long enough to see the effect settle</td></tr><tr><td align=\"left\"><strong>Contaminated groups</strong></td><td align=\"left\">Treatment leaks into control (shared accounts, network effects)</td><td align=\"left\">Randomise at the right unit; check the split is clean</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>When you can't run an A/B test.</strong> Sometimes randomisation is impossible — too little traffic, ethical or contractual constraints, a change that hits everyone at once (a pricing model, a back-office tool). The honest answer is <em>not</em> \"skip evaluation\"; it's to reach for a weaker-but-real causal design:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Approach</th><th align=\"left\">When</th><th align=\"left\">Caveat</th></tr></thead><tbody><tr><td align=\"left\"><strong>Before / after</strong></td><td align=\"left\">Cheap, no split possible</td><td align=\"left\">Confounded by anything else that changed (seasonality, the economy) — weakest evidence</td></tr><tr><td align=\"left\"><strong>Holdout group</strong></td><td align=\"left\">You can withhold the change from a slice indefinitely</td><td align=\"left\">A standing control; clean but \"wastes\" the holdout's potential gains</td></tr><tr><td align=\"left\"><strong>Geo / regional test</strong></td><td align=\"left\">Roll out by region, compare to held-back regions</td><td align=\"left\">Regions must be comparable; spillover between them muddies it</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>These are the <em>intuition</em>; the proper machinery for \"did X cause Y when I couldn't randomise\" is <strong>causal inference</strong> — gestured at here, treated in <span class=\"vault-ref\" title=\"In the Obsidian vault: 08 - Causal Inference &#x26; Experimentation\">Causal Inference &#x26; Experimentation</span> (and deeper still in the AI Scientist path).</p>"
+      }
+     ]
+    },
+    {
+     "id": "business-metric-vs-model-metric",
+     "number": 6,
+     "title": "Business Metric vs Model Metric",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The single most common disconnect in AI delivery: <strong>the model's metric is not the client's KPI.</strong> AUC, F1, RMSE — these are <em>instruments</em>. The client cares about retained revenue, hours saved, cost avoided, NPS. Your job as tech lead is to <strong>build and defend the bridge</strong> between the two, and to stay alert to its weak joints.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "worked-example",
+       "title": "when optimising the proxy backfires",
+       "html": "<p>An e-commerce team optimises a recommender for <strong>click-through rate</strong> (the model metric) as a proxy for <strong>revenue</strong> (the business KPI). CTR climbs 20% — a triumph on the dashboard. But revenue is flat, because the model learned to surface cheap, clicky, low-margin items. The proxy improved while the goal stagnated. The lesson isn't \"CTR is bad\" — it's that <strong>a proxy is only as good as its link to the real outcome, and that link must be checked, not assumed.</strong> When you can't measure the real KPI directly in the experiment, choose the proxy most tightly coupled to it and treat the coupling itself as a thing to validate.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The mapping is a deliverable in its own right: <em>model metric → leading indicator → business KPI → € impact</em>, with each arrow's assumption written down. A team that can't draw this chain doesn't yet know what \"good\" means.</p>"
+      }
+     ]
+    },
+    {
+     "id": "how-to-read-a-data-scientists-eval-critically",
+     "number": 7,
+     "title": "How to Read a Data Scientist's Eval Critically",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>This is the capstone skill of the module — the questions that, asked in a review, separate a robust result from a flattering one. You don't need to out-maths the data scientist; you need to ask the right things and listen for confident, specific answers.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>A weak evaluation almost always fails on one of three fronts: <strong>no honest comparison</strong> (no baseline, wrong metric), <strong>a contaminated estimate</strong> (leakage, a peeked-at test set, the wrong split), or <strong>a missing bridge to the business</strong> (offline only, optimising a proxy). The questions below probe exactly those three seams.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<ul>\n<li><em>\"What's the baseline, and how much better is this than the current process?\"</em> — exposes vanity numbers.</li>\n<li><em>\"Why this metric? What does a false positive cost the client versus a false negative?\"</em> — exposes a textbook-default choice.</li>\n<li><em>\"Show me the confusion matrix / the errors, not just the headline score.\"</em> — exposes a number hiding a lopsided failure mode.</li>\n<li><em>\"How was the data split, and when was each transformation fit?\"</em> — exposes leakage.</li>\n<li><em>\"Has the test set been used to make any decisions?\"</em> — exposes a burned test set.</li>\n<li><em>\"How will this offline metric translate to a business outcome, and how will we confirm it live?\"</em> — exposes the offline≠online gap.</li>\n<li><em>\"What's the variance across folds / how stable is this result?\"</em> — exposes fragility dressed up as a single confident number.</li>\n</ul>\n<p>If the answers are vague or defensive, the problem is the evaluation, not the question.</p>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "client-mission-patterns--commercial-angle",
+   "kind": "missions",
+   "title": "Client Mission Patterns / Commercial Angle",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Evaluation and experimentation sell as <strong>trust and rigour</strong> — the work that lets a client believe (and a board sign off on) an AI investment. These missions punch above their size because they de-risk far larger ones.</p>\n<ul>\n<li><strong>Model Audit / Independent Validation (\"second opinion\")</strong> — <em>Problem:</em> a client has a model (theirs or a vendor's) about to go live, or already live, and someone senior wants an independent check before betting on it. <em>Deliverable:</em> an audit report — metric appropriateness, baseline comparison, leakage check, a re-run on held-out or fresh data, and a go / fix / no-go recommendation with the reasoning. <em>Scope:</em> 1-3 weeks, fixed price. <em>Who buys:</em> a CTO/CDO de-risking a launch, a risk/compliance function, an investor doing technical due diligence. <em>This is the highest-trust, highest-margin mission in this module — you're selling judgement, not build.</em></li>\n<li><strong>Experimentation / A-B Testing Capability Setup</strong> — <em>Problem:</em> the client ships changes (and models) on opinion because they have no way to measure causal impact. <em>Deliverable:</em> an experimentation framework — assignment/randomisation logic, a metrics layer with primary and guardrail metrics, a sample-size/duration calculator, and a lightweight experiment-review ritual. <em>Scope:</em> 4-8 weeks. <em>Who buys:</em> product/growth leadership, a data platform owner. <em>(Lands on the data platform — see <a class=\"wikilink\" data-module=\"12\" href=\"#/module/12\">Data Engineering &#x26; Platforms</a> — and feeds <a class=\"wikilink\" data-module=\"13\" href=\"#/module/13\">MLOps &#x26; Productionization</a>.)</em></li>\n<li><strong>Define Success Metrics &#x26; Evaluation Plan for an AI Initiative</strong> — <em>Problem:</em> a project is starting (or floundering) with no agreed definition of \"good.\" <em>Deliverable:</em> a one-page evaluation plan — the chosen model metric, its mapping to the business KPI, the baseline, the validation protocol, and the offline→online plan. <em>Scope:</em> 1-2 weeks, often the opening act of a larger build. <em>Who buys:</em> the project's executive sponsor; an internal team wanting an external sign-off on their plan.</li>\n</ul>\n<p><strong>Buy-vs-build for the client:</strong> the <em>framework</em> (an experimentation platform) can be bought or assembled from existing tools — sell the <em>design, the metric definitions, and the rigour</em>, which are bespoke. <strong>What to charge for:</strong> the audit and the evaluation plan as fixed-price, repeatable IP; the capability setup as a scoped build. <strong>What NOT to promise:</strong> that an audit will <em>bless</em> a model (it may condemn it — that's the value); a specific lift from an A/B test before it's run; or that an experiment will be conclusive when the client's traffic is too thin to power it — surface that constraint up front, don't discover it after eight weeks.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "tools--vendor-landscape",
+   "kind": "tools",
+   "title": "Tools & Vendor Landscape",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p><em>As of 2026 — treat names/prices as perishable; re-check before quoting.</em></p>"
+    },
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Tool / Category</th><th align=\"left\">Use here</th><th align=\"left\">OSS / Paid</th><th align=\"left\">Note</th></tr></thead><tbody><tr><td align=\"left\">scikit-learn <code>metrics</code></td><td align=\"left\">Standard offline metrics &#x26; confusion matrices</td><td align=\"left\">OSS</td><td align=\"left\">The default; covers most classification/regression needs</td></tr><tr><td align=\"left\">Experiment-tracking (MLflow, Weights &#x26; Biases)</td><td align=\"left\">Logging runs, metrics, comparing models</td><td align=\"left\">OSS / Freemium</td><td align=\"left\">Keeps evals reproducible; deeper use → <a class=\"wikilink\" data-module=\"13\" href=\"#/module/13\">MLOps &#x26; Productionization</a></td></tr><tr><td align=\"left\">A/B platforms (Optimizely, GrowthBook, Statsig, LaunchDarkly)</td><td align=\"left\">Running &#x26; analysing online experiments</td><td align=\"left\">Paid / OSS (GrowthBook)</td><td align=\"left\">Buy the assignment + stats engine; don't hand-roll significance</td></tr><tr><td align=\"left\">Statistics libraries (<code>statsmodels</code>, <code>scipy.stats</code>)</td><td align=\"left\">Sample-size &#x26; significance under the hood</td><td align=\"left\">OSS</td><td align=\"left\">Powers a homegrown framework when a platform is overkill</td></tr><tr><td align=\"left\">Model-validation / monitoring (Evidently, Fiddler, Arize)</td><td align=\"left\">Drift detection, offline→online gap, live monitoring</td><td align=\"left\">OSS / Paid</td><td align=\"left\">The bridge from \"good offline\" to \"still good in production\"</td></tr><tr><td align=\"left\">Notebooks + a clear template</td><td align=\"left\">The actual audit deliverable</td><td align=\"left\">OSS</td><td align=\"left\">For a model audit, a rigorous reproducible notebook <em>is</em> the product</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>For most audits and evaluation plans, the heavy tooling is optional — the deliverable is a disciplined analysis and a defensible recommendation, not a platform.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "when-is-this-overkill",
+   "kind": "overkill",
+   "title": "When Is This Overkill?",
+   "blocks": [
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Situation</th><th align=\"left\">Heavy evaluation/experimentation is overkill — do this instead</th></tr></thead><tbody><tr><td align=\"left\">A reversible, low-stakes change (button colour, copy tweak)</td><td align=\"left\">Ship it, watch the metric, roll back if it dips — a full A/B test isn't worth the setup</td></tr><tr><td align=\"left\">Traffic is far too low to ever reach significance</td><td align=\"left\">Use judgement + a before/after sanity check; be honest that it won't be conclusive</td></tr><tr><td align=\"left\">A one-off internal analysis, not a recurring decision</td><td align=\"left\">A clean train/test split and a baseline is enough; skip the experimentation platform</td></tr><tr><td align=\"left\">The model already obviously beats a trivial baseline by miles, low risk</td><td align=\"left\">A single held-out test + a baseline suffices; don't gold-plate the validation</td></tr><tr><td align=\"left\">No real outcome to measure yet (pure exploration)</td><td align=\"left\">Define the success metric <em>first</em> (Mission 3 above) — measuring comes after</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The mirror image of \"you don't need AI for this\" is \"you don't need a full experiment for this.\" Matching the rigour to the stakes is itself the senior judgement.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "resources",
+   "kind": "resources",
+   "title": "Resources",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "books",
+     "number": null,
+     "title": "Books",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Chip Huyen — <em>Designing Machine Learning Systems</em> — the offline/online gap, evaluation in production, and monitoring, framed pragmatically. <em>(Paid)</em></li>\n<li>Kohavi, Tang &#x26; Xu — <em>Trustworthy Online Controlled Experiments</em> — the definitive practical guide to A/B testing and its many traps. <em>(Paid)</em></li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "courses--articles-free",
+     "number": null,
+     "title": "Courses & Articles (Free)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>scikit-learn's <em>Model evaluation</em> user-guide section — a clear, example-led tour of the metrics. <em>Free.</em></li>\n<li>Google's <em>Rules of Machine Learning</em> (Martin Zinkevich) — battle-tested guidance on metrics, baselines, and not fooling yourself. <em>Free.</em></li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "go-deeper",
+     "number": null,
+     "title": "Go Deeper",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li><strong>Deeper math</strong> (estimators, statistical learning theory, the maths of evaluation &#x26; experimentation) → <span class=\"vault-ref\" title=\"In the Obsidian vault: 07 - Model Selection, Evaluation &#x26; AutoML\">Model Selection, Evaluation &#x26; AutoML</span> and <span class=\"vault-ref\" title=\"In the Obsidian vault: 08 - Causal Inference &#x26; Experimentation\">Causal Inference &#x26; Experimentation</span> (AI Scientist Path).</li>\n<li><strong>Deeper code</strong> (implementing metrics, cross-validation pipelines, experiment tracking &#x26; a model registry) → <span class=\"vault-ref\" title=\"In the Obsidian vault: 04 - Classical ML Mastery\">Classical ML Mastery</span> and <span class=\"vault-ref\" title=\"In the Obsidian vault: 07 - Experiment Tracking &#x26; Model Registry\">Experiment Tracking &#x26; Model Registry</span> (ML Engineer Path).</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "practical-artifacts",
+   "kind": "artifacts",
+   "title": "Practical Artifacts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "decision-checklist--is-this-evaluation-trustworthy",
+     "number": null,
+     "title": "Decision Checklist — \"Is this evaluation trustworthy?\"",
+     "blocks": [
+      {
+       "type": "checklist",
+       "checklistId": "05/practical-artifacts/1",
+       "items": [
+        {
+         "id": "0",
+         "html": "Is the metric tied to the business cost of each error — not a textbook default?"
+        },
+        {
+         "id": "1",
+         "html": "Is there a baseline (naïve, current process, simplest model) the result is compared against?"
+        },
+        {
+         "id": "2",
+         "html": "Was the test set held out and judged <strong>once</strong>, with no decisions made on it?"
+        },
+        {
+         "id": "3",
+         "html": "Was every transformation fit inside the training data only (no leakage)?"
+        },
+        {
+         "id": "4",
+         "html": "Is there a stated plan to confirm the offline result on live traffic?"
+        },
+        {
+         "id": "5",
+         "html": "Is the model metric mapped to a business KPI, with the link checked, not assumed?"
+        },
+        {
+         "id": "6",
+         "html": "Do we know how stable the result is (variance across folds / confidence)?"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "red-flags",
+     "number": null,
+     "title": "Red Flags",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>A headline accuracy with no baseline and no class balance mentioned.</li>\n<li>\"We picked F1 because it's standard.\" (Standard for <em>what</em> cost structure?)</li>\n<li>The test set was used to choose the model or the threshold. (It's no longer a test set.)</li>\n<li>Offline metrics presented as proof of business impact.</li>\n<li>An A/B test stopped early because it \"looked significant.\"</li>\n<li>Twenty metrics measured, the one winner highlighted.</li>\n<li>The model metric improved but nobody can state the KPI it should move.</li>\n<li>\"We'll validate it once it's live\" — with no actual experiment design.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "scoping-prompts-ask-the-client--the-team",
+     "number": null,
+     "title": "Scoping Prompts (ask the client / the team)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"How do you define success today, in numbers the business recognises?\"</li>\n<li>\"What does a false positive cost you, versus a false negative?\"</li>\n<li>\"What do you do <em>now</em>, without this model, and how well does it work?\"</li>\n<li>\"How would we prove, on live traffic, that this actually changed outcomes?\"</li>\n<li>\"Can you randomise users — and if not, what's the cleanest comparison we can make?\"</li>\n<li>\"Has anyone independently checked this model, or only the team that built it?\"</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "self-assessment",
+   "kind": "self-assessment",
+   "title": "Self-Assessment",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Before moving on, you should be able to:</p>"
+    },
+    {
+     "type": "checklist",
+     "checklistId": "05/self-assessment/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Choose and justify an evaluation metric from a business problem, including the threshold trade-off"
+      },
+      {
+       "id": "1",
+       "html": "Explain why a given accuracy number is or isn't meaningful by naming the right baseline"
+      },
+      {
+       "id": "2",
+       "html": "Detect leakage and a burned test set from how the validation was set up"
+      },
+      {
+       "id": "3",
+       "html": "Explain why an offline win can fail online, and design the experiment that would confirm it"
+      },
+      {
+       "id": "4",
+       "html": "Scope an A/B test — or name and justify the alternative when randomisation is impossible"
+      },
+      {
+       "id": "5",
+       "html": "Run a critical eval review whose questions expose a weak evaluation"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  }
+ ]
+}

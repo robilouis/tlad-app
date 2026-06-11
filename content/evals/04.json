@@ -1,0 +1,347 @@
+{
+  "moduleId": "04",
+  "quiz": [
+    {
+      "id": "q1",
+      "conceptRef": "framing-supervised-vs-unsupervised-and-the-start-simple-ladder",
+      "prompt": "A client wants to \"predict customer dissatisfaction,\" but dissatisfaction has never been recorded anywhere — no flag, no survey, no defined event. Where does this sit in the module's framing?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "\"No labels\" is to supervised ML what \"no data\" is to AI overall — a stop condition; the first mission is defining and capturing the label, not modelling.",
+          "correct": true,
+          "explanation": "Right. Supervised learning needs examples with the answer attached. If the outcome was never recorded, the honest first engagement is agreeing a definition and instrumenting its capture — a churn model needs a clean, agreed 'churned' definition before a single feature is built."
+        },
+        {
+          "id": "b",
+          "text": "Use unsupervised clustering instead — it doesn't need labels, so it can predict dissatisfaction directly.",
+          "correct": false,
+          "explanation": "Clustering finds structure (groups that resemble each other); it cannot tell you which group is 'dissatisfied' — that judgement requires exactly the ground truth that's missing. Unsupervised methods explore; they don't substitute for an absent label."
+        },
+        {
+          "id": "c",
+          "text": "Have an LLM read support messages and generate dissatisfaction labels, then train on those.",
+          "correct": false,
+          "explanation": "That's weak/auto-labelling — sometimes a useful bootstrap, but it carries systematic, correlated errors and quietly replaces the client's target with the LLM's opinion. It doesn't remove the need to define what dissatisfaction *means* and validate labels against reality."
+        },
+        {
+          "id": "d",
+          "text": "Proceed with regression on satisfaction-adjacent metrics — close enough is fine at the framing stage.",
+          "correct": false,
+          "explanation": "Building on an undefined outcome is the named red flag 'no agreed label definition before feature work starts — you're building on sand.' A proxy chosen casually at framing time becomes the thing the model actually optimises, whether or not it matches the client's intent."
+        }
+      ],
+      "takeaway": "Detect the missing-label stop condition early: if the outcome was never recorded, the first mission is defining and capturing the label, not modelling.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q2",
+      "conceptRef": "linear--logistic-regression--the-honest-baseline",
+      "prompt": "On a credit-scoring engagement where decisions must be defended to a regulator, XGBoost beats logistic regression by 0.5% on a metric where 0.5% is within noise. What does the module say to ship?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The logistic regression — the baseline disciplined the project by showing the complex model doesn't beat it by enough to justify its cost, and explainability is a hard requirement here anyway.",
+          "correct": true,
+          "explanation": "Both of the module's arguments converge: every fancier model must beat the regression by enough to justify its cost (0.5% in noise doesn't), and in regulated settings the readable coefficients — 'each extra support ticket adds 2 points of risk' — are part of the deliverable."
+        },
+        {
+          "id": "b",
+          "text": "The XGBoost — any measured improvement should be captured, and SHAP values make trees explainable enough for any regulator.",
+          "correct": false,
+          "explanation": "A 0.5% difference inside noise isn't a measured improvement — it's a coin flip dressed as progress. SHAP gives per-prediction reasons, but where explanation is a *hard* requirement, the directly readable linear model is the better sell, especially with no real accuracy gain to trade away."
+        },
+        {
+          "id": "c",
+          "text": "Neither — the small gap proves the features are weak, so restart with deep learning on the raw data.",
+          "correct": false,
+          "explanation": "A small gap between rungs 1 and 2 suggests the signal is largely linear/monotonic — an argument for *stopping*, not escalating. Deep learning on tabular credit data inverts the ladder and adds cost, opacity, and regulatory risk for no evidence of gain."
+        },
+        {
+          "id": "d",
+          "text": "Ship both in an ensemble — combining them captures the strengths of each.",
+          "correct": false,
+          "explanation": "An ensemble maximises complexity precisely when the evidence says complexity isn't paying. It compounds the explainability problem for a regulator and doubles the maintenance surface — the opposite of stopping at the cheapest rung that clears the bar."
+        }
+      ],
+      "takeaway": "The baseline's job is to discipline the project: if the fancy model can't beat the simple one by more than noise, that's a finding — ship the simple one.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q3",
+      "conceptRef": "tree-based-models-the-workhorse-of-tabular-ml",
+      "prompt": "A stakeholder pushes for a deep neural network on a 50,000-row tabular dataset of mixed numeric and categorical features. Why does the module make gradient-boosted trees the default instead?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Boosted trees capture interactions automatically, handle mixed types and missing values, need no feature scaling, train in minutes on a CPU, and stay explainable via SHAP — beating deep nets on most tabular problems at a fraction of the cost.",
+          "correct": true,
+          "explanation": "That's the property table in one breath. The honest summary: pick XGBoost/LightGBM/CatBoost, tune modestly, and you'll beat a deep network on nearly any tabular problem for a tiny fraction of the cost, talent, and risk — a fact that reshapes roadmaps."
+        },
+        {
+          "id": "b",
+          "text": "Deep networks can't model feature interactions, which only trees can represent.",
+          "correct": false,
+          "explanation": "Overclaims the case. Deep nets *can* model interactions — the issue is they need far more data, compute, and tuning to do it on tabular problems, and arrive less explainable and more expensive. The argument is economics and reliability, not impossibility."
+        },
+        {
+          "id": "c",
+          "text": "Trees are chosen because they never overfit, unlike neural networks.",
+          "correct": false,
+          "explanation": "A single deep decision tree famously *memorises* the training data — that's exactly why ensembles exist (bagging stabilises, boosting corrects). Trees can absolutely overfit; the ensemble structure and regularisation manage it, they don't abolish it."
+        },
+        {
+          "id": "d",
+          "text": "It's a temporary 2026 convention — tabular deep learning is expected to take over, so new projects should adopt it early.",
+          "correct": false,
+          "explanation": "Betting a client's mission on an anticipated future is the over-engineering trap. The module's standing rule is to prove the simple thing fails before reaching for the complex one — and on tabular data, boosted trees are the rung that rarely fails."
+        }
+      ],
+      "takeaway": "Good features + boosted trees beat deep learning on most tabular problems at a fraction of the cost — make anything fancier earn its place with evidence.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q4",
+      "conceptRef": "tree-based-models-the-workhorse-of-tabular-ml",
+      "prompt": "In a design review you're asked to explain the difference between Random Forest and XGBoost \"in one sentence each, no maths.\" Which pairing is right?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Random Forest is a crowd voting independently so individual mistakes wash out (cuts variance); XGBoost is a relay team where each runner is told exactly where the last one fell short (cuts bias).",
+          "correct": true,
+          "explanation": "Bagging = average away the noise: many trees on random slices, votes averaged, instability cancels. Boosting = relentlessly fix the residual mistake: trees built in sequence, each targeting what the running ensemble still gets wrong."
+        },
+        {
+          "id": "b",
+          "text": "Random Forest builds trees sequentially to fix errors; XGBoost averages many independent trees to stabilise predictions.",
+          "correct": false,
+          "explanation": "Exactly reversed — this is the most common confusion. The *forest* is the independent crowd (bagging); the *boosted* ensemble is the sequential error-fixer. Swapping them means recommending the wrong tool for the wrong failure mode (variance vs bias)."
+        },
+        {
+          "id": "c",
+          "text": "Random Forest is for regression and XGBoost is for classification.",
+          "correct": false,
+          "explanation": "Both families handle both task types. The distinction is *how the ensemble is built* (independent vs sequential) and *which error component it attacks* (variance vs bias), not what kind of target it predicts."
+        },
+        {
+          "id": "d",
+          "text": "They're essentially identical; XGBoost is just a faster implementation of Random Forest.",
+          "correct": false,
+          "explanation": "They share 'many trees' and nothing else important: independent-and-averaged versus sequential-and-corrective are different mechanisms with different strengths. Random Forest is the robust low-tuning baseline; boosting is the usual accuracy winner that wants a bit more care."
+        }
+      ],
+      "takeaway": "Bagging averages an independent crowd to cut variance; boosting runs a sequential relay to cut bias — one sentence each is all a tech lead needs.",
+      "difficulty": "stretch"
+    },
+    {
+      "id": "q5",
+      "conceptRef": "a-quick-worked-example-churn-propensity",
+      "prompt": "In the telco churn example, what is the actual deliverable the mission should promise — and why?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A monthly ranked call-list with per-customer top reasons (via SHAP), wired into the retention team's workflow — because the client buys the decision the model powers, not the model.",
+          "correct": true,
+          "explanation": "The deliverable is *not* 'a model.' Retention agents need to know who to call and what to offer; success is measured against a held-out period and ideally an A/B test of called-vs-not. Don't sell 'an XGBoost model'; sell the decision it powers, wired into where they work."
+        },
+        {
+          "id": "b",
+          "text": "The trained XGBoost model artifact and its accuracy report — integration is the client's responsibility.",
+          "correct": false,
+          "explanation": "A model in a notebook changes nothing. The module's commercial framing is explicit: the model is cheap and commodity (open-source libraries); the billable value is the data work, validation, and *integration into the client's workflow*."
+        },
+        {
+          "id": "c",
+          "text": "A churn-probability score for every customer, published as a dashboard for executives to monitor.",
+          "correct": false,
+          "explanation": "Closer, but it stops short of the decision: a wall of probabilities doesn't tell a retention agent who to call this month or what to offer them. The ranked list plus reason codes is what converts scores into actions — and actions into measurable retained revenue."
+        },
+        {
+          "id": "d",
+          "text": "A real-time churn-prediction API, since production-grade serving is what distinguishes professional delivery.",
+          "correct": false,
+          "explanation": "Over-engineering the serving layer for a *monthly* retention campaign inverts the value/complexity budget. The cadence of the decision (a monthly call-list) sets the required infrastructure — real-time serving solves a problem this client doesn't have."
+        }
+      ],
+      "takeaway": "Sell the decision, not the model: the deliverable is a ranked, explainable action list in the client's own workflow, with success measured against the real process.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q6",
+      "conceptRef": "unsupervised-clustering--dimensionality-reduction-kept-brief",
+      "prompt": "A marketing team is thrilled: k-means found five customer segments, beautifully visualised on a t-SNE plot where two clusters look far apart. What should temper the enthusiasm?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "k-means always returns groups — even in noise — so the segments only matter if the team will act differently per group and a human can name them sensibly; and t-SNE distances are qualitative, not measurements.",
+          "correct": true,
+          "explanation": "Both cautions in one: clustering has no 'accuracy' to point at, so the bar is business usefulness judged by you; and reading distances or cluster sizes off a t-SNE/UMAP plot as if they were measurements is a named red flag — it's a photograph for communication, not an analysis."
+        },
+        {
+          "id": "b",
+          "text": "Five is the wrong number of segments — statistical tests should determine the true k before anything is shown to marketing.",
+          "correct": false,
+          "explanation": "There is rarely a 'true k' to discover — clusters are only as meaningful as the features and the chosen k. The deciding test is pragmatic: will the team treat the groups differently, and can humans name them? A statistically optimal k nobody can act on is worth nothing."
+        },
+        {
+          "id": "c",
+          "text": "Clustering should be replaced by a supervised model, which is strictly more rigorous.",
+          "correct": false,
+          "explanation": "Supervised models need labels — and 'what segment is this customer in' has no ground truth to supervise on. Clustering is the right tool family for exploring structure; the discipline is in judging usefulness, not in switching paradigms."
+        },
+        {
+          "id": "d",
+          "text": "The visualisation should use PCA instead, because its axes preserve exact distances.",
+          "correct": false,
+          "explanation": "PCA's axes aren't directly human-readable either, and swapping projection methods misses the real point: no 2-D squash of high-dimensional data is a measurement instrument. The question to press is 'what will you do differently per segment?', not which picture to draw."
+        }
+      ],
+      "takeaway": "Segmentation helps only when the client will act differently per group and humans can name the groups — and never read distances off a t-SNE plot as if they were measurements.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q7",
+      "conceptRef": "time-series--forecasting",
+      "prompt": "A data scientist validates a demand forecaster using a random 80/20 train/test split over three years of daily sales, and reports excellent error metrics. What's wrong?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Random shuffling of time-ordered data lets the model peek at the future — the score is fiction; insist on walk-forward backtesting: train on the past, predict the next window, roll forward.",
+          "correct": true,
+          "explanation": "Time breaks the usual assumptions: rows aren't independent, and a random split places future days in training while 'predicting' the past — temporal leakage by construction. Backtesting evaluates the model exactly how it will be used, which is non-negotiable for any time-series promise."
+        },
+        {
+          "id": "b",
+          "text": "The split ratio is wrong — time series require 90/10 splits to leave enough training history.",
+          "correct": false,
+          "explanation": "The ratio isn't the defect — the *randomness* is. Any shuffled split, at any ratio, mixes future into past. The fix is structural (split by time, roll forward), not a different percentage."
+        },
+        {
+          "id": "c",
+          "text": "Nothing is wrong if the error metrics are strong — a good score is a good score regardless of split method.",
+          "correct": false,
+          "explanation": "This is exactly the red flag: 'a forecast validated with a random train/test split — it peeked at the future; the score is fiction.' A strong score obtained illegitimately predicts nothing about live performance; treat it as a bug report."
+        },
+        {
+          "id": "d",
+          "text": "Daily data is too granular for validation — aggregate to monthly before splitting randomly.",
+          "correct": false,
+          "explanation": "Aggregation changes the granularity, not the leakage: a random split of monthly points still trains on the future to predict the past. Temporal order must be respected at every grain."
+        }
+      ],
+      "takeaway": "Never evaluate a forecaster with a random split — walk-forward backtesting (train on past, predict the next window, roll forward) is the only honest rehearsal of production.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q8",
+      "conceptRef": "time-series--forecasting",
+      "prompt": "A client asks you to forecast monthly sales and a colleague proposes opening with a Transformer-based deep forecaster. Per the module, what's the right opening move — and the right way to present results?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Start with a seasonal-naïve baseline that every model must beat, escalate through ETS/ARIMA/Prophet only as needed — the M-competitions keep finding simple methods win on most real series — and deliver ranges, not points.",
+          "correct": true,
+          "explanation": "The full discipline: baseline first ('this December ≈ last December'), classical methods next, ML on lag/calendar features only with many series or external drivers, deep learning above that. And '80% chance between 850 and 1,200' lets the client set safety stock; a bare point sold as certainty loses trust the first time reality lands outside it."
+        },
+        {
+          "id": "b",
+          "text": "The Transformer is right — deep forecasters dominate classical methods, and clients expect state-of-the-art.",
+          "correct": false,
+          "explanation": "The M-competition bake-offs keep finding the opposite on most real business series: simple methods win. 'Don't open with a Transformer for forecast-our-monthly-sales' is nearly verbatim from the module — state-of-the-art on benchmarks isn't state-of-the-art on a client's 36 monthly points."
+        },
+        {
+          "id": "c",
+          "text": "Skip baselines for forecasting — seasonal-naïve is too trivial to be informative, so start at Prophet.",
+          "correct": false,
+          "explanation": "Trivial is the point: if a fancy model can't meaningfully beat 'same as last December', the client shouldn't pay for it — with two years of flat monthly data, that's a real possibility the baseline exposes immediately. The baseline is the cheapest piece of information in the mission."
+        },
+        {
+          "id": "d",
+          "text": "Deliver a single point forecast — operations teams can't plan around ranges, so a precise number is more professional.",
+          "correct": false,
+          "explanation": "A point presented as certainty is a named red flag — reality will land outside it and trust dies. Ranges are *more* operational, not less: a client can set safety stock or size buffers from '80% between 850 and 1,200'; ask whether a process truly forces a single number before assuming it."
+        }
+      ],
+      "takeaway": "Forecasting rewards humility: seasonal-naïve baseline first, simple classical methods next (they usually win), walk-forward validation always, and ranges — never bare points sold as certainty.",
+      "difficulty": "stretch"
+    }
+  ],
+  "exercises": [
+    {
+      "id": "ex1",
+      "title": "Walk the ladder: scope the subscription-churn mission",
+      "estimatedMinutes": 30,
+      "scenario": "A B2C streaming service (~400k subscribers, ~3.5% monthly churn) asks for \"an AI churn solution.\" Discovery facts: billing and usage events are clean in a warehouse going back 30 months; \"cancellation\" is recorded, but the business actually cares about *non-renewal at the end of the monthly cycle*, which includes payment failures never reactivated; the retention team can make ~2,000 outreach contacts per month; the Head of CRM must explain targeting logic to the customer-care director; an agency has already pitched them a \"deep-learning churn brain\" at 4× your price.\n\nScope the mission using the module's playbook: framing, ladder, deliverable, validation, and the counter-pitch.",
+      "givens": [
+        "30 months of clean, structured billing + usage events (tabular)",
+        "Outcome recorded as 'cancellation', but the business target is non-renewal (incl. unrecovered payment failures) — label needs an agreed definition",
+        "Retention capacity: ~2,000 contacts/month out of ~400k subscribers; ~3.5% monthly churn (~14k churners/month)",
+        "Explainability matters (CRM must justify targeting); competing pitch: deep learning at 4× price"
+      ],
+      "tasks": [
+        "Frame the problem (supervised/unsupervised, regression/classification) and write the label definition you'd put in the statement of work.",
+        "Walk the start-simple ladder: which rungs do you build, in what order, and what's the promotion criterion between them?",
+        "Define the deliverable and how success will be measured — including how the 2,000-contact capacity shapes the model's job.",
+        "Write the 3-4 sentence counter-pitch to the deep-learning agency proposal for the Head of CRM."
+      ],
+      "solution": "**Step 1 — framing and label.** Supervised **classification**: labels exist once defined (the outcome is recorded), and the target is a category (will / won't renew). Proposed SOW definition: *\"A subscriber-month is labelled churned if the subscription is not active 30 days after the cycle's renewal date — whether by explicit cancellation or by payment failure never reactivated.\"* This matters: training on 'pressed cancel' alone would teach the model to ignore the silent payment-failure churners, who may be the easiest to save. Pull the 30 months of history and tag every subscriber-month — and expect this label-and-data step to be most of the work.\n\n**Step 2 — the ladder.** *Rung 0 (rule):* rank by days-to-renewal + recent payment failure + 30-day usage collapse — costs a day, gives the team something immediately, and becomes the 'current process' benchmark. *Rung 1 (logistic regression):* same features, calibrated probabilities, readable coefficients — the honest baseline. *Rung 2 (gradient-boosted trees):* XGBoost/LightGBM on tenure, plan, spend, usage trend, support tickets, payment failures, days-to-contract-end; expected to sharpen the ranking by catching interactions (e.g. high-spend + sudden usage drop). *Promotion criterion:* each rung must beat the one below by a margin that matters **within the top 2,000** ranked customers — not on a global metric. Stop at rung 2; the data is tabular, so deep learning needs evidence rung 2 fails, which is unlikely.\n\n**Step 3 — deliverable and success.** A **monthly ranked call-list of 2,000 customers** with per-customer top reasons (SHAP for the tree; coefficients for the regression), delivered into the CRM the team already uses. The capacity constraint defines the model's real job: not 'classify 400k people' but *rank well at the top* — precision among the top 2,000 is the operative quality. Validation: held-out recent months (time-split, not shuffled), compared against rung 0 and the team's current gut-feel targeting; then, ideally, a called-vs-not A/B test within the flagged list so retained revenue — not a model metric — proves the value. Price in a monitoring/retraining retainer: churn drivers drift.\n\n**Step 4 — counter-pitch.** *\"Your data is exactly the kind where gradient-boosted trees on well-built features match or beat deep learning — that's been the repeated finding on tabular problems for a decade — at a quarter of the cost and with reasons your care director can read for every name on the list. The expensive part of this mission isn't the algorithm, it's agreeing what 'churned' means, building honest features, and proving lift against what your team does today. We'd rather spend your budget there, and let the simplest model that wins the bake-off carry the list.\"*",
+      "rubric": {
+        "keyPoints": [
+          "Label definition is written explicitly and includes unrecovered payment failures — recognising the recorded event ≠ the business target",
+          "Ladder is walked with a promotion criterion tied to the top-2,000 ranking, and stops at boosted trees with deep learning requiring evidence of failure",
+          "Deliverable is the ranked call-list + reason codes in the CRM, with success measured against the current process and ideally a call/no-call experiment",
+          "Counter-pitch argues economics and explainability (tabular ⇒ trees; budget belongs in data/label/validation), not technology tribalism"
+        ],
+        "pitfalls": [
+          "Promising a global accuracy number when the business can only act on 2,000 contacts — the capacity constraint defines the metric that matters",
+          "Accepting 'cancellation' as the label without surfacing the payment-failure churners the definition silently excludes",
+          "Validating on a shuffled split — subscriber-months are time-ordered; train on the past, test on later months",
+          "Matching the agency's deep-learning pitch to win the deal — over-engineering tabular problems is the exact trap the module names"
+        ],
+        "takeaways": [
+          "The ladder plus an agreed label definition turns 'an AI churn solution' into a scoped, defensible mission with a stopping rule",
+          "Operational capacity (who acts, how often, on how many) should shape the model's objective and metric from day one — not be discovered at delivery"
+        ],
+        "transfer": "Ranking-under-capacity is a universal shape: sales lead scoring (reps can work N leads), predictive maintenance (technicians can inspect N machines), fraud review queues (analysts process N cases), hospital outreach (nurses can call N patients). In every case the right question is not 'how accurate is the model overall?' but 'how good is the top of the list we can actually act on, versus how the team picks today?' — and the deliverable is the list in the operators' own tool, with reasons attached."
+      }
+    },
+    {
+      "id": "ex2",
+      "title": "Rescue the forecasting proposal",
+      "estimatedMinutes": 30,
+      "scenario": "A food distributor wants demand forecasts for ~1,200 SKUs across 3 depots to cut stock-outs and waste. An internal data scientist has a draft proposal: *\"We'll build an LSTM deep-learning forecaster. Validation: 80/20 random split on the last 3 years of daily data, target 95% accuracy. Deliverable: next-month point forecast per SKU.\"* The ops director likes the confidence but asks you to review it before signing.\n\nThree facts from a quick look at the data: demand is strongly weekly- and holiday-seasonal; ~200 SKUs are new in the last 6 months; volumes for the slowest third of SKUs are tiny and intermittent (many zero-demand days).",
+      "givens": [
+        "~1,200 SKUs × 3 depots, 3 years of daily history; strong weekly/holiday seasonality",
+        "Draft plan: LSTM, random 80/20 split, '95% accuracy' target, point forecasts",
+        "~200 SKUs have <6 months history; the slowest third are intermittent (frequent zeros)",
+        "Business goal: fewer stock-outs (costly misses) and less waste (costly over-ordering)"
+      ],
+      "tasks": [
+        "Identify the three serious flaws in the draft plan and explain the consequence of each.",
+        "Propose the method ladder you'd actually run, and where ML (and the LSTM) would legitimately enter.",
+        "Specify the validation protocol and what you'd report instead of '95% accuracy' — including why point forecasts are the wrong deliverable for ordering decisions.",
+        "Draft the revised promise to the ops director in 2-3 sentences."
+      ],
+      "solution": "**Step 1 — three flaws.** *(1) Random split on time-ordered data:* shuffling lets the model train on the future and 'predict' the past — temporal leakage by construction; the validation score will be fiction and the live forecasts will disappoint. *(2) '95% accuracy' is not a forecasting target:* accuracy is a classification word; for quantities you need an error metric — and on intermittent SKUs percentage errors explode near zero, so a single blanket number across 1,200 heterogeneous SKUs is meaningless however it's defined. *(3) Point forecasts as the deliverable:* ordering decisions need buffers; a bare '1,000 units' sold as certainty gives ops nothing to size safety stock with, and trust dies the first week reality lands outside it. (A fourth, structural: opening with an LSTM skips the ladder entirely — the M-competitions keep finding simple methods win on most real series.)\n\n**Step 2 — the ladder.** Rung 0: **seasonal-naïve** per SKU-depot ('this Tuesday ≈ last Tuesday', holiday-adjusted) — the benchmark every model must beat. Rung 1: **ETS/ARIMA** (or Prophet for the holiday calendar) on the stable, high-volume SKUs. Rung 2: with 3,600 series and shared drivers (promotions, holidays, weather), **gradient-boosted trees on lag and calendar features** is the legitimate scale-up — one model learning across series. The **LSTM enters only** if rung 2 measurably beats classical methods *and* the gap on high-value SKUs justifies the added cost — an evidence gate, not a style choice. Special cases: new SKUs (<6 months) get analogue-based or category-level forecasts, not their own model; intermittent SKUs need either intermittent-demand methods or honest aggregation to weekly grain.\n\n**Step 3 — validation and reporting.** **Walk-forward backtesting**: train on history up to month *t*, forecast month *t+1*, roll forward across at least 12 folds so every season is rehearsed. Report per-segment (fast/slow/new SKUs) error versus the **seasonal-naïve baseline** — 'X% better than same-as-last-week' is the number that means something — using a scale-robust metric (e.g. MASE-style relative error rather than MAPE, which explodes on the zero-heavy SKUs; metric details are a module-05/18 concern). Deliverable: **prediction intervals** ('80% chance between 850 and 1,200 units'), because the interval is what sets safety stock — and the asymmetry between stock-out cost and waste cost should set where in the interval ops orders.\n\n**Step 4 — the revised promise.** *\"We'll benchmark every SKU against the dumbest credible forecast — same as last week, adjusted for holidays — and only pay for sophistication where it demonstrably beats that. You'll get ranges, not single numbers, because ranges are what let you set safety stock by SKU; and we'll validate by replaying the last twelve months exactly as the system would have run live, so the performance we quote is performance you'll recognise after go-live.\"*",
+      "rubric": {
+        "keyPoints": [
+          "All three flaws caught: random split (temporal leakage), '95% accuracy' (wrong concept + meaningless across heterogeneous/intermittent SKUs), point forecasts (no buffer-setting information)",
+          "Ladder runs seasonal-naïve → classical → boosted trees on lags/calendar, with the LSTM behind an explicit evidence gate — and many-series scale correctly identified as what justifies the ML rung",
+          "Walk-forward backtesting with per-segment reporting versus the baseline, and intervals as the deliverable tied to the stock-out/waste cost asymmetry",
+          "New and intermittent SKUs get separate treatment instead of being averaged into one blanket metric"
+        ],
+        "pitfalls": [
+          "Fixing the split but keeping the blanket accuracy target — a single number across fast, slow, and new SKUs hides exactly where the money is lost",
+          "Using MAPE on intermittent series — it explodes near zero and will be gamed by over-forecasting the quiet SKUs",
+          "Rejecting deep learning ideologically instead of gating it on evidence — 3,600 series is genuinely the regime where ML *can* earn its place",
+          "Delivering intervals but letting ops keep ordering at the point estimate — the deliverable includes the decision rule, not just the numbers"
+        ],
+        "takeaways": [
+          "A forecast's validation must rehearse production: train on the past, predict the next window, roll forward — anything else is fiction",
+          "Every model must beat seasonal-naïve to justify its cost, and ranges beat points because decisions are made with buffers"
+        ],
+        "transfer": "The same review template applies to any predictive procurement decision: capacity planning (cloud or call-centre staffing), cash-flow projection, energy-load forecasting, even engineering estimates of project duration. The invariants: respect time in validation, benchmark against the naive carry-forward before crediting any model, segment heterogeneous populations before quoting one metric, and deliver uncertainty (ranges, scenarios) because the consumer of a forecast is always making a buffer decision, not a trivia bet."
+      }
+    }
+  ]
+}

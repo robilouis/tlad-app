@@ -1,0 +1,505 @@
+{
+ "id": "16",
+ "title": "Scoping, Estimating & Delivering AI & Data Missions",
+ "weeks": [
+  30,
+  31
+ ],
+ "part": "VI — Leadership & Commercial Offer",
+ "partIndex": 6,
+ "addon": false,
+ "pitchHtml": "<p>You now know the landscape, the methods, the platform, and the law. This module is where you turn all of it into a <strong>single client engagement that lands on time, on budget, and provably worked</strong> — and where you don't lose your shirt doing it. It is the practitioner-leader's delivery playbook: how to qualify a real opportunity from AI theatre, scope an outcome instead of a technology, estimate work whose hardest parts are genuinely unknowable up front, price and stage it so risk is shared, control the cost of compute and tokens before the bill shocks anyone, and run the delivery in a way that survives the iterative, uncertain nature of ML. The recurring question of this path here becomes brutally concrete: <strong>what exactly are you committing to, what does it cost to deliver, and what must you refuse to promise?</strong> The leadership and team foundations sit in <span class=\"vault-ref\" title=\"In the Obsidian vault: 24 - ML Systems Engineering &#x26; Technical Leadership\">ML Systems Engineering &#x26; Technical Leadership</span> (AI Scientist Path); this module extends them from \"lead a team\" into \"scope, price, and run a paid mission.\"</p>",
+ "prev": "15",
+ "next": "17",
+ "sectionCount": 8,
+ "quizCount": 8,
+ "exerciseCount": 2,
+ "sections": [
+  {
+   "id": "learning-objectives",
+   "kind": "objectives",
+   "title": "Learning Objectives",
+   "blocks": [
+    {
+     "type": "checklist",
+     "checklistId": "16/learning-objectives/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Qualify an opportunity with a use-case canvas and a value × feasibility score, killing AI theatre early"
+      },
+      {
+       "id": "1",
+       "html": "Scope a mission around an outcome and a \"definition of done\", staged <strong>PoC → pilot → production</strong>"
+      },
+      {
+       "id": "2",
+       "html": "Estimate AI/data work under genuine uncertainty — sizing the <em>data</em> work explicitly and communicating ranges, not false precision"
+      },
+      {
+       "id": "3",
+       "html": "Apply a build-vs-buy framework to a specific capability, extending the basics in <span class=\"vault-ref\" title=\"In the Obsidian vault: 24 - ML Systems Engineering &#x26; Technical Leadership\">ML Systems Engineering &#x26; Technical Leadership</span>"
+      },
+      {
+       "id": "4",
+       "html": "Forecast and control the cost of AI (compute, tokens, storage, people, licences) and frame a defensible TCO and ROI"
+      },
+      {
+       "id": "5",
+       "html": "Choose an engagement model (T&#x26;M / fixed / phased) and staff the right roles at the right phase"
+      },
+      {
+       "id": "6",
+       "html": "Run delivery with agile adapted to ML's iterative reality, managing stakeholder expectations throughout"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "key-concepts",
+   "kind": "concepts",
+   "title": "Key Concepts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "discovery--qualification-real-opportunity-vs-ai-theatre",
+     "number": 1,
+     "title": "Discovery & Qualification: Real Opportunity vs AI Theatre",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Most AI requests arrive as a solution (\"we want a chatbot / an agent / a forecasting model\"), not a problem. Your first job is to reverse that — find the decision or action that changes, and whether it's worth changing. The questions that separate signal from theatre:</p>\n<ul>\n<li><strong>What decision or action changes if this works, and how often does it happen?</strong> No downstream action ⇒ no value, however clever the model.</li>\n<li><strong>What is it worth?</strong> Put a number on it (€ saved, hours removed, revenue unlocked, risk reduced). \"Innovation\" is not a number.</li>\n<li><strong>Who owns the pain and will act on the output?</strong> A use case with no owner who <em>feels</em> the problem dies after the demo.</li>\n<li><strong>Does the data exist, lawfully, and is it usable?</strong> Callback to <a class=\"wikilink\" data-module=\"01\" href=\"#/module/01\">AI &#x26; Data Landscape &#x26; Tech-Lead Mindset</a>: <em>no usable data → no AI</em>. This is a gate, not a footnote.</li>\n<li><strong>What do you do today, and what's actually wrong with it?</strong> Sometimes the honest answer is \"fix the process\" or \"buy a €30/month SaaS.\"</li>\n<li><strong>How will we know it worked?</strong> If success can't be measured, it can't be delivered or sold.</li>\n</ul>\n<p><strong>The use-case canvas</strong> — one page you fill in <em>with</em> the client, before any proposal:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Field</th><th align=\"left\">What goes here</th><th align=\"left\">Theatre smell if…</th></tr></thead><tbody><tr><td align=\"left\">Outcome</td><td align=\"left\">The decision/action that changes, in business terms</td><td align=\"left\">\"Use AI\", \"be innovative\"</td></tr><tr><td align=\"left\">Value</td><td align=\"left\">€ / hours / risk, with a rough magnitude</td><td align=\"left\">No number, or \"priceless\"</td></tr><tr><td align=\"left\">Trigger &#x26; volume</td><td align=\"left\">When it fires, how many times/month</td><td align=\"left\">Happens 5×/month (let a human do it)</td></tr><tr><td align=\"left\">User &#x26; owner</td><td align=\"left\">Who consumes the output and acts on it</td><td align=\"left\">No named owner</td></tr><tr><td align=\"left\">Data</td><td align=\"left\">Source, access, lawful basis, rough quality</td><td align=\"left\">\"We'll figure out the data later\"</td></tr><tr><td align=\"left\">Success metric</td><td align=\"left\">The number that proves it, online and offline</td><td align=\"left\">\"It'll feel better\"</td></tr><tr><td align=\"left\">Failure tolerance</td><td align=\"left\">Cost of a wrong/hallucinated output; human-in-the-loop?</td><td align=\"left\">Zero-tolerance + full autonomy</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Value × feasibility scoring.</strong> Score each candidate 1-5 on <em>value</em> (the canvas's € magnitude × confidence) and <em>feasibility</em> (data readiness, technical maturity, governance, change effort), then plot on the 2×2 from <a class=\"wikilink\" data-module=\"01\" href=\"#/module/01\">AI &#x26; Data Landscape &#x26; Tech-Lead Mindset</a>:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\"></th><th align=\"left\">Low feasibility</th><th align=\"left\">High feasibility</th></tr></thead><tbody><tr><td align=\"left\"><strong>High value</strong></td><td align=\"left\"><em>Strategic bets</em> — stage as discovery + PoC, expect to kill some</td><td align=\"left\"><em>Do now</em> — your flagship missions</td></tr><tr><td align=\"left\"><strong>Low value</strong></td><td align=\"left\"><em>Drop</em> — politely decline; this is where trust is built</td><td align=\"left\"><em>Quick wins</em> — automate cheaply, fund the ambitious ones</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Qualification is expected-value triage, not optimism. The same <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>E</mi><mi>V</mi><mo>≈</mo><mi>P</mi><mo stretchy=\"false\">(</mo><mtext>success</mtext><mo stretchy=\"false\">)</mo><mo>×</mo><mtext>value</mtext><mo>−</mo><mtext>cost</mtext></mrow><annotation encoding=\"application/x-tex\">EV \\approx P(\\text{success}) \\times \\text{value} - \\text{cost}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0576em;\">E</span><span class=\"mord mathnormal\" style=\"margin-right:0.2222em;\">V</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">≈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mopen\">(</span><span class=\"mord text\"><span class=\"mord\">success</span></span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">×</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.7778em;vertical-align:-0.0833em;\"></span><span class=\"mord text\"><span class=\"mord\">value</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6151em;\"></span><span class=\"mord text\"><span class=\"mord\">cost</span></span></span></span></span> lens from module 01 applies per opportunity: a frontier idea with huge value but 20% feasibility and high cost may have <em>lower</em> expected value than a boring automation that's near-certain and cheap. You don't need to compute it precisely — you need to force the three terms onto the table before anyone signs.</p>"
+      }
+     ]
+    },
+    {
+     "id": "scoping-a-mission-outcome-stages-definition-of-done",
+     "number": 2,
+     "title": "Scoping a Mission: Outcome, Stages, Definition of Done",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>A scoped mission answers four things before work starts: <strong>what outcome</strong>, <strong>what proves it</strong>, <strong>what's delivered</strong>, and <strong>when it's done</strong>.</p>\n<ul>\n<li><strong>Define the outcome and success criteria up front.</strong> Write the acceptance test before the build: <em>\"The model flags ≥ 80% of fraudulent transactions at ≤ 2% false-positive rate, validated on a held-out month, and the ops team acts on the queue.\"</em> Both an offline metric and a business condition. Crucially — agree it <em>in writing</em> with the buyer.</li>\n<li><strong>Surface data prerequisites as gates, not assumptions.</strong> \"Access to 12 months of labelled transactions by week 1\" is a dependency the client owns. Make it explicit; a slipped data gate is the #1 cause of blown timelines (callback: most AI projects are ~70% data work).</li>\n<li><strong>Stage it: PoC → pilot → production.</strong> Each stage has a different question, audience, and exit:</li>\n</ul>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Stage</th><th align=\"left\">Question it answers</th><th align=\"left\">Audience</th><th align=\"left\">Exit criterion</th><th align=\"left\">Typical length</th></tr></thead><tbody><tr><td align=\"left\"><strong>Discovery</strong></td><td align=\"left\">Is this worth doing, and how?</td><td align=\"left\">Sponsor</td><td align=\"left\">Scored canvas + plan + estimate</td><td align=\"left\">1-3 weeks</td></tr><tr><td align=\"left\"><strong>PoC</strong></td><td align=\"left\"><em>Is it feasible at all?</em></td><td align=\"left\">Tech sponsor</td><td align=\"left\">Metric hit on sample data, offline</td><td align=\"left\">2-6 weeks</td></tr><tr><td align=\"left\"><strong>Pilot</strong></td><td align=\"left\"><em>Does it work for real users, safely?</em></td><td align=\"left\">Users + owner</td><td align=\"left\">Shadow/limited live, business metric moves</td><td align=\"left\">1-3 months</td></tr><tr><td align=\"left\"><strong>Production</strong></td><td align=\"left\"><em>Does it run reliably &#x26; affordably?</em></td><td align=\"left\">Ops</td><td align=\"left\">Monitored, on-budget, handed over</td><td align=\"left\">Ongoing</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The staging <em>is</em> your risk management: each gate is a real go/no-go where the client can stop having spent little. Never let a PoC's throwaway code silently become production — see the trap in §7.</p>\n<ul>\n<li><strong>A crisp \"definition of done.\"</strong> For each deliverable, state what \"done\" means in observable terms: code merged + tests passing, model registered with a model card, monitoring live, runbook written, owner trained. \"The model works\" is not a definition of done.</li>\n<li><strong>Avoiding scope creep.</strong> Write down what's <em>out</em> of scope as explicitly as what's in. New ideas mid-mission are routed to a backlog and a change request, not absorbed silently. A one-line rule that saves margins: <em>\"In scope is what's in the signed canvas; everything else is a change request.\"</em></li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "worked-example",
+       "title": "scoping a support-deflection assistant",
+       "html": "<p>A client wants \"an AI that answers customer questions.\" You run the canvas with them and reframe:</p>\n<ul>\n<li><strong>Outcome:</strong> deflect tier-1 support tickets so agents handle fewer repetitive questions. <strong>Value:</strong> ~40% of 10k monthly tickets are repetitive; at ~€6 fully-loaded cost/ticket, deflecting half is ~€120k/year.</li>\n<li><strong>Data gate:</strong> 18 months of resolved tickets + the help-centre articles, accessible by week 2 (client-owned dependency).</li>\n<li><strong>Staging:</strong> <em>Discovery</em> (2 wks) scores feasibility and picks RAG over fine-tuning (see <a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a>). <em>PoC</em> (4 wks): on 500 historical questions, the assistant must give a correct, grounded answer ≥ 70% of the time, offline-judged. <em>Pilot</em> (8 wks): deflect on 10% of live traffic with a \"talk to a human\" escape and answer-quality monitoring. <em>Production</em>: rollout + monitoring + handover.</li>\n<li><strong>Definition of done (pilot):</strong> measured deflection rate, hallucination rate under threshold, escalation path working, owner trained on the content-update loop.</li>\n<li><strong>What you do <em>not</em> promise:</strong> a specific deflection % before the PoC, or zero hallucinations ever. You promise a <em>method</em> for finding the number and a guardrail for the failure mode.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "estimation-under-uncertainty",
+     "number": 3,
+     "title": "Estimation Under Uncertainty",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>AI/data estimation is hard for reasons that don't apply to ordinary software: you're estimating <strong>research</strong> (will this approach even hit the metric?) and <strong>data work whose size you can't see until you open the data</strong> (quality, gaps, labelling effort). Treating these like a known CRUD app is how fixed-price ML missions lose money.</p>\n<ul>\n<li><strong>Estimate the data work explicitly, as its own line.</strong> Acquisition, access, cleaning, labelling, and feature work routinely dominate. If you remember one number, remember that the modelling is often the <em>small</em> part. Give data its own T-shirt size and its own dependency gates.</li>\n<li><strong>T-shirt sizing over fake precision.</strong> Size each workstream S/M/L/XL with an explicit basis (\"M = ~3-5 person-weeks, assumes data is reasonably clean\"). Resist the false confidence of \"37.5 days.\"</li>\n<li><strong>Discovery-phase-first is the antidote.</strong> You cannot responsibly fixed-price the unknown. Sell a short <strong>paid discovery</strong> (see Mission Patterns) that converts unknowns into knowns — <em>then</em> estimate the build with real information. This is the single most effective de-risking move in this module.</li>\n<li><strong>Communicate ranges, not points.</strong> Present estimates as ranges tied to assumptions and a confidence level: <em>\"6-10 weeks if the data is as described; we'll re-baseline after the 2-week discovery.\"</em> A point estimate you don't believe is a liability you'll be held to.</li>\n</ul>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Workstream</th><th align=\"left\">Why it's uncertain</th><th align=\"left\">How to size it honestly</th></tr></thead><tbody><tr><td align=\"left\">Data acquisition &#x26; access</td><td align=\"left\">Permissions, systems, lawful basis unknown until you ask</td><td align=\"left\">Gate + range; client owns the dependency</td></tr><tr><td align=\"left\">Data quality &#x26; cleaning</td><td align=\"left\">Invisible until you open the data</td><td align=\"left\">Discovery spike first; size <em>after</em></td></tr><tr><td align=\"left\">Labelling</td><td align=\"left\">Volume × cost-per-label × QA loops</td><td align=\"left\">Estimate per-label cost; pilot on a subset</td></tr><tr><td align=\"left\">Modelling / research</td><td align=\"left\">\"Will it hit the metric?\" is genuinely open</td><td align=\"left\">Time-boxed PoC with a kill criterion</td></tr><tr><td align=\"left\">Integration &#x26; MLOps</td><td align=\"left\">Often underestimated; see <a class=\"wikilink\" data-module=\"13\" href=\"#/module/13\">MLOps &#x26; Productionization</a></td><td align=\"left\">Treat as real software; don't tack on at the end</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Your estimate's error is dominated by the <em>least-known</em> workstream, not the average one. Adding a precise figure for the easy modelling part next to a hand-wave for data quality doesn't make the total precise — the unknown swamps it. The cure isn't more padding; it's converting the biggest unknown into a known via a cheap discovery spike <em>before</em> you commit to a number.</p>"
+      }
+     ]
+    },
+    {
+     "id": "build-vs-buy-for-this-mission",
+     "number": 4,
+     "title": "Build vs Buy for This Mission",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p><span class=\"vault-ref\" title=\"In the Obsidian vault: 24 - ML Systems Engineering &#x26; Technical Leadership\">ML Systems Engineering &#x26; Technical Leadership</span> gives the general build-vs-buy table and the complexity-budget ROI calculation (improvement × impact vs engineering + infra cost). Don't re-derive it — <em>apply</em> it to the specific capability in front of you, and add the dimension that table omits: <strong>cost evolution over time</strong> (see §6).</p>\n<p>The path's stance — <strong>buy the commodity, build the differentiator</strong> — operationalised:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Capability</th><th align=\"left\">Default</th><th align=\"left\">Why</th></tr></thead><tbody><tr><td align=\"left\">Foundation model</td><td align=\"left\"><strong>Buy</strong> (hosted API)</td><td align=\"left\">Commodity; you can't out-train a frontier lab</td></tr><tr><td align=\"left\">Vector store / embeddings</td><td align=\"left\"><strong>Buy / OSS</strong></td><td align=\"left\">Commodity infra; differentiation is your <em>content</em>, not the store</td></tr><tr><td align=\"left\">OCR, transcription, translation</td><td align=\"left\"><strong>Buy</strong></td><td align=\"left\">Solved; per-call cost beats build</td></tr><tr><td align=\"left\">Your proprietary data &#x26; domain workflow</td><td align=\"left\"><strong>Build</strong></td><td align=\"left\">This <em>is</em> the defensible value — nobody else has it</td></tr><tr><td align=\"left\">Integration into the client's process</td><td align=\"left\"><strong>Build</strong></td><td align=\"left\">Generic by definition for the client; specific in practice</td></tr><tr><td align=\"left\">Trust/eval/guardrail layer for your use case</td><td align=\"left\"><strong>Build (thin)</strong></td><td align=\"left\">Off-the-shelf gets you 80%; the last 20% is yours</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The build-vs-buy <em>advisory</em> is itself a sellable mission (see Mission Patterns). The trap to name for clients: \"build\" feels cheaper because the recurring API line is visible while engineers' fully-loaded cost and maintenance are not.</p>"
+      }
+     ]
+    },
+    {
+     "id": "vendor--tool-selection",
+     "number": 5,
+     "title": "Vendor & Tool Selection",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>When you buy, choose deliberately. The failure mode is picking on a demo and discovering the lock-in later.</p>\n<ul>\n<li><strong>Evaluation criteria:</strong> fit-for-task quality, latency, <strong>price at <em>your</em> expected volume</strong> (not list price), data terms (residency, training-on-your-data, retention), reliability/SLA, security/compliance posture, and exit cost.</li>\n<li><strong>Run a bake-off / POC on <em>your</em> data.</strong> Vendor benchmarks are marketing. Define a small fixed eval set from the real use case (callback to <a class=\"wikilink\" data-module=\"05\" href=\"#/module/05\">Model Evaluation, Validation &#x26; Experimentation</a>), run 2-3 candidates head-to-head, score on quality <em>and</em> cost-per-unit. A weekend bake-off beats a quarter of regret.</li>\n<li><strong>Avoid lock-in deliberately:</strong> prefer an abstraction layer over provider SDKs so swapping a model is a config change; keep prompts/data/evals portable; watch egress fees and proprietary formats; favour open standards where the cost is small. Lock-in isn't always wrong — but enter it <em>knowingly</em>, with a switching cost you've estimated.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "finops--cost-of-ai",
+     "number": 6,
+     "title": "FinOps / Cost-of-AI",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>This is the part inexperienced teams and clients systematically forget — and the one most likely to turn a \"successful\" model into a money pit. <strong>FinOps for AI is making cost a first-class, monitored engineering signal</strong>, not a quarterly surprise.</p>\n<p><strong>The cost drivers:</strong></p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Driver</th><th align=\"left\">What runs it up</th><th align=\"left\">Lever to control it</th></tr></thead><tbody><tr><td align=\"left\"><strong>Compute / GPU</strong></td><td align=\"left\">Training &#x26; inference on accelerators; idle reserved capacity</td><td align=\"left\">Right-size; spot/auto-scale; <strong>distil/quantise</strong> (see <span class=\"vault-ref\" title=\"In the Obsidian vault: 24 - ML Systems Engineering &#x26; Technical Leadership\">ML Systems Engineering &#x26; Technical Leadership</span>); batch when latency allows</td></tr><tr><td align=\"left\"><strong>LLM API tokens</strong></td><td align=\"left\">Per-token in+out × volume; long contexts; chatty agents</td><td align=\"left\">Smaller models for easy calls (routing); <strong>prompt caching</strong>; cap context; cache answers; trim retrieved chunks</td></tr><tr><td align=\"left\"><strong>Storage &#x26; data</strong></td><td align=\"left\">Warehouse, vectors, feature store, logs, egress</td><td align=\"left\">Lifecycle/TTL policies; tiering; watch egress between clouds</td></tr><tr><td align=\"left\"><strong>People</strong></td><td align=\"left\">Fully-loaded engineer/DS time — usually the biggest line</td><td align=\"left\">Don't build the commodity; reuse; staff to phase (§8)</td></tr><tr><td align=\"left\"><strong>Licences / SaaS</strong></td><td align=\"left\">Per-seat or per-call platform fees</td><td align=\"left\">Match plan to real usage; consolidate</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>TCO — count the whole iceberg.</strong> The visible API/compute bill is the tip. Total cost of ownership = build + run (compute, tokens, storage) + <strong>maintenance</strong> (monitoring, retraining, dependency churn) + licences + the people to operate it. A model is a liability with a monthly invoice for as long as it lives.</p>\n<p><strong>A simple ROI / payback framing</strong> (use <em>one</em> formula, then talk in plain € — this is the module's first of at most two display expressions):</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\text{Annual ROI} = \\frac{(\\text{annual benefit}) - (\\text{annual run \\& maintenance cost})}{\\text{build cost}}, \\qquad \\text{Payback (months)} = \\frac{\\text{build cost}}{\\text{monthly net benefit}}",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mtext>Annual ROI</mtext><mo>=</mo><mfrac><mrow><mo stretchy=\"false\">(</mo><mtext>annual benefit</mtext><mo stretchy=\"false\">)</mo><mo>−</mo><mo stretchy=\"false\">(</mo><mtext>annual run &amp; maintenance cost</mtext><mo stretchy=\"false\">)</mo></mrow><mtext>build cost</mtext></mfrac><mo separator=\"true\">,</mo><mspace width=\"2em\"/><mtext>Payback (months)</mtext><mo>=</mo><mfrac><mtext>build cost</mtext><mtext>monthly net benefit</mtext></mfrac></mrow><annotation encoding=\"application/x-tex\">\\text{Annual ROI} = \\frac{(\\text{annual benefit}) - (\\text{annual run \\&amp; maintenance cost})}{\\text{build cost}}, \\qquad \\text{Payback (months)} = \\frac{\\text{build cost}}{\\text{monthly net benefit}}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord text\"><span class=\"mord\">Annual ROI</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.113em;vertical-align:-0.686em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.427em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">build cost</span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mopen\">(</span><span class=\"mord text\"><span class=\"mord\">annual benefit</span></span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mopen\">(</span><span class=\"mord text\"><span class=\"mord\">annual run &amp; maintenance cost</span></span><span class=\"mclose\">)</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:2em;\"></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord text\"><span class=\"mord\">Payback (months)</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.2519em;vertical-align:-0.8804em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3714em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">monthly net benefit</span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">build cost</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.8804em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>Worked: the support assistant from §2 — benefit ~€120k/year; build ~€60k; run (tokens + hosting + monitoring) ~€18k/year; maintenance ~€12k/year. Net annual = €120k − €30k = €90k ⇒ <strong>ROI ≈ 150%/yr, payback ≈ 8 months</strong>. Compare that against the same numbers if tokens were 5× (chatty, uncached): run jumps to ~€90k/year, net collapses to ~€18k, payback stretches past 3 years — <em>the engineering decision and the business case are the same decision.</em></p>\n<p><strong>Cost-per-unit — the number to track and to put in the SLA.</strong> Formalise the unit-economics idea above into one figure:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\text{cost per unit} = \\frac{\\text{total monthly AI cost}}{\\text{units served per month}}",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mtext>cost per unit</mtext><mo>=</mo><mfrac><mtext>total monthly AI cost</mtext><mtext>units served per month</mtext></mfrac></mrow><annotation encoding=\"application/x-tex\">\\text{cost per unit} = \\frac{\\text{total monthly AI cost}}{\\text{units served per month}}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8623em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\">cost per unit</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.2519em;vertical-align:-0.8804em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3714em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">units served per month</span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">total monthly AI cost</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.8804em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>where the <strong>unit</strong> is the thing the business counts — a request, a resolved ticket, or 1k tokens — and the numerator is <em>all</em> the cost for that period (compute + tokens + storage + the slice of people/licences you allocate to it). Worked: €7,500/month of run cost over 50,000 tickets ⇒ <strong>€0.15 per ticket</strong> — set that against the ~€6 human cost to see the deflection economics at a glance.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Totals hide trouble; a unit cost exposes it. A bill that looks fine in aggregate can mean a <em>per-ticket</em> cost quietly climbing as contexts grow or an agent gets chattier — the total only spikes once volume catches up. Tracking cost-per-unit turns spend into a rate you can forecast (multiply by projected volume), benchmark against the human/legacy cost, and commit to: it's the right thing to put in an SLA and on the dashboard <em>next to</em> the quality metric, because the two move together.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Forecasting &#x26; controlling spend (the FinOps loop):</strong> estimate unit economics up front (<strong>cost per request / per ticket / per 1k tokens</strong>), then in production <em>tag</em> spend by feature, set <strong>budgets and alerts</strong>, watch a cost-per-unit dashboard next to the quality dashboard, and review monthly. Make one engineer accountable for the AI bill the way one is accountable for latency.</p>\n<p><strong>The \"GenAI bill shock\" failure mode.</strong> A demo costs cents, so nobody models the per-call economics; at production volume — long contexts, multi-step agents, no caching, biggest model for every call — the monthly bill arrives at 10-100× the forecast and the project is \"paused.\" Prevent it by computing <strong>cost-per-transaction at expected volume during the PoC</strong>, not after launch, and by making token/compute cost an explicit acceptance criterion.</p>\n<p><strong>Build-vs-buy economics over time — the crossover volume.</strong> Buy is cheaper to <em>start</em> (no build, pay-as-you-go) but the recurring bill scales with usage; build is expensive up front but its marginal cost can flatten. Set total build cost against cumulative buy cost at a volume <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>n</mi></mrow><annotation encoding=\"application/x-tex\">n</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mord mathnormal\">n</span></span></span></span> and solve for where they meet:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\text{build\\_fixed} + n\\cdot\\text{build\\_marginal} = n\\cdot\\text{buy\\_unit\\_price} \\quad\\Longrightarrow\\quad n^{*} = \\frac{\\text{build\\_fixed}}{\\text{buy\\_unit\\_price} - \\text{build\\_marginal}}",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mtext>build_fixed</mtext><mo>+</mo><mi>n</mi><mo>⋅</mo><mtext>build_marginal</mtext><mo>=</mo><mi>n</mi><mo>⋅</mo><mtext>buy_unit_price</mtext><mspace width=\"1em\"/><mo>⟹</mo><mspace width=\"1em\"/><msup><mi>n</mi><mo lspace=\"0em\" rspace=\"0em\">∗</mo></msup><mo>=</mo><mfrac><mtext>build_fixed</mtext><mrow><mtext>buy_unit_price</mtext><mo>−</mo><mtext>build_marginal</mtext></mrow></mfrac></mrow><annotation encoding=\"application/x-tex\">\\text{build\\_fixed} + n\\cdot\\text{build\\_marginal} = n\\cdot\\text{buy\\_unit\\_price} \\quad\\Longrightarrow\\quad n^{*} = \\frac{\\text{build\\_fixed}}{\\text{buy\\_unit\\_price} - \\text{build\\_marginal}}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1.0044em;vertical-align:-0.31em;\"></span><span class=\"mord text\"><span class=\"mord\">build_fixed</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.4445em;\"></span><span class=\"mord mathnormal\">n</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">⋅</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.0044em;vertical-align:-0.31em;\"></span><span class=\"mord text\"><span class=\"mord\">build_marginal</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.4445em;\"></span><span class=\"mord mathnormal\">n</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">⋅</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.0044em;vertical-align:-0.31em;\"></span><span class=\"mord text\"><span class=\"mord\">buy_unit_price</span></span><span class=\"mspace\" style=\"margin-right:1em;\"></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">⟹</span><span class=\"mspace\" style=\"margin-right:1em;\"></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.7387em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">n</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.7387em;\"><span style=\"top:-3.113em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">∗</span></span></span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.3904em;vertical-align:-0.996em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3944em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">buy_unit_price</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord text\"><span class=\"mord\">build_marginal</span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.7em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">build_fixed</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.996em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>where <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mtext>build_fixed</mtext></mrow><annotation encoding=\"application/x-tex\">\\text{build\\_fixed}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1.0044em;vertical-align:-0.31em;\"></span><span class=\"mord text\"><span class=\"mord\">build_fixed</span></span></span></span></span> is the one-off build + setup cost, <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mtext>build_marginal</mtext></mrow><annotation encoding=\"application/x-tex\">\\text{build\\_marginal}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1.0044em;vertical-align:-0.31em;\"></span><span class=\"mord text\"><span class=\"mord\">build_marginal</span></span></span></span></span> is your per-unit cost to run what you built (compute, your own tokens, the people slice), and <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mtext>buy_unit_price</mtext></mrow><annotation encoding=\"application/x-tex\">\\text{buy\\_unit\\_price}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1.0044em;vertical-align:-0.31em;\"></span><span class=\"mord text\"><span class=\"mord\">buy_unit_price</span></span></span></span></span> is the vendor's per-unit charge. <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msup><mi>n</mi><mo lspace=\"0em\" rspace=\"0em\">∗</mo></msup></mrow><annotation encoding=\"application/x-tex\">n^{*}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6887em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">n</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6887em;\"><span style=\"top:-3.063em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">∗</span></span></span></span></span></span></span></span></span></span></span></span> is the <strong>crossover volume</strong>: below it, buy is cheaper; above it, build is. (If <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mtext>build_marginal</mtext><mo>≥</mo><mtext>buy_unit_price</mtext></mrow><annotation encoding=\"application/x-tex\">\\text{build\\_marginal} \\ge \\text{buy\\_unit\\_price}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1.0044em;vertical-align:-0.31em;\"></span><span class=\"mord text\"><span class=\"mord\">build_marginal</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">≥</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.0044em;vertical-align:-0.31em;\"></span><span class=\"mord text\"><span class=\"mord\">buy_unit_price</span></span></span></span></span> there is no crossover — building never wins, so buy.)</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>The build's fixed cost is a bet you only recoup on volume, and each unit you serve in-house saves the <em>gap</em> between the vendor's price and your own marginal cost — so <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msup><mi>n</mi><mo lspace=\"0em\" rspace=\"0em\">∗</mo></msup></mrow><annotation encoding=\"application/x-tex\">n^{*}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6887em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">n</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6887em;\"><span style=\"top:-3.063em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">∗</span></span></span></span></span></span></span></span></span></span></span></span> is just \"fixed cost ÷ saving per unit,\" the point where accumulated savings have repaid the build. The decision must ride on <em>projected</em> volume, not today's: a capability handling 5k calls/month now but 500k next year crosses over even though today's number says buy. Below crossover (most early missions) buy; only persistently far above it, with stable requirements, does build pay — and remember <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mtext>build_marginal</mtext></mrow><annotation encoding=\"application/x-tex\">\\text{build\\_marginal}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1.0044em;vertical-align:-0.31em;\"></span><span class=\"mord text\"><span class=\"mord\">build_marginal</span></span></span></span></span> must include maintenance, the line teams forget.</p>"
+      }
+     ]
+    },
+    {
+     "id": "risk-management",
+     "number": 7,
+     "title": "Risk Management",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Name the risks on the canvas and assign each a mitigation and an owner. The ones specific to AI/data:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Risk</th><th align=\"left\">What it looks like</th><th align=\"left\">Mitigation</th></tr></thead><tbody><tr><td align=\"left\"><strong>Data risk</strong></td><td align=\"left\">Wrong, late, biased, or unlawful data</td><td align=\"left\">Data gate in week 1; quality spike in discovery; governance from day one (<a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>)</td></tr><tr><td align=\"left\"><strong>Model risk</strong></td><td align=\"left\">Doesn't hit the metric; drifts; degrades</td><td align=\"left\">Time-boxed PoC with a kill criterion; monitoring + retraining plan (<a class=\"wikilink\" data-module=\"13\" href=\"#/module/13\">MLOps &#x26; Productionization</a>)</td></tr><tr><td align=\"left\"><strong>The \"PoC that never productionises\" trap</strong></td><td align=\"left\">A great demo on a laptop; nobody can deploy/operate it; throwaway code becomes prod</td><td align=\"left\">Gate PoC→production explicitly; budget the productionisation as real work; never quietly ship PoC code</td></tr><tr><td align=\"left\"><strong>Vendor / model dependency</strong></td><td align=\"left\">A single provider's price, terms, or availability can sink you</td><td align=\"left\">Abstraction layer; a tested fallback model; estimated switching cost (§5)</td></tr><tr><td align=\"left\"><strong>Change-of-model risk</strong></td><td align=\"left\">The provider deprecates or silently updates the model; your prompts/evals regress</td><td align=\"left\">Pin versions where possible; keep a regression eval set; budget for periodic re-validation</td></tr><tr><td align=\"left\"><strong>Scope / expectation risk</strong></td><td align=\"left\">\"Can it also just…\"; success redefined as \"use AI\"</td><td align=\"left\">Written definition of done; change-request discipline (§2)</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The two you'll under-price by default: <strong>productionisation</strong> (the demo is 20% of the work) and <strong>maintenance</strong> (a live model is never \"finished\").</p>"
+      }
+     ]
+    },
+    {
+     "id": "engagement-models--staffing",
+     "number": 8,
+     "title": "Engagement Models & Staffing",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p><strong>Which contract shape</strong> depends on how much is known — which is exactly what discovery resolves:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Model</th><th align=\"left\">Use when</th><th align=\"left\">Risk sits with</th><th align=\"left\">Watch out for</th></tr></thead><tbody><tr><td align=\"left\"><strong>Time &#x26; materials</strong></td><td align=\"left\">High uncertainty (research, messy data)</td><td align=\"left\">Client</td><td align=\"left\">Needs trust + transparency; cap it</td></tr><tr><td align=\"left\"><strong>Fixed price</strong></td><td align=\"left\">Genuinely well-understood, bounded work</td><td align=\"left\">You</td><td align=\"left\">Deadly for un-scoped ML; only after discovery</td></tr><tr><td align=\"left\"><strong>Phased / capped</strong></td><td align=\"left\">The norm for AI/data</td><td align=\"left\">Shared</td><td align=\"left\">Manage each gate as a real go/no-go</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The pragmatic default: <strong>fixed-price the discovery, then phase the rest</strong> with go/no-go gates — small fixed pieces where each phase is scoped from the previous one's findings. This aligns incentives and shares the risk that no estimate can fully remove.</p>\n<p><strong>Staff to the phase, not to the org chart</strong> (roles per <a class=\"wikilink\" data-module=\"01\" href=\"#/module/01\">AI &#x26; Data Landscape &#x26; Tech-Lead Mindset</a> and <span class=\"vault-ref\" title=\"In the Obsidian vault: 24 - ML Systems Engineering &#x26; Technical Leadership\">ML Systems Engineering &#x26; Technical Leadership</span>):</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Phase</th><th align=\"left\">Who you actually need</th><th align=\"left\">Who you <em>don't</em> yet</th></tr></thead><tbody><tr><td align=\"left\">Discovery</td><td align=\"left\">Tech lead + a senior generalist (DS-leaning)</td><td align=\"left\">A full team</td></tr><tr><td align=\"left\">PoC</td><td align=\"left\">Data scientist / AI engineer + data engineer for the pipe</td><td align=\"left\">MLOps, ops</td></tr><tr><td align=\"left\">Pilot</td><td align=\"left\">+ ML/AI engineer to harden; + the client's product owner</td><td align=\"left\">A second model</td></tr><tr><td align=\"left\">Production</td><td align=\"left\">+ MLOps/platform; + ops handover; DS drops to part-time</td><td align=\"left\">The whole PoC team kept idle</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Staffing is a coverage problem over the <em>current phase</em>, not a fixed headcount (echoing module 01). The classic waste is carrying a four-person discovery team into a phase that needs two, or — the inverse — staffing a production handover with researchers who've never run a service. Match the people to the question the phase is answering.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Managing a small delivery team.</strong> Shared ownership of the production metric (not \"my model\" / \"your pipeline\"); ML-aware code review (check for data leakage, honest evaluation, reproducibility — <a class=\"wikilink\" data-module=\"05\" href=\"#/module/05\">Model Evaluation, Validation &#x26; Experimentation</a>); and the cultural default this whole path argues for — <em>reward impact, not complexity</em>. The engineer who replaces a model with a SQL rule should be celebrated, not sidelined.</p>"
+      }
+     ]
+    },
+    {
+     "id": "running-delivery-agile-adapted-for-ml",
+     "number": 9,
+     "title": "Running Delivery: Agile Adapted for ML",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Standard sprint mechanics work, but ML/data delivery is <strong>iterative and uncertain in ways software isn't</strong>: a sprint can end with \"the approach doesn't hit the metric,\" which is a <em>valid, valuable result</em>, not a failure. Adapt accordingly:</p>\n<ul>\n<li><strong>Time-box research as spikes with a question and a kill criterion</strong> (\"by Friday: can we beat the rule baseline on the sample? if not, we pivot\"). This protects the budget from open-ended tinkering.</li>\n<li><strong>Track learning, not just velocity.</strong> Early increments produce <em>de-risked knowledge</em> (data quality understood, baseline established), not always shippable features. Make that progress visible to the sponsor so \"no model yet\" doesn't read as \"no progress.\"</li>\n<li><strong>Demo on real (sample) data every cycle</strong>, never on a cherry-picked example — demos hide the long tail (callback to module 01's red flag).</li>\n<li><strong>Manage stakeholder expectations continuously, at three altitudes</strong> (executive / manager / engineer — the 3-level explanation from <span class=\"vault-ref\" title=\"In the Obsidian vault: 24 - ML Systems Engineering &#x26; Technical Leadership\">ML Systems Engineering &#x26; Technical Leadership</span>). Re-baseline the range after discovery and again after the PoC; surprises kill trust faster than bad news does. Say <em>\"so what does this mean for the business?\"</em> every time you show a metric.</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "client-mission-patterns--commercial-angle",
+   "kind": "missions",
+   "title": "Client Mission Patterns / Commercial Angle",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>These three are the <em>sellable wrappers</em> around this module's craft — and the natural first steps that de-risk everything that follows.</p>\n<ul>\n<li><strong>Paid Discovery &#x26; Scoping Sprint</strong> <em>(the sellable first step)</em> — <em>Problem:</em> the client wants a build but nobody can responsibly estimate it. <em>Deliverable:</em> a completed use-case canvas, value × feasibility score, data-gate assessment, a recommended <strong>PoC → pilot → production</strong> plan with a ranged estimate and a definition of done. <em>Scope:</em> 1-3 weeks, <strong>fixed price</strong>. <em>Who buys:</em> the sponsor about to fund a build (CTO/CDO, product lead). <em>This is the antidote to estimating the unknown</em> — it converts a risky fixed-price into a phased plan and almost always pays for itself by killing or reshaping the build.</li>\n<li><strong>AI Cost / FinOps Audit &#x26; Optimisation</strong> — <em>Problem:</em> \"our AI bill is out of control\" (GenAI bill shock) or \"we don't know what our models cost.\" <em>Deliverable:</em> a TCO breakdown by driver, a <strong>cost-per-unit</strong> baseline, a prioritised optimisation list (model routing, caching, right-sizing, storage lifecycle), and a budgets-and-alerts setup. <em>Scope:</em> 2-4 weeks. <em>Who buys:</em> CTO/CFO, platform owner. <em>Outcome is a number:</em> \"we cut your run cost X% with no quality loss\" is one of the easiest ROIs to sell.</li>\n<li><strong>Build-vs-Buy Advisory for a Specific Capability</strong> — <em>Problem:</em> \"should we build our own &#x3C;capability> or buy it?\" <em>Deliverable:</em> a decision memo applying the framework (§4) and the complexity-budget ROI from <span class=\"vault-ref\" title=\"In the Obsidian vault: 24 - ML Systems Engineering &#x26; Technical Leadership\">ML Systems Engineering &#x26; Technical Leadership</span>, with a <strong>cost-over-time / crossover-volume</strong> model and a recommendation. <em>Scope:</em> 1-2 weeks. <em>Who buys:</em> engineering leadership facing a roadmap fork. <em>Sell the decision, de-risked</em> — repeatable IP you can run many times.</li>\n</ul>\n<p><strong>Buy-vs-build for the client at this stage:</strong> you are selling <em>judgment, scoping, and de-risking</em> — buy that from a senior practitioner rather than discovering the unknowns the expensive way. <strong>What to charge for:</strong> the discovery/audit/advisory as fixed-price packages (repeatable IP), and the staged build as phased, capped engagements. <strong>What NOT to promise:</strong> a specific accuracy/deflection number before the PoC; a fixed price for un-scoped ML; \"no hallucinations / fully autonomous\"; or a build cost that ignores run + maintenance. Commit to a <em>method</em> and a <em>range</em>, then narrow both as discovery and the PoC retire the unknowns.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "tools--vendor-landscape",
+   "kind": "tools",
+   "title": "Tools & Vendor Landscape",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p><em>As of 2026 — treat names/prices as perishable; re-check before quoting a client.</em></p>"
+    },
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Tool / Category</th><th align=\"left\">Use here</th><th align=\"left\">OSS / Paid</th><th align=\"left\">Note (lock-in / caveat)</th></tr></thead><tbody><tr><td align=\"left\">Cloud cost tools (AWS Cost Explorer, GCP Billing, Azure Cost Mgmt)</td><td align=\"left\">Tag &#x26; monitor compute/storage spend</td><td align=\"left\">Paid (native)</td><td align=\"left\">Per-cloud; tagging discipline is the real work</td></tr><tr><td align=\"left\">FinOps platforms (Kubecost / OpenCost, Vantage, CloudZero)</td><td align=\"left\">Cost allocation &#x26; anomaly alerts</td><td align=\"left\">Mixed</td><td align=\"left\">Newer for GenAI; verify token-cost coverage</td></tr><tr><td align=\"left\">LLM gateways/routers (LiteLLM, OpenRouter, cloud gateways)</td><td align=\"left\">Abstraction, routing, <strong>caching</strong>, spend caps</td><td align=\"left\">Mixed</td><td align=\"left\">Reduces lock-in <em>and</em> token cost; adds a hop</td></tr><tr><td align=\"left\">Eval/observability (LangSmith, Langfuse, Helicone)</td><td align=\"left\">Bake-offs, quality + cost-per-call dashboards</td><td align=\"left\">Mixed</td><td align=\"left\">Keep your eval set portable</td></tr><tr><td align=\"left\">Estimation/PM (story points, T-shirt sizing in Jira/Linear)</td><td align=\"left\">Sizing &#x26; phased tracking</td><td align=\"left\">Mixed</td><td align=\"left\">The discipline matters more than the tool</td></tr><tr><td align=\"left\">Pricing references (vendor pricing pages, a16z/state-of-AI)</td><td align=\"left\">TCO &#x26; ROI inputs</td><td align=\"left\">Free</td><td align=\"left\"><strong>Date everything</strong>; prices move monthly</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The core \"tools\" of this module are a canvas, an estimate range, a phased SOW, and a cost-per-unit dashboard — process, not platform.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "when-is-this-overkill",
+   "kind": "overkill",
+   "title": "When Is This Overkill?",
+   "blocks": [
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Situation</th><th align=\"left\">The heavy scoping/FinOps machinery is overkill — do this instead</th></tr></thead><tbody><tr><td align=\"left\">A 1-2 day internal spike</td><td align=\"left\">Skip the SOW; time-box it and report back</td></tr><tr><td align=\"left\">Tiny, well-understood automation</td><td align=\"left\">Quick estimate + just do it; no discovery phase needed</td></tr><tr><td align=\"left\">Spend is a few €/month</td><td align=\"left\">Don't build a FinOps practice; revisit at scale</td></tr><tr><td align=\"left\">One-off throwaway analysis</td><td align=\"left\">No production plan, no monitoring — label it disposable</td></tr><tr><td align=\"left\">Capability is an obvious commodity</td><td align=\"left\">Buy it; the build-vs-buy memo would cost more than the decision</td></tr><tr><td align=\"left\">You genuinely <em>know</em> the scope cold</td><td align=\"left\">A short fixed price beats a phased ceremony</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The judgment is symmetric with the rest of the path: match the rigour of scoping and FinOps to the <em>size of the bet</em>. A €5k automation doesn't need a €5k discovery phase.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "resources",
+   "kind": "resources",
+   "title": "Resources",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "books",
+     "number": null,
+     "title": "Books",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>McGrath &#x26; Bock — <em>Delivering Data Analytics</em> / agile-for-data delivery — running iterative data engagements.</li>\n<li>Agrawal, Gans &#x26; Goldfarb — <em>Prediction Machines</em> — the economics that underpin AI ROI and qualification.</li>\n<li>DeMarco &#x26; Lister — <em>Waltzing with Bears</em> — software risk &#x26; estimation under uncertainty; transfers directly.</li>\n<li>Huyen — <em>Designing Machine Learning Systems</em> / <em>AI Engineering</em> — cost, staging, and the productionisation reality. <em>(Paid)</em></li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "courses--articles-free",
+     "number": null,
+     "title": "Courses & Articles (Free)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>FinOps Foundation materials — the cost-discipline vocabulary (allocation, showback, unit economics).</li>\n<li>Vendor pricing pages + a16z / state-of-AI reports — current cost landscape. <em>Date everything.</em></li>\n<li>Sculley et al., \"Hidden Technical Debt in ML Systems\" — why maintenance dominates TCO.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "go-deeper",
+     "number": null,
+     "title": "Go Deeper",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Leadership / systems foundation this module extends → <span class=\"vault-ref\" title=\"In the Obsidian vault: 24 - ML Systems Engineering &#x26; Technical Leadership\">ML Systems Engineering &#x26; Technical Leadership</span> (AI Scientist Path) — build-vs-buy basics, the complexity-budget ROI calc, stakeholder communication, and team roles.</li>\n<li>System-design framing for scoping the technical solution → <span class=\"vault-ref\" title=\"In the Obsidian vault: 09 - ML System Design\">ML System Design</span> (ML Engineer Path).</li>\n<li>Assembling these mission patterns into a coherent service offer &#x26; operating model → <a class=\"wikilink\" data-module=\"17\" href=\"#/module/17\">Building the AI &#x26; Data Offer &#x26; Leading the Pole</a>.</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "practical-artifacts",
+   "kind": "artifacts",
+   "title": "Practical Artifacts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "decision-checklist--is-this-mission-ready-to-scopeprice",
+     "number": null,
+     "title": "Decision Checklist — \"Is this mission ready to scope/price?\"",
+     "blocks": [
+      {
+       "type": "checklist",
+       "checklistId": "16/practical-artifacts/1",
+       "items": [
+        {
+         "id": "0",
+         "html": "The outcome is a decision/action with a € number and a named owner"
+        },
+        {
+         "id": "1",
+         "html": "Data existence, access, and lawful basis are confirmed or made an explicit week-1 gate"
+        },
+        {
+         "id": "2",
+         "html": "Success has an offline metric <em>and</em> a business condition, agreed in writing"
+        },
+        {
+         "id": "3",
+         "html": "The work is staged PoC → pilot → production with go/no-go gates"
+        },
+        {
+         "id": "4",
+         "html": "The biggest unknown is being retired by a paid discovery <em>before</em> a fixed price"
+        },
+        {
+         "id": "5",
+         "html": "Cost-per-unit at expected volume is estimated (no bill-shock surprise)"
+        },
+        {
+         "id": "6",
+         "html": "A definition of done exists for every deliverable (incl. monitoring &#x26; handover)"
+        },
+        {
+         "id": "7",
+         "html": "Each AI-specific risk has a mitigation and an owner"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "red-flags",
+     "number": null,
+     "title": "Red Flags",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"Just give us a fixed price\" before any discovery on un-scoped ML.</li>\n<li>The estimate has a precise modelling figure but hand-waves the data work.</li>\n<li>The PoC's success would be a demo, with no plan or budget to productionise.</li>\n<li>Token/compute cost was never modelled at production volume (\"the demo was cheap\").</li>\n<li>Success is \"use AI\", or scope grows by absorption with no change requests.</li>\n<li>Single-vendor dependency with no fallback and no switching-cost estimate.</li>\n<li>\"The model is finished\" — with no monitoring, retraining, or maintenance budget.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "scoping-prompts-ask-the-client",
+     "number": null,
+     "title": "Scoping Prompts (ask the client)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"If this works perfectly, what action changes, how often, and what is that worth?\"</li>\n<li>\"What must be true about the data, and who owns getting it to us by when?\"</li>\n<li>\"How will we <em>both</em> agree it worked — what number, measured how?\"</li>\n<li>\"What's the most expensive way this can be wrong, and is a human in the loop?\"</li>\n<li>\"Can we run a short paid discovery so I can give you a real estimate instead of a guess?\"</li>\n<li>\"At your expected volume, what does one request/ticket cost to serve?\"</li>\n<li>\"If the provider changes or deprecates the model, what's our plan?\"</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "self-assessment",
+   "kind": "self-assessment",
+   "title": "Self-Assessment",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Before moving on, you should be able to:</p>"
+    },
+    {
+     "type": "checklist",
+     "checklistId": "16/self-assessment/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Qualify an opportunity with a use-case canvas and a value × feasibility score, and decline AI theatre gracefully"
+      },
+      {
+       "id": "1",
+       "html": "Scope a mission as an outcome with a definition of done, staged PoC → pilot → production with real gates"
+      },
+      {
+       "id": "2",
+       "html": "Estimate under uncertainty — sizing the data work explicitly, selling discovery-first, and communicating ranges"
+      },
+      {
+       "id": "3",
+       "html": "Run a build-vs-buy and a vendor bake-off for a specific capability, lock-in entered knowingly"
+      },
+      {
+       "id": "4",
+       "html": "Build a TCO + ROI/payback case and a FinOps loop that prevents GenAI bill shock"
+      },
+      {
+       "id": "5",
+       "html": "Choose T&#x26;M / fixed / phased, staff to the phase, and run ML-adapted agile while managing expectations at three altitudes"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  }
+ ]
+}

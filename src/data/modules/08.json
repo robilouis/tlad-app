@@ -1,0 +1,434 @@
+{
+ "id": "08",
+ "title": "NLP & Embeddings in Practice",
+ "weeks": [
+  16,
+  17
+ ],
+ "part": "III — Deep Learning & Modern AI",
+ "partIndex": 3,
+ "addon": false,
+ "pitchHtml": "<p>Most of your clients' value is locked inside text — tickets, contracts, reviews, emails, knowledge bases — and they want it out. This module is the leader's map of turning <strong>text into something a machine can act on</strong>: the classic task menu (classification, extraction, sentiment, summarisation, translation), how text becomes numbers, and the one idea that underpins modern search and RAG — <strong>embeddings</strong>. The era when you built a bespoke NLP pipeline per task is largely over; an LLM does most of it out of the box. But knowing the framing, and knowing the <em>one</em> primitive (embeddings) that LLMs did <strong>not</strong> make obsolete, is what lets you scope these missions, price them, and decide when a small dedicated model still wins. The recurring question returns in a new form: <strong>buy the language commodity, build only the part that's yours.</strong></p>",
+ "prev": "07",
+ "next": "09",
+ "sectionCount": 8,
+ "quizCount": 8,
+ "exerciseCount": 2,
+ "sections": [
+  {
+   "id": "learning-objectives",
+   "kind": "objectives",
+   "title": "Learning Objectives",
+   "blocks": [
+    {
+     "type": "checklist",
+     "checklistId": "08/learning-objectives/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Name the classic NLP tasks and frame any text request as one of them — even when an LLM will ultimately solve it"
+      },
+      {
+       "id": "1",
+       "html": "Explain in one breath how text becomes numbers, and why <strong>embeddings</strong> replaced keyword matching for meaning"
+      },
+      {
+       "id": "2",
+       "html": "Describe what an embedding <em>is</em> well enough to justify semantic search, clustering, dedup, and RAG to a client"
+      },
+      {
+       "id": "3",
+       "html": "Decide <strong>\"reach for an LLM\" vs \"reach for a small dedicated model\"</strong> on cost, latency, privacy, and determinism — and defend it"
+      },
+      {
+       "id": "4",
+       "html": "Scope and price an embeddings/NLP mission (semantic search, routing, feedback analysis, entity extraction)"
+      },
+      {
+       "id": "5",
+       "html": "Recognise what the LLM era made obsolete and what is still worth building yourself"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "key-concepts",
+   "kind": "concepts",
+   "title": "Key Concepts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "the-classic-nlp-task-menu",
+     "number": 1,
+     "title": "The Classic NLP Task Menu",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Almost every text request a client brings you is one of a handful of classic tasks wearing a business costume. Recognising the task is half the scoping — it tells you what \"good\" means, what data you need, and whether a small model or an LLM is the right tool. The tasks haven't changed; what's changed is that <strong>one general model now solves most of them zero-shot</strong>.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Task</th><th align=\"left\">What it does</th><th align=\"left\">Typical business use</th><th align=\"left\">Small model vs LLM lean</th></tr></thead><tbody><tr><td align=\"left\"><strong>Text classification</strong></td><td align=\"left\">Assign a label to a document</td><td align=\"left\">Ticket routing, spam, content moderation, intent detection</td><td align=\"left\"><strong>Small</strong> at high volume; LLM to prototype or for nuanced/rare labels</td></tr><tr><td align=\"left\"><strong>Named-entity recognition (NER)</strong></td><td align=\"left\">Pull structured spans out of text (names, dates, amounts, IDs)</td><td align=\"left\">Contract/invoice extraction, CV parsing, PII detection</td><td align=\"left\">LLM for messy/varied text; <strong>small</strong> when the schema is fixed and volume is huge</td></tr><tr><td align=\"left\"><strong>Sentiment / intent</strong></td><td align=\"left\">Score tone or detect what the user wants</td><td align=\"left\">Review analysis, support triage, churn signals</td><td align=\"left\">LLM for nuance (sarcasm, mixed); <strong>small</strong> for cheap high-volume scoring</td></tr><tr><td align=\"left\"><strong>Topic modelling / clustering</strong></td><td align=\"left\">Group documents by theme <em>without</em> predefined labels</td><td align=\"left\">\"What are people complaining about?\", corpus exploration</td><td align=\"left\"><strong>Embeddings + clustering</strong> — neither a classifier nor an LLM call per doc</td></tr><tr><td align=\"left\"><strong>Summarisation</strong></td><td align=\"left\">Compress a long text to its essence</td><td align=\"left\">Call notes, document digests, exec briefings</td><td align=\"left\"><strong>LLM</strong> — this is where they shine; small models are weak here</td></tr><tr><td align=\"left\"><strong>Translation</strong></td><td align=\"left\">Render text in another language</td><td align=\"left\">Localisation, multilingual support</td><td align=\"left\"><strong>Buy an API</strong> (commodity); LLM if you need tone/context control</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>The menu is still the right <em>vocabulary</em> even though the <em>kitchen</em> changed. When a client says \"we want AI to read our contracts,\" your job is to decompose it: that's <strong>NER</strong> (pull the parties, dates, amounts) plus maybe <strong>classification</strong> (contract type) plus maybe <strong>summarisation</strong> (a plain-language abstract). Each sub-task has a different bar for \"good\" and a different cost curve. The leader who can't name the tasks ends up scoping one giant vague \"AI reads contracts\" deliverable — and missing the deadline on the 20% of clauses that actually mattered.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>Two tasks deserve a flag. <strong>Summarisation and free-form generation</strong> have no single right answer, so you cannot score them with accuracy/F1 — evaluation is its own discipline that lives in <a class=\"wikilink\" data-module=\"09\" href=\"#/module/09\">Large Language Models in Practice</a>. And <strong>topic modelling</strong> is the odd one out: it has <em>no labels at all</em>, which is exactly what embeddings unlock (concept 3).</p>"
+      }
+     ]
+    },
+    {
+     "id": "from-text-to-numbers-tokens-keywords-and-the-jump-to-meaning",
+     "number": 2,
+     "title": "From Text to Numbers: Tokens, Keywords, and the Jump to Meaning",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>A model cannot consume a string; it consumes numbers. Two steps get you there.</p>\n<p><strong>Tokenisation</strong> is the chopping step: splitting text into the small units a model actually reads. Modern models don't split on whole words (the vocabulary would be infinite — every typo and proper noun is a new word) but on <strong>sub-word pieces</strong>, so <code>\"tokenisation\"</code> might become <code>token</code> + <code>isation</code>. You don't need the algorithm. You need two consequences: <strong>(a) cost and limits are counted in tokens, not words</strong> (roughly ¾ of a word each in English, far more per character in languages like Japanese or for code) — this is how LLM bills and context windows work, see <a class=\"wikilink\" data-module=\"09\" href=\"#/module/09\">Large Language Models in Practice</a>; and <strong>(b)</strong> tokenisation is why models handle never-before-seen words gracefully instead of choking.</p>\n<p><strong>The representation question — keyword vs meaning.</strong> Once you have tokens, how do you represent a <em>document</em> so a machine can compare two of them?</p>\n<ul>\n<li><strong>Bag-of-words (the precursor).</strong> The simplest representation: a document is just the multiset of words it contains, counts only, order discarded — <code>\"the cat sat\"</code> and <code>\"sat the cat\"</code> look identical. Crude, but the foundation TF-IDF refines.</li>\n<li><strong>Keyword / TF-IDF (the classic).</strong> Represent a document by <em>which words it contains</em>, weighting rare-but-informative words (\"mitochondria\") above ubiquitous ones (\"the\"). This is how classic search engines worked, and it is genuinely good for matching exact terms. Its fatal flaw for meaning: <strong>it has no idea that \"car\" and \"automobile\" are the same thing, or that \"great\" and \"fantastic\" are close.</strong> Different words = different dimensions = zero similarity, even when the meaning is identical. Synonyms split the signal; paraphrases miss entirely.</li>\n<li><strong>Embeddings (the modern primitive).</strong> Represent a document by its <em>meaning</em> as a list of numbers, learned so that texts meaning similar things land near each other — regardless of the exact words used. This is the jump that unlocks everything in the next concept.</li>\n</ul>\n<p><strong>The TF-IDF formula</strong> is one every practitioner should recognise — it is still a strong, near-free baseline for keyword weighting and classic search:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\text{tfidf}(t,d) = \\text{tf}(t,d)\\cdot\\text{idf}(t) \\qquad \\text{where}\\qquad \\text{idf}(t)=\\log\\frac{N}{\\text{df}(t)}",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mtext>tfidf</mtext><mo stretchy=\"false\">(</mo><mi>t</mi><mo separator=\"true\">,</mo><mi>d</mi><mo stretchy=\"false\">)</mo><mo>=</mo><mtext>tf</mtext><mo stretchy=\"false\">(</mo><mi>t</mi><mo separator=\"true\">,</mo><mi>d</mi><mo stretchy=\"false\">)</mo><mo>⋅</mo><mtext>idf</mtext><mo stretchy=\"false\">(</mo><mi>t</mi><mo stretchy=\"false\">)</mo><mspace width=\"2em\"/><mtext>where</mtext><mspace width=\"2em\"/><mtext>idf</mtext><mo stretchy=\"false\">(</mo><mi>t</mi><mo stretchy=\"false\">)</mo><mo>=</mo><mi>log</mi><mo>⁡</mo><mfrac><mi>N</mi><mrow><mtext>df</mtext><mo stretchy=\"false\">(</mo><mi>t</mi><mo stretchy=\"false\">)</mo></mrow></mfrac></mrow><annotation encoding=\"application/x-tex\">\\text{tfidf}(t,d) = \\text{tf}(t,d)\\cdot\\text{idf}(t) \\qquad \\text{where}\\qquad \\text{idf}(t)=\\log\\frac{N}{\\text{df}(t)}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\"><span class=\"mord\">tfidf</span></span><span class=\"mopen\">(</span><span class=\"mord mathnormal\">t</span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\">d</span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\"><span class=\"mord\">tf</span></span><span class=\"mopen\">(</span><span class=\"mord mathnormal\">t</span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\">d</span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">⋅</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\"><span class=\"mord\">idf</span></span><span class=\"mopen\">(</span><span class=\"mord mathnormal\">t</span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:2em;\"></span><span class=\"mord text\"><span class=\"mord\">where</span></span><span class=\"mspace\" style=\"margin-right:2em;\"></span><span class=\"mord text\"><span class=\"mord\">idf</span></span><span class=\"mopen\">(</span><span class=\"mord mathnormal\">t</span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.2963em;vertical-align:-0.936em;\"></span><span class=\"mop\">lo<span style=\"margin-right:0.0139em;\">g</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3603em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">df</span></span><span class=\"mopen\">(</span><span class=\"mord mathnormal\">t</span><span class=\"mclose\">)</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.109em;\">N</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.936em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<ul>\n<li><strong>tf(t, d)</strong> — <em>term frequency</em>: how often term <code>t</code> appears in document <code>d</code> (a word used a lot in this doc matters more <em>for this doc</em>).</li>\n<li><strong>df(t)</strong> — <em>document frequency</em>: how many documents contain term <code>t</code> at all.</li>\n<li><strong>N</strong> — the total number of documents in the corpus.</li>\n<li><strong>idf(t)</strong> — <em>inverse document frequency</em>: rare-across-the-corpus terms score high, ubiquitous ones (\"the\", \"and\") score near zero.</li>\n</ul>\n<p>A word scores high in a document when it is <strong>frequent here but rare everywhere else</strong> — exactly the words that characterise the document. Use case: keyword weighting, classic/full-text search ranking, and a cheap, surprisingly strong classification baseline before you reach for anything heavier.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "why IDF uses a log",
+       "html": "<p>Without the log, a word appearing in 1 of 1M docs would outweigh one in 10 docs by a factor of 100,000 — absurdly spiky. The log compresses that into diminishing returns: going from common to rare boosts the weight, but each further halving of <code>df</code> adds <em>less and less</em>. It dampens the influence of very common terms smoothly instead of letting raw frequency dominate. You don't derive it — you recognise it as \"rarity, but with the volume turned down.\"</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>BM25</strong> is the length-normalised successor to TF-IDF that powers modern keyword and <strong>hybrid</strong> search engines — same instinct (rare terms matter, frequent-here terms matter) but with saturating term frequency and a correction so long documents don't win by sheer length. It is the keyword half of hybrid retrieval; for the full formula see <span class=\"vault-ref\" title=\"In the Obsidian vault: 17 - RAG &#x26; Applied LLM Systems\">RAG &#x26; Applied LLM Systems</span> (AI Scientist Path), and for how it blends with embeddings see <a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a>.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Keyword search asks <em>\"do these two texts share the same words?\"</em> Embeddings ask <em>\"do these two texts mean the same thing?\"</em> A user searching \"how do I cancel my plan\" should find a help article titled \"Terminating your subscription\" — they share <em>zero</em> important keywords. TF-IDF can't bridge that; embeddings were built to. (You don't choose one forever — strong production search often blends both, BM25 for exact terms and embeddings for meaning. See <a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a>.)</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Comparing strings, not meanings — Levenshtein / edit distance.</strong> Sometimes the question isn't \"do these mean the same?\" but \"are these two strings <em>nearly the same characters</em>?\" The <strong>Levenshtein (edit) distance</strong> between two strings is the <strong>minimum number of single-character insertions, deletions, or substitutions</strong> needed to turn one into the other. <code>cat</code> → <code>cot</code> (substitute a→o) → <code>coat</code> (insert a) is two edits, so the distance is 2. Small distance = likely a typo, variant, or duplicate. Use cases: <strong>fuzzy matching, deduplication / entity resolution</strong> (\"Jon Smith\" vs \"John Smith\"), <strong>spell-check</strong>, and <strong>fuzzy joins</strong> across messy datasets where keys don't match exactly.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Edit distance measures <em>surface</em> similarity (spelling), not meaning — it's blind to synonyms but excellent at catching the same string typed slightly differently. It's the cheap, deterministic first pass for dedup and matching before you ever reach for embeddings.</p>"
+      }
+     ]
+    },
+    {
+     "id": "embeddings--the-centrepiece",
+     "number": 3,
+     "title": "Embeddings — the Centrepiece",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>This is the one idea to take from this entire module. Everything modern — semantic search, RAG, clustering, dedup, recommendation — is built on it.</p>\n<p><strong>What an embedding is.</strong> An <strong>embedding</strong> is a piece of text (a word, a sentence, a whole document) mapped to a fixed-length list of numbers — a <strong>vector</strong>, typically a few hundred to a couple of thousand of them. The model that produces it (an <strong>embedding model</strong>) is trained so that <strong>texts close in meaning produce vectors close together, and unrelated texts produce vectors far apart.</strong> That single property — <em>close = similar in meaning</em> — is what makes the numbers useful. The vector itself is uninterpretable (no human reads \"dimension 412\"); what matters is the <em>distances between vectors</em>.</p>\n<p><strong>The embedding space.</strong> Picture every possible text as a point in a vast multi-dimensional space. The embedding model is the map that places them. In a good map, \"Paris\", \"London\" and \"Tokyo\" cluster in one neighbourhood (cities); \"happy\", \"joyful\", \"delighted\" cluster in another (positive affect); a furious customer review and a calm one sit far apart even if they share words like \"product\" and \"delivery.\" You can't draw 1,000 dimensions, but the intuition is exactly the 2-D one: <strong>meaning becomes geometry, and geometry is something a computer can search, sort, and group.</strong></p>\n<p><strong>Measuring closeness — cosine similarity.</strong> To ask \"how similar are these two texts?\" you measure how close their two vectors point in that space. The standard measure is <strong>cosine similarity</strong>: it looks at the <em>angle</em> between two vectors, not their length. Same direction → similarity near 1 (very similar); perpendicular → near 0 (unrelated); opposite → near −1. The formula every practitioner should recognise:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\cos(\\theta)=\\frac{A\\cdot B}{\\lVert A\\rVert\\,\\lVert B\\rVert}",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mi>cos</mi><mo>⁡</mo><mo stretchy=\"false\">(</mo><mi>θ</mi><mo stretchy=\"false\">)</mo><mo>=</mo><mfrac><mrow><mi>A</mi><mo>⋅</mo><mi>B</mi></mrow><mrow><mo stretchy=\"false\">∥</mo><mi>A</mi><mo stretchy=\"false\">∥</mo><mtext> </mtext><mo stretchy=\"false\">∥</mo><mi>B</mi><mo stretchy=\"false\">∥</mo></mrow></mfrac></mrow><annotation encoding=\"application/x-tex\">\\cos(\\theta)=\\frac{A\\cdot B}{\\lVert A\\rVert\\,\\lVert B\\rVert}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mop\">cos</span><span class=\"mopen\">(</span><span class=\"mord mathnormal\" style=\"margin-right:0.0278em;\">θ</span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.2963em;vertical-align:-0.936em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3603em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mopen\">∥</span><span class=\"mord mathnormal\">A</span><span class=\"mclose\">∥</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mopen\">∥</span><span class=\"mord mathnormal\" style=\"margin-right:0.0502em;\">B</span><span class=\"mclose\">∥</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">A</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">⋅</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0502em;\">B</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.936em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>where <code>A</code> and <code>B</code> are the two embedding vectors, <code>A · B</code> is their dot product, and <code>‖A‖</code>, <code>‖B‖</code> are their lengths (magnitudes). Dividing by the two lengths is the key move: it <strong>cancels magnitude out entirely</strong>, leaving only direction. That is why cosine measures <em>meaning</em> (which way the arrow points) rather than <em>length</em> (how long the text is) — a one-line tweet and a long essay on the same topic still score as similar.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Think of each text as an arrow from the origin. Two arrows pointing the same way mean \"these say the same kind of thing,\" whatever their magnitude. We use the <em>angle</em> rather than straight-line distance precisely so that a short tweet and a long paragraph about the same topic still count as similar — length shouldn't dilute meaning. In practice \"find similar text\" reduces to \"find the arrows pointing closest to mine,\" and at scale that search is delegated to a <strong>vector database</strong> (see Tools, and <a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a>).</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Why this one primitive unlocks so much.</strong> Once text is a point in a meaning-space and you can measure closeness, a whole family of problems collapses into the same move — <em>embed, then compare</em>:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Capability</th><th align=\"left\">The move</th><th align=\"left\">Concrete example</th></tr></thead><tbody><tr><td align=\"left\"><strong>Semantic search</strong></td><td align=\"left\">Embed the query, return the nearest documents</td><td align=\"left\">\"cancel my plan\" finds \"terminate subscription\"</td></tr><tr><td align=\"left\"><strong>Clustering / topic discovery</strong></td><td align=\"left\">Embed all docs, group the nearby ones</td><td align=\"left\">Auto-discover the 8 themes in 50k reviews — <em>no labels needed</em></td></tr><tr><td align=\"left\"><strong>Deduplication / near-dup</strong></td><td align=\"left\">Flag pairs whose vectors are very close</td><td align=\"left\">Spot the same complaint filed five ways; merge duplicate tickets</td></tr><tr><td align=\"left\"><strong>Recommendation</strong></td><td align=\"left\">Recommend items whose vectors are near things the user liked</td><td align=\"left\">\"More articles like this one\"</td></tr><tr><td align=\"left\"><strong>RAG (retrieval)</strong></td><td align=\"left\">Embed a question, fetch the nearest knowledge chunks, feed them to an LLM</td><td align=\"left\">Grounded answers over the client's own documents → <a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a></td></tr><tr><td align=\"left\"><strong>Classification (cheap)</strong></td><td align=\"left\">Embed once, train a tiny classifier on the vectors</td><td align=\"left\">High-volume routing without an LLM call per item</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "worked-example",
+       "title": "semantic search over a support knowledge base",
+       "html": "<p>A SaaS client has 4,000 help articles and a search bar their users hate, because it only matches exact keywords: searching \"I was charged twice\" returns nothing, since the relevant article is titled \"Resolving duplicate billing.\" You run each article through an embedding model once (a one-off batch job — a few cents to a few euros total) and store the 4,000 vectors in a vector database. At query time you embed the user's phrase and return the articles whose vectors are nearest. \"I was charged twice\" now lands on \"Resolving duplicate billing\" because their <em>meanings</em> are close, despite sharing no keywords. <strong>No LLM is involved, no model is trained, and the running cost is a tiny embedding call plus a vector lookup per search</strong> — milliseconds, fractions of a cent. This is the cheapest, highest-trust win in the whole NLP toolbox, and it is the literal first half of every RAG system. <em>(The second half — handing those retrieved articles to an LLM to write the answer — is <a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a>.)</em></p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The commercial point: <strong>embeddings are a commodity you rent, not something you build.</strong> Embedding models are cheap, fast, and excellent off the shelf. The value you add is <em>what you embed</em> (the client's proprietary corpus) and <em>the workflow around it</em> — never the maths.</p>"
+      }
+     ]
+    },
+    {
+     "id": "when-a-small-model-beats-an-llm",
+     "number": 4,
+     "title": "When a Small Model Beats an LLM",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The reflex in 2026 is \"just call an LLM.\" For prototypes and low volume, that reflex is right — it's the fastest path to a working demo. But at production scale, a <strong>small fine-tuned or classic model</strong> routinely wins on the four axes a client actually pays attention to. This is the most important <em>judgement</em> in the module.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Axis</th><th align=\"left\">Why a dedicated/classic model can win</th><th align=\"left\">Concrete bite</th></tr></thead><tbody><tr><td align=\"left\"><strong>Cost at scale</strong></td><td align=\"left\">A purpose-built classifier costs a tiny fraction of an LLM call, per item</td><td align=\"left\">Classifying 10M tickets/month: an LLM API can run into five or six figures monthly; a fine-tuned small model runs on modest hardware for a fraction</td></tr><tr><td align=\"left\"><strong>Latency</strong></td><td align=\"left\">A small model answers in milliseconds; an LLM round-trip is hundreds of ms to seconds</td><td align=\"left\">In-the-loop routing or real-time moderation can't wait on a slow generative call</td></tr><tr><td align=\"left\"><strong>Privacy / residency</strong></td><td align=\"left\">A self-hosted small model keeps data in your perimeter</td><td align=\"left\">Health/finance/public-sector data that legally can't leave the building → ties to <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a></td></tr><tr><td align=\"left\"><strong>Determinism</strong></td><td align=\"left\">A classifier gives the same label every time; an LLM can drift or phrase things differently</td><td align=\"left\">Auditable, repeatable decisions (compliance routing) want a fixed, testable output</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>An LLM is a brilliant, expensive generalist consultant; a small fine-tuned model is a cheap, fast, utterly reliable specialist clerk. You hire the consultant to <em>figure out the problem and handle the weird cases</em>; once the task is well-defined and runs millions of times, you train the clerk to do that one thing. A common, mature pattern is to <strong>use the LLM to label a few thousand examples, then train a small model on those labels</strong> — you get the LLM's quality baked into a model that's 100× cheaper and faster to run. The LLM designs the job; the small model does the shift work.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>A clean rule of thumb for the room:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Reach for an <strong>LLM</strong> when…</th><th align=\"left\">Reach for a <strong>dedicated / small model</strong> when…</th></tr></thead><tbody><tr><td align=\"left\">The task is fuzzy, varied, or open-ended</td><td align=\"left\">The task is narrow and well-defined</td></tr><tr><td align=\"left\">You need it working <em>this week</em> (zero-shot, no training data)</td><td align=\"left\">You have (or can cheaply generate) labelled examples</td></tr><tr><td align=\"left\">Volume is low-to-medium</td><td align=\"left\">Volume is high and per-call cost compounds</td></tr><tr><td align=\"left\">Output is generative (summaries, rewrites, answers)</td><td align=\"left\">Output is a fixed label, score, or span</td></tr><tr><td align=\"left\">Occasional variability is acceptable</td><td align=\"left\">You need determinism, auditability, or sub-100ms latency</td></tr><tr><td align=\"left\">Data can leave your perimeter</td><td align=\"left\">Strict privacy / residency forbids external calls</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The escalation mirrors the whole path: <strong>prototype with the LLM to prove value fast, then graduate the high-volume, well-defined slice to a cheap dedicated model once the spec is stable.</strong> Don't fine-tune on day one; don't run a frontier LLM on 50M items on day 100. (LLM economics in full: <a class=\"wikilink\" data-module=\"09\" href=\"#/module/09\">Large Language Models in Practice</a>.)</p>"
+      }
+     ]
+    },
+    {
+     "id": "the-shift-from-bespoke-pipelines-to-llms--what-changed-what-survived",
+     "number": 5,
+     "title": "The Shift from Bespoke Pipelines to LLMs — What Changed, What Survived",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>For a decade, an NLP project meant assembling a <strong>bespoke pipeline per task</strong>: collect and label thousands of examples, engineer features, train a model, evaluate, maintain it. Each new task (a new entity type, a new language, a new label) was a new project. The LLM era flattened most of that.</p>\n<p><strong>What the LLM era made largely obsolete:</strong></p>\n<ul>\n<li><strong>Per-task data labelling and training as the default first step.</strong> An LLM does classification, extraction, and sentiment <em>zero-shot</em> — no training set, working in an afternoon. The prototype that used to take a quarter takes a day.</li>\n<li><strong>Hand-built linguistic pipelines</strong> (rule-based parsers, hand-tuned feature engineering for text, bespoke per-language models). The general model absorbed most of it.</li>\n<li><strong>The cold-start problem.</strong> You no longer need labelled data to <em>begin</em>; you need it only to <em>optimise</em> a high-volume task later.</li>\n</ul>\n<p><strong>What survived — and is still worth building yourself:</strong></p>\n<ul>\n<li><strong>Embeddings + vector search.</strong> The LLM did <strong>not</strong> replace this; modern systems lean on it harder than ever (it <em>is</em> the retrieval half of RAG). This is the durable primitive of the whole module.</li>\n<li><strong>Small dedicated models for the high-volume, well-defined, latency- or privacy-critical slice</strong> (concept 4). The economics didn't go away — they got more important as volume grew.</li>\n<li><strong>Your proprietary data and domain workflow.</strong> The model is a rented commodity; the defensible value is the client's corpus, the integration, the human-in-the-loop process, and the trust layer around it. That is exactly where to spend the build budget.</li>\n<li><strong>Evaluation discipline.</strong> \"It demoed well\" is not \"it works at scale\" — knowing <em>whether</em> the text system is actually good is unchanged in importance (see <a class=\"wikilink\" data-module=\"05\" href=\"#/module/05\">Model Evaluation, Validation &#x26; Experimentation</a>).</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>The LLM era didn't delete NLP — it <strong>moved the build line</strong>. The commodity boundary slid upward: training a sentiment classifier from scratch used to be differentiating work; now it's a one-line API call. Your build budget should chase the new line — proprietary data, retrieval over it, the cheap specialist models that make scale affordable, and the workflow trust — not the parts a foundation model now gives away for free.</p>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "client-mission-patterns--commercial-angle",
+   "kind": "missions",
+   "title": "Client Mission Patterns / Commercial Angle",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>These are the four NLP/embeddings missions you can name, scope, and sell. Each is concrete, has a named deliverable, and a real buyer.</p>\n<ul>\n<li><strong>Semantic search over a document corpus</strong> — <em>Problem:</em> \"our people can't find anything in our wiki/contracts/knowledge base; keyword search is useless.\" <em>Deliverable:</em> an embedding-based search service over the client's corpus (ingestion + chunking + embedding + vector store + a search endpoint or UI), with a relevance evaluation on real queries. <em>Scope:</em> 3-6 weeks. <em>Who buys:</em> COO/knowledge-management lead, support leadership, legal ops. <em>Note:</em> this is the natural on-ramp to a RAG mission — scope it as a standalone win first, then upsell <a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a>.</li>\n<li><strong>Document classification / routing at scale</strong> — <em>Problem:</em> thousands of incoming tickets/emails/documents manually triaged. <em>Deliverable:</em> an automated classifier (LLM to bootstrap labels, then a cheap small model for production volume) that routes each item to the right queue/owner, with a confidence threshold and a human-review path for low-confidence cases. <em>Scope:</em> 4-8 weeks. <em>Who buys:</em> head of support/operations, shared-services lead. <em>Note:</em> sell the <strong>cost-per-item-at-scale</strong> story explicitly — the LLM-to-small-model graduation is the margin.</li>\n<li><strong>Customer-feedback / review analysis (themes + sentiment)</strong> — <em>Problem:</em> \"we have 50k reviews/survey responses/support transcripts and no idea what they're telling us.\" <em>Deliverable:</em> a themes-and-sentiment report — embedding-based clustering to surface the recurring themes (no predefined labels), sentiment per theme, trends over time, and the verbatim quotes behind each — delivered as a dashboard or a one-off study. <em>Scope:</em> 2-5 weeks. <em>Who buys:</em> product, CX, marketing/insights. <em>Note:</em> high perceived value, low technical risk — an excellent door-opener.</li>\n<li><strong>Entity extraction from unstructured text</strong> — <em>Problem:</em> key facts (parties, dates, amounts, clause types, product IDs) are trapped in PDFs/emails/contracts and re-keyed by hand. <em>Deliverable:</em> an extraction pipeline that turns unstructured documents into structured rows against an agreed schema, with an accuracy report per field and a human-validation step for low-confidence extractions. <em>Scope:</em> 4-10 weeks (driven by document variety and the cost of an extraction error). <em>Who buys:</em> finance, legal, procurement, operations. <em>Note:</em> scope to the <strong>fields that carry the cost</strong>; \"extract everything\" is unboundable.</li>\n</ul>\n<p><strong>Buy-vs-build for the client:</strong> <em>buy</em> the embedding model and the LLM (commodities) and rent the vector store; <em>build</em> only the corpus ingestion, the domain schema, the cheap production model, and the human-in-the-loop workflow. <strong>What to charge for:</strong> a fixed-price discovery + evaluation, then the build; the recurring embedding/LLM run-cost is passed through or folded into a managed-service retainer. <strong>What NOT to promise:</strong> a specific extraction-accuracy or search-relevance number before you've seen the client's actual documents — commit to a <em>method and a target</em>, measure on their data, then quote. Never promise \"it'll read any document perfectly\"; the long tail of weird formats is where these missions overrun.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "tools--vendor-landscape",
+   "kind": "tools",
+   "title": "Tools & Vendor Landscape",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p><em>As of 2026 — treat names/prices as perishable; re-check before quoting.</em></p>"
+    },
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Tool / Category</th><th align=\"left\">Use here</th><th align=\"left\">OSS / Paid</th><th align=\"left\">Note</th></tr></thead><tbody><tr><td align=\"left\">Hosted embedding APIs (OpenAI, Cohere, Voyage, Google)</td><td align=\"left\">Turn text into vectors, no infra</td><td align=\"left\">Paid (per-token, cheap)</td><td align=\"left\">Easiest start; compare on quality, price, dimensions, data terms</td></tr><tr><td align=\"left\">Open embedding models (e.g. via Sentence-Transformers; leaderboards like MTEB)</td><td align=\"left\">Self-hosted embeddings, privacy/cost control</td><td align=\"left\">OSS</td><td align=\"left\">Use MTEB to choose; self-host when data can't leave the perimeter</td></tr><tr><td align=\"left\">Vector databases (Pinecone, Weaviate, Qdrant, Milvus, pgvector)</td><td align=\"left\">Store &#x26; nearest-neighbour-search vectors at scale</td><td align=\"left\">Mixed (pgvector OSS)</td><td align=\"left\"><code>pgvector</code> if you already run Postgres; managed if scale/ops matter</td></tr><tr><td align=\"left\">spaCy</td><td align=\"left\">Fast, production NER / classification / tokenisation</td><td align=\"left\">OSS</td><td align=\"left\">The classic-NLP workhorse; great cheap specialist</td></tr><tr><td align=\"left\">Hugging Face (models + Transformers + datasets)</td><td align=\"left\">Pre-trained small models, fine-tuning, hosting</td><td align=\"left\">OSS + paid</td><td align=\"left\">The hub for dedicated/small models and fine-tuning</td></tr><tr><td align=\"left\">Hosted LLM APIs (Anthropic Claude, OpenAI, Google, Mistral)</td><td align=\"left\">Zero-shot classify/extract/summarise; bootstrap labels</td><td align=\"left\">Paid (per-token)</td><td align=\"left\">Prototype fast; watch per-item cost at scale → <a class=\"wikilink\" data-module=\"09\" href=\"#/module/09\">Large Language Models in Practice</a></td></tr><tr><td align=\"left\">Cloud translation APIs (Google, DeepL, AWS)</td><td align=\"left\">Commodity translation</td><td align=\"left\">Paid</td><td align=\"left\">Buy it; don't build translation</td></tr><tr><td align=\"left\">Managed search platforms (Elastic, OpenSearch, Vespa, Algolia)</td><td align=\"left\">Hybrid keyword + vector search in one engine</td><td align=\"left\">Mixed</td><td align=\"left\">When you need keyword <em>and</em> semantic together</td></tr></tbody></table>"
+    },
+    {
+     "type": "callout",
+     "kind": "note",
+     "title": "Note on freshness",
+     "html": "<p>Embedding model quality and price move fast and the rankings reshuffle quarterly — check a current leaderboard (e.g. MTEB) and live pricing before committing a client to a model.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "when-is-this-overkill",
+   "kind": "overkill",
+   "title": "When Is This Overkill?",
+   "blocks": [
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Situation</th><th align=\"left\">Embeddings/NLP is overkill — do this instead</th></tr></thead><tbody><tr><td align=\"left\">Users search for exact codes, SKUs, IDs, names</td><td align=\"left\">Plain keyword/full-text search; embeddings add cost, not value</td></tr><tr><td align=\"left\">A handful of fixed categories with obvious keywords</td><td align=\"left\">Write keyword rules / regex; ship in a day</td></tr><tr><td align=\"left\">You need to read text a few times a day</td><td align=\"left\">Let a person read it; automate the data-gathering around them</td></tr><tr><td align=\"left\">The corpus is tiny (a few dozen docs)</td><td align=\"left\">Read them; or simple search — clustering needs volume to mean anything</td></tr><tr><td align=\"left\">\"Summarise this once\" for one user</td><td align=\"left\">A single LLM call, or a person — no pipeline</td></tr><tr><td align=\"left\">Structured data is already in a database</td><td align=\"left\">Query it with SQL/BI; don't NLP your way to data you already have</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The senior move is to ask <em>\"is the meaning actually fuzzy, or are people just searching badly?\"</em> A surprising number of \"we need AI search\" requests are solved by fixing synonyms and filters in the existing keyword engine.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "resources",
+   "kind": "resources",
+   "title": "Resources",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "books",
+     "number": null,
+     "title": "Books",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Jurafsky &#x26; Martin — <em>Speech and Language Processing</em> (free draft online) — the field's standard reference; read for framing, skip the heavy maths.</li>\n<li>Tunstall, von Werra &#x26; Wolf — <em>Natural Language Processing with Transformers</em> — practical, Hugging-Face-centric. <em>(Paid)</em></li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "courses--articles-free",
+     "number": null,
+     "title": "Courses & Articles (Free)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Hugging Face NLP / LLM course — hands-on, modern, free.</li>\n<li>Vendor embedding &#x26; RAG guides (OpenAI, Cohere, Anthropic) and the <strong>MTEB</strong> embedding leaderboard — for current model choice. <em>Date everything.</em></li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "go-deeper",
+     "number": null,
+     "title": "Go Deeper",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Deeper math (embeddings, tokenisation, sequence models, the distributional hypothesis) → <span class=\"vault-ref\" title=\"In the Obsidian vault: 15 - Natural Language Processing\">Natural Language Processing</span> (AI Scientist Path).</li>\n<li>Deeper code (building NLP/LLM pipelines, fine-tuning, serving) → <span class=\"vault-ref\" title=\"In the Obsidian vault: 08 - NLP &#x26; LLMs\">NLP &#x26; LLMs</span> (ML Engineer Path).</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "practical-artifacts",
+   "kind": "artifacts",
+   "title": "Practical Artifacts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "decision-checklist--scoping-an-nlp--embeddings-mission",
+     "number": null,
+     "title": "Decision Checklist — scoping an NLP / embeddings mission",
+     "blocks": [
+      {
+       "type": "checklist",
+       "checklistId": "08/practical-artifacts/1",
+       "items": [
+        {
+         "id": "0",
+         "html": "Which classic task is this really? (classification / NER / sentiment / topic / summarisation / translation)"
+        },
+        {
+         "id": "1",
+         "html": "Is the problem <em>meaning</em> (→ embeddings) or <em>exact terms</em> (→ keyword search)?"
+        },
+        {
+         "id": "2",
+         "html": "What volume per month — and does that push us from LLM toward a small model?"
+        },
+        {
+         "id": "3",
+         "html": "Latency, privacy, determinism: any hard constraint that rules out an external LLM call?"
+        },
+        {
+         "id": "4",
+         "html": "Do we have (or can we cheaply generate, via an LLM) labelled examples for the high-volume path?"
+        },
+        {
+         "id": "5",
+         "html": "How will we <em>measure</em> \"good\" on the client's own data — and against what baseline?"
+        },
+        {
+         "id": "6",
+         "html": "Which fields/labels actually carry the business cost? (Scope to those, not \"everything.\")"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "red-flags",
+     "number": null,
+     "title": "Red Flags",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"Just throw it all at an LLM\" — for millions of items/month, that's a runaway bill <em>and</em> a latency problem.</li>\n<li>\"Build us a custom NER model from scratch\" — usually an LLM prototype gets you 80% by Friday; start there.</li>\n<li>\"Semantic search\" requested when users actually search for exact IDs/codes (keyword search is the real fix).</li>\n<li>No labelled data, no plan to get any, <em>and</em> a demand for a high-accuracy guarantee up front.</li>\n<li>\"Summarisation accuracy must be 95%\" — there's no single right summary; that metric doesn't exist (see <a class=\"wikilink\" data-module=\"09\" href=\"#/module/09\">Large Language Models in Practice</a>).</li>\n<li>A corpus of 30 documents and a request to \"discover the themes\" — too little to cluster meaningfully.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "scoping-prompts-ask-the-client",
+     "number": null,
+     "title": "Scoping Prompts (ask the client)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"When someone searches today and fails, what did they type and what did they expect to find?\"</li>\n<li>\"Of everything you want extracted, which three fields, if wrong, actually cost you money or time?\"</li>\n<li>\"How many of these documents/messages arrive per day, and how fast must each be handled?\"</li>\n<li>\"Can this text legally leave your systems and be sent to an external API?\"</li>\n<li>\"What do you do with the output — route it, report it, decide on it — and who acts on it?\"</li>\n<li>\"How will we both agree it's working well enough to go live?\"</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "self-assessment",
+   "kind": "self-assessment",
+   "title": "Self-Assessment",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Before moving on, you should be able to:</p>"
+    },
+    {
+     "type": "checklist",
+     "checklistId": "08/self-assessment/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Decompose a vague \"AI reads our text\" request into named classic NLP tasks"
+      },
+      {
+       "id": "1",
+       "html": "Explain embeddings — <em>close = similar in meaning</em> — and why they unlock semantic search, clustering, dedup, and RAG, without writing a formula"
+      },
+      {
+       "id": "2",
+       "html": "Walk through a semantic-search build end to end and state its (tiny) running cost"
+      },
+      {
+       "id": "3",
+       "html": "Route a task to LLM vs small/dedicated model on cost, latency, privacy, and determinism, with a one-line justification"
+      },
+      {
+       "id": "4",
+       "html": "Scope and price at least two of the four mission archetypes, naming the deliverable and the buyer"
+      },
+      {
+       "id": "5",
+       "html": "Say what the LLM era made obsolete and what's still worth building yourself — and where the build budget should go"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  }
+ ]
+}

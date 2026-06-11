@@ -1,0 +1,348 @@
+{
+  "moduleId": "19",
+  "quiz": [
+    {
+      "id": "q1",
+      "conceptRef": "what-automl-automates--and-what-it-doesnt",
+      "prompt": "An AutoML run on a client's churn data returns a leaderboard topped at AUC 0.97 after one afternoon. The product manager wants to ship it. What is the tech lead's first question?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "\"Is the matrix it optimised even sound?\" — check for leakage, confirm the target is the one the business agreed, and compare against a sensible baseline before celebrating anything.",
+          "correct": true,
+          "explanation": "AutoML optimises the matrix it's handed, faithfully. A pristine leaderboard on a dataset full of leakage — or aimed at a target the business never agreed on — is a confident answer to the wrong question. The columns AutoML can't touch (framing, data quality) are where missions actually fail."
+        },
+        {
+          "id": "b",
+          "text": "\"Which models are in the winning ensemble?\" — understanding the architecture is the prerequisite to shipping it.",
+          "correct": false,
+          "explanation": "Interesting later, irrelevant now. Knowing it's a 20-model stack tells you nothing about whether the score is real. The threat to validity is upstream of the model — in the data and the framing the search never questioned."
+        },
+        {
+          "id": "c",
+          "text": "Nothing — AutoML validates each candidate internally with cross-validation, so the score is already trustworthy.",
+          "correct": false,
+          "explanation": "Internal CV protects against overfitting *within the matrix it was given*. It cannot detect that a feature encodes the outcome (leakage) or that the target is wrong — it will cross-validate the mistake beautifully. The output still needs the same validation bar as any hand-built model."
+        },
+        {
+          "id": "d",
+          "text": "\"Can we re-run it with a bigger compute budget to confirm the result?\"",
+          "correct": false,
+          "explanation": "More search on the same flawed matrix produces a more confident version of the same wrong answer. Automation amplifies whatever you point it at — including bad framing. Spend the next hour on a leakage check, not more trials."
+        }
+      ],
+      "takeaway": "AutoML automates the modelling slice; it cannot question the framing or fix the data — and a brilliant leaderboard on a leaky dataset is a confident answer to the wrong question.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q2",
+      "conceptRef": "hyperparameter-optimisation--the-engine-inside-automl",
+      "prompt": "A team plans a grid search over 5 hyperparameters with 5 candidate values each. How many configurations is that, and what's the structural lesson?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "$5^5 = 3{,}125$ — the cost is a *product* across knobs, so it explodes combinatorially: one more knob makes it 15,625. Estimate `trials × folds × time-per-fit` before launching anything.",
+          "correct": true,
+          "explanation": "Multiplication, not addition. This is why grid search becomes infeasible past ~3 knobs — and why the module's worked example has the lead stopping a 324-hour grid run that random search replaces in 2.5 hours."
+        },
+        {
+          "id": "b",
+          "text": "25 configurations ($5 \\times 5$) — large but entirely manageable.",
+          "correct": false,
+          "explanation": "That's the additive intuition, and it's exactly the trap. Five knobs at five values is the full cross-product $5^5$, not $5 \\times 5$. Mistaking a product for a sum is how un-costed grid searches end up running for days."
+        },
+        {
+          "id": "c",
+          "text": "$5^5 = 3{,}125$, but it doesn't matter — cloud trials run in parallel, so wall-clock time is the only constraint and cost is unaffected.",
+          "correct": false,
+          "explanation": "Parallelism compresses wall-clock time, not spend: 3,125 configurations × folds is the same compute bill whether it runs overnight or in an hour. Worse, grid spends most of that budget varying knobs that don't matter."
+        },
+        {
+          "id": "d",
+          "text": "It can't be computed without knowing the dataset size.",
+          "correct": false,
+          "explanation": "The trial *count* is pure combinatorics — dataset size affects time-per-fit, which is the other factor in the cost estimate. The whole point of the `trials × folds × time-per-fit` formula is that you can size the run on a whiteboard before launching."
+        }
+      ],
+      "takeaway": "Grid search cost is a product across knobs — combinatorial explosion past ~3 knobs — so always estimate trials × folds × time-per-fit before launching a tuning run.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q3",
+      "conceptRef": "hyperparameter-optimisation--the-engine-inside-automl",
+      "prompt": "For the same total budget of trials, why does random search usually beat grid search?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Because only a few knobs usually matter: a grid of $T$ trials tries only about $T^{1/d}$ distinct values of each knob, while random search tries a fresh value of every knob on every trial — far denser coverage of whichever dimension turns out to matter.",
+          "correct": true,
+          "explanation": "This is the coverage argument from Bergstra & Bengio. Grid pins the important knob to a coarse lattice while wasting budget varying irrelevant ones; random jitters everything at once, so the important knob gets ~T distinct values for the same cost."
+        },
+        {
+          "id": "b",
+          "text": "Because random sampling acts as a regulariser, preventing the search from overfitting the validation set.",
+          "correct": false,
+          "explanation": "Plausible-sounding but not the mechanism. Both methods evaluate against the same validation protocol and can overfit it equally with enough trials. Random's advantage is coverage of the important dimensions, not regularisation."
+        },
+        {
+          "id": "c",
+          "text": "It doesn't — grid search is exhaustive, so at equal budget it's always at least as good as random.",
+          "correct": false,
+          "explanation": "Grid is only 'exhaustive' over the coarse lattice it can afford, which is the problem: at equal budget it explores ~$T^{1/d}$ values per knob versus random's ~$T$. Exhaustiveness over the wrong grid is just thorough mediocrity."
+        },
+        {
+          "id": "d",
+          "text": "Because random search learns from past trials, steering toward promising regions of the space.",
+          "correct": false,
+          "explanation": "That's Bayesian optimisation, not random search. Random forgets every result the instant it has it — that's precisely why BO replaces it when trials are expensive and the budget is small."
+        }
+      ],
+      "takeaway": "Random search wins because only a few knobs usually matter — it explores ~T values of every knob where a grid manages ~T^(1/d); it's the right default past ~3 knobs with cheap-to-moderate trials.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q4",
+      "conceptRef": "hyperparameter-optimisation--the-engine-inside-automl",
+      "prompt": "Each tuning trial is a fine-tune costing ~2 GPU-hours, the budget allows ~30 trials, and the score is only meaningful after a full run (no reliable early signal to stop on). Which search strategy fits?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Bayesian optimisation — a surrogate model of \"configuration → score\" makes every expensive trial informed, and an acquisition function like Expected Improvement balances exploiting promising regions with exploring uncertain ones, reaching a strong configuration in tens of trials.",
+          "correct": true,
+          "explanation": "This is BO's exact niche: trials are dear, the budget is small, so forgetting results (random) is unaffordable. BO remembers — each evaluation updates a map of the space, and EI sends the next trial where it's most likely to beat the best so far."
+        },
+        {
+          "id": "b",
+          "text": "Grid search — with only 30 trials you want guaranteed systematic coverage.",
+          "correct": false,
+          "explanation": "Thirty trials of grid over several knobs gives 2-3 values per dimension — a lattice so coarse it's nearly useless, with budget wasted on knobs that don't matter. Grid's home is tiny spaces with *cheap* trials, the opposite of this scenario."
+        },
+        {
+          "id": "c",
+          "text": "Random search — it's the everyday default, and defaults exist for a reason.",
+          "correct": false,
+          "explanation": "Random is the right default for *cheap-to-moderate* trials. At 2 GPU-hours each, throwing away the information from every completed trial is exactly the waste BO exists to eliminate — random needs the hundreds of shots this budget doesn't have."
+        },
+        {
+          "id": "d",
+          "text": "Hyperband — kill the losers early and pour the saved budget into the survivors.",
+          "correct": false,
+          "explanation": "Right idea, wrong precondition: Hyperband needs a *partial-fidelity signal* (a few epochs, a data subsample) that predicts final quality, so weak configurations can be cut cheaply. The scenario says scores are only meaningful after a full run — there's nothing to cut on."
+        }
+      ],
+      "takeaway": "Match the search to the trial economics: grid for tiny cheap spaces, random as the cheap-trial default, BO when trials are expensive and the budget small, Hyperband when a partial signal lets you kill losers early.",
+      "difficulty": "stretch"
+    },
+    {
+      "id": "q5",
+      "conceptRef": "automated-feature-engineering-briefly",
+      "prompt": "featuretools' deep feature synthesis just generated 1,800 candidate features from a client's customers → orders → line-items tables. What's the right stance toward this output?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Treat it as a candidate-generator that still needs a human filter — prune the mostly-useless columns, check for leakage (features built from post-outcome data), and add the domain-meaningful features it can't invent.",
+          "correct": true,
+          "explanation": "That's the documented position. DFS is genuinely useful for wide relational data where hand-crafting hundreds of aggregates is tedious — but it produces *generic* features, can manufacture leakage, and will never find the domain ratio an expert knows matters."
+        },
+        {
+          "id": "b",
+          "text": "Feed all 1,800 to the model — modern algorithms are robust to irrelevant features, and the search will keep what works.",
+          "correct": false,
+          "explanation": "Two problems: thousands of mostly-useless columns inflate cost and overfitting risk, and — worse — if even one feature uses post-outcome data, the model will latch onto it and the leaderboard becomes fiction. Volume makes the leakage audit harder, not optional."
+        },
+        {
+          "id": "c",
+          "text": "Discard the output — automated features are always inferior to hand-crafted ones.",
+          "correct": false,
+          "explanation": "Too absolute. Mechanically generating MEAN(orders.amount), COUNT(orders), DAYS_SINCE(last_order) across relationships is real, tedious work done for free. The tool's limits (generic, leak-prone) call for a filter, not a ban."
+        },
+        {
+          "id": "d",
+          "text": "It means the data-quality work of module 03 is no longer needed — the synthesis handles the data layer.",
+          "correct": false,
+          "explanation": "DFS aggregates whatever is in the tables, garbage included. It mirrors AutoML's broader limit: it optimises (or here, transforms) the data it's handed — acquisition, quality and meaning remain entirely human problems."
+        }
+      ],
+      "takeaway": "Automated feature engineering is a candidate-generator, not a feature engineer — it needs a human filter for leakage and relevance, and it can't invent the domain feature an expert knows matters.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q6",
+      "conceptRef": "neural-architecture-search-nas--know-it-exists-rarely-buy-it",
+      "prompt": "A vendor proposes Neural Architecture Search to \"design a custom network\" for a client's ordinary tabular churn problem. How should you read this?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "As a value/complexity red flag: NAS is compute-heavy and finicky, its payoff (a slightly better architecture) only matters at massive scale — big-lab and hyperscaler territory — and for client missions the right move is adopting a proven architecture.",
+          "correct": true,
+          "explanation": "Verbatim the module's judgment: 'If someone proposes NAS for a normal business problem, that is a value/complexity red flag.' The outputs of big-lab NAS already reach you as off-the-shelf architecture families — you use them, you don't re-run the search."
+        },
+        {
+          "id": "b",
+          "text": "As a reasonable premium option, provided the client has the compute budget to fund the search.",
+          "correct": false,
+          "explanation": "Budget doesn't fix the value side of the equation: the payoff of a custom-searched architecture only materialises when a model is served at enormous scale or under hard on-device constraints. A churn model meets neither — the spend buys nothing a proven architecture wouldn't."
+        },
+        {
+          "id": "c",
+          "text": "As sound engineering — architecture is the main driver of accuracy, so searching it directly attacks the bottleneck.",
+          "correct": false,
+          "explanation": "Doubly wrong here: on tabular business data, gradient-boosted trees are typically the practical winner over any neural architecture — and even within deep learning, data quality and features dominate architecture tweaks for problems at this scale."
+        },
+        {
+          "id": "d",
+          "text": "As outdated caution — efficient NAS variants (weight-sharing, differentiable search) have made it cheap enough for routine use.",
+          "correct": false,
+          "explanation": "The efficient variants cut cost *dramatically* from 'hundreds of GPUs for weeks', but the module is explicit that it remains compute-heavy and finicky — and cheaper search doesn't create a payoff that was never there for a normal business problem."
+        }
+      ],
+      "takeaway": "Know NAS exists, rarely buy it: its payoff matters at hyperscaler scale, its outputs reach you off the shelf, and proposing it for an ordinary business problem is a value/complexity red flag.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q7",
+      "conceptRef": "when-automl-shines-vs-when-it-fails",
+      "prompt": "Which use of AutoML does the module call the most defensible?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Establishing the floor: run AutoML first as a baseline machine — if your hand-built model can't beat it, either AutoML found the right approach or you've made a mistake worth finding.",
+          "correct": true,
+          "explanation": "It turns 'is our model any good?' from an opinion into a benchmark — cheaply. This is also why it's the engine of the rapid-PoC mission: a strong baseline in an afternoon tells you whether the problem is tractable before anyone commits to a build."
+        },
+        {
+          "id": "b",
+          "text": "Replacing the validation step — the search already cross-validates every candidate, so a separate evaluation is redundant.",
+          "correct": false,
+          "explanation": "Validation of the *final* model against the business metric, on data the search never touched, by someone qualified, remains mandatory. AutoML's internal CV is part of the search, not the audit of the result."
+        },
+        {
+          "id": "c",
+          "text": "Rescuing weak datasets — the search compensates for quality problems by finding the model most robust to them.",
+          "correct": false,
+          "explanation": "The named failure mode, inverted: when the real problem is data quality or framing, AutoML 'optimises garbage faithfully'. It cannot fix bad data — it will faithfully model the mess and hand you a confident score on it."
+        },
+        {
+          "id": "d",
+          "text": "Shipping the leaderboard winner directly to production, since the search already selected the best deployable pipeline.",
+          "correct": false,
+          "explanation": "The output is often an opaque 20-model ensemble — and AutoML doesn't touch deployment, monitoring, or governance. 'We'll just ship whatever AutoML returns' is a listed red flag: the result still needs an owner, an audit, and the standard MLOps path."
+        }
+      ],
+      "takeaway": "AutoML's most defensible job is the baseline machine — it sets the floor cheaply and turns model quality from an opinion into a benchmark; it never replaces validation, data work, or ownership.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q8",
+      "conceptRef": "the-leaders-angle--staffing-build-vs-buy-and-citizen-data-science",
+      "prompt": "A CDO is excited that an AutoML platform will let analysts build models without data scientists, but worries about \"shadow models.\" What's the right governance posture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Gate it, don't ban it: AutoML for exploration and baselines by anyone — but a qualified review, a mandatory validation checklist, and a named owner before any model touches a real decision.",
+          "correct": true,
+          "explanation": "The module's answer verbatim. The upside of citizen data science is real (more people delivering value, scarce DS time freed); the risk is unaccountable models with leakage, wrong metrics, or hidden fairness problems shipping into real decisions. The gate keeps the upside and contains the risk."
+        },
+        {
+          "id": "b",
+          "text": "Ban model-building outside the data science team — validation skill can't be delegated, so the risk outweighs the benefit.",
+          "correct": false,
+          "explanation": "A ban forfeits the genuine upside and usually just drives the modelling underground (spreadsheets and shadow tools — the very thing the CDO fears). The skills gap is real, which is why the answer is a review gate, not prohibition."
+        },
+        {
+          "id": "c",
+          "text": "Trust the platform — enterprise AutoML tools ship with built-in guardrails and audit trails that handle the governance question.",
+          "correct": false,
+          "explanation": "Platform features (audit trails, UI guardrails) support governance but can't supply the missing judgment: smelling leakage, mapping the metric to the business KPI, deciding a model is fit to ship. Automation removes the mechanics, not the judgement — that's the whole risk."
+        },
+        {
+          "id": "d",
+          "text": "Allow analysts to ship freely but hold the platform vendor contractually accountable for model failures.",
+          "correct": false,
+          "explanation": "Accountability for a model in a real decision can't be outsourced to a tool vendor — the vendor controls neither your data, your framing, nor your deployment context. The governance design needs an internal owner per model; that's what the gate establishes."
+        }
+      ],
+      "takeaway": "Automation removes the mechanics, not the judgement: let anyone explore with AutoML, but require a qualified review and a named owner before any model touches a real decision.",
+      "difficulty": "stretch"
+    }
+  ],
+  "exercises": [
+    {
+      "id": "ex1",
+      "title": "Stop the runaway grid search",
+      "estimatedMinutes": 25,
+      "scenario": "During a delivery review at a logistics client, you discover the internal data science team is about to launch a hyperparameter grid search on the cloud for their gradient-boosting ETA model: **4 hyperparameters, 6 candidate values each, 5-fold cross-validation**, with one fit taking **~45 seconds** on their instance type. Nobody has estimated the cost; the team lead says \"it'll probably run over the weekend.\"\n\nYou have ten minutes at the whiteboard to size it, propose the alternative, and leave them a rule for next time.",
+      "givens": [
+        "Grid: 4 knobs × 6 values each; validation: 5-fold CV; one fit ≈ 45 s",
+        "Alternative budget to consider: random search with T = 50 configurations over the same ranges",
+        "Past experiments suggest only one or two of the four knobs meaningfully move the score (typical, per the module)",
+        "Two other tuning jobs are in the team's backlog: (a) a fine-tune where one trial costs ~2 GPU-hours with a budget of ~30 trials; (b) a deep model where validation loss after 2 of 20 epochs is a good predictor of final quality"
+      ],
+      "tasks": [
+        "Compute the total number of fits and the compute time for the grid search.",
+        "Compute the same for random search at T = 50, and make the coverage argument for why it will likely match the grid's result.",
+        "Recommend the right search strategy for the two backlog jobs, with one sentence of justification each.",
+        "Write the one-line rule you'd leave on the team's wall."
+      ],
+      "solution": "**Step 1 — size the grid.** Configurations: $6^4 = 1{,}296$. With 5-fold CV: $1{,}296 \\times 5 = 6{,}480$ fits. At 45 s each: $6{,}480 \\times 45 = 291{,}600$ s ≈ **81 hours of compute**. \"Over the weekend\" was off by roughly 2× even with perfect parallelism on one machine — and parallelising doesn't reduce the bill, only the wall-clock.\n\n**Step 2 — size random search.** $T = 50$ configurations × 5 folds = 250 fits × 45 s = 11,250 s ≈ **3.1 hours** — about **26× cheaper**. The coverage argument: the grid's budget buys only $1{,}296^{1/4} = 6$ distinct values of each knob, while random search tries a fresh value of every knob on every trial — **50 distinct values per knob**. Since only one or two knobs actually matter (as the team's own experiments suggest), random search samples the important dimension ~8× more densely than the grid, for 4% of the cost. On this kind of problem it lands within a hair of the grid optimum.\n\n**Step 3 — the backlog jobs.** (a) *2 GPU-hours/trial, ~30 trials:* **Bayesian optimisation** — at that price you can't afford to forget results; a surrogate plus Expected Improvement makes each trial informed and reaches a strong configuration in tens of trials, exactly this budget. (b) *Early epochs predict final quality:* **Hyperband / successive halving** — the partial-fidelity signal is precisely what it cuts on: start many configurations on a few epochs, keep the top fraction, multiply the survivors' budget, and each round costs roughly the same total while the field narrows to the configurations that earned full training.\n\n**Step 4 — the wall rule.** *\"Before any tuning run: trials × folds × time-per-fit. If you haven't done that multiplication, you don't get to press launch.\"* (Corollary: past ~3 knobs, random is the default; expensive trials → BO; cheap partial signal → Hyperband; grid only for tiny, cheap spaces.)",
+      "rubric": {
+        "keyPoints": [
+          "Grid sized correctly: 6⁴ = 1,296 configs → 6,480 fits → ≈ 81 hours; random at T = 50 → 250 fits → ≈ 3.1 hours",
+          "Coverage argument made quantitatively: 6 distinct values per knob (grid) vs 50 (random), tied to 'only a few knobs matter'",
+          "Backlog routing: BO for expensive-trial/small-budget, Hyperband for the partial-signal job — with the precondition for each named",
+          "A reusable costing rule (trials × folds × time-per-fit) stated as the before-launch gate"
+        ],
+        "pitfalls": [
+          "Treating parallelism as a cost fix — it compresses wall-clock, not the compute bill",
+          "Computing 4 × 6 = 24 instead of 6⁴ — the additive trap that makes combinatorial explosions invisible",
+          "Recommending Hyperband for the fine-tune job whose score is only meaningful after a full run — it needs a cheap partial signal to cut on",
+          "Letting the team grid-search 'to be thorough' — exhaustiveness over a coarse lattice wastes most of its budget on knobs that don't matter"
+        ],
+        "takeaways": [
+          "Tuning-run cost is a whiteboard calculation — trials × folds × time-per-fit — and the right search method is usually the cheap one",
+          "Match the search strategy to trial economics: random by default, BO when trials are dear, Hyperband when partial fidelity is informative"
+        ],
+        "transfer": "Sizing a search before launching it is the same discipline as capacity-planning any combinatorial process: cloud cost estimation before a backfill job, load-test matrix design (browsers × regions × scenarios), even A/B test sizing. The deeper pattern — when a cost is a *product* of independent choices, intuition undershoots it badly — also explains exploding test suites, configuration sprawl in infrastructure, and SKU proliferation in retail. Multiply first, commit second."
+      }
+    },
+    {
+      "id": "ex2",
+      "title": "The citizen-built churn model wants to ship on Friday",
+      "estimatedMinutes": 30,
+      "scenario": "At a telecom client, the head of analytics proudly shows you a churn model that a business analyst built in two days on the company's new AutoML platform: **AUC 0.99**, leaderboard screenshot attached. The plan is to wire it into the retention-campaign tool on **Friday**, automatically triggering discount offers to customers the model flags. No data scientist has looked at it; nobody is named as its owner; among the input columns you spot `last_retention_call_outcome` and `contract_end_processed_date`.\n\nThe head of analytics asks: \"This is exactly what we bought the platform for — why would we slow it down?\"",
+      "givens": [
+        "AUC 0.99 on the platform's internal validation; no external baseline was run",
+        "Features include post-outcome columns: `last_retention_call_outcome`, `contract_end_processed_date`",
+        "The decision is real and costly: automatic discount offers to flagged customers",
+        "The client has many more modelling requests than data scientists — the citizen-DS demand is genuine",
+        "Your engagement includes designing the client's analytics operating model"
+      ],
+      "tasks": [
+        "List the red flags in this specific model and what each one implies.",
+        "Design the governance gate you'd install: who can build, what's mandatory before shipping, who signs off, who owns.",
+        "Answer the head of analytics' question — two or three sentences that defend the gate without killing the citizen-DS programme.",
+        "State what AutoML changes about this client's staffing and build-vs-buy line, and what it doesn't."
+      ],
+      "solution": "**Step 1 — the red flags.** (1) **AUC 0.99 is a leakage smell, not a triumph** — churn is never that predictable; a near-perfect score on a real behavioural problem almost always means a feature encodes the outcome. (2) The two named columns confirm it: `last_retention_call_outcome` and `contract_end_processed_date` are *post-outcome* data — they exist *because* the customer is already churning or churned. The model has learned to read the answer off the page; in production, at decision time, those fields are empty or mean something else. (3) **No baseline** — nobody knows what a trivial rule (e.g. 'flag customers within 60 days of contract end') would score, so even the honest part of the performance is unmeasured against the floor. (4) **No owner, no review** — the exact 'unaccountable model' the module warns about, headed into a real decision with money attached. (5) The decision is *automated* (discounts fire without a human), which raises the bar further: a leaky model here doesn't just mispredict, it burns margin on customers who were never leaving.\n\n**Step 2 — the governance gate.** *Who can build:* anyone — exploration and baselines are explicitly open; that's the platform's legitimate value. *Mandatory before any model touches a real decision:* (a) leakage review — every feature checked for 'would this value exist, with this meaning, at prediction time?'; (b) a sensible baseline the model must beat; (c) validation on a holdout the platform's search never saw, with the metric mapped to the business KPI (here: incremental retention € net of discount cost, not AUC); (d) a fairness/appropriateness check given it targets price discrimination at customers. *Sign-off:* a qualified reviewer (data scientist or trained senior analyst) approves, recorded. *Ownership:* a named owner per shipped model, responsible for monitoring and retirement. *Cadence:* shipped citizen models reviewed periodically — the gate is a process, not a one-time ceremony.\n\n**Step 3 — the answer.** *\"The platform is doing exactly its job — it got an analyst to a candidate model in two days instead of a quarter, and we want a lot more of that. But this particular model has almost certainly learned from fields that only get filled in after a customer churns, so on Friday it would score brilliantly and target the wrong people with real discounts. The gate isn't a slowdown — it's the difference between scaling model-building and scaling unaccountable mistakes; exploration stays free, shipping into a money decision takes one qualified review and a named owner.\"*\n\n**Step 4 — what AutoML changes, and doesn't.** It *moves the build-vs-buy line*: tuning and model selection are now a rented commodity, so the client should stop hiring 'another data scientist to tune models' and staff toward what the automation doesn't do — problem framing, data quality, validation judgment, integration and monitoring. One strong generalist who can frame, judge and ship now covers what needed a modelling specialist. What it *doesn't* change: the validation and monitoring bar, the need for an owner, the data work, and the governance obligations — every column in the 'AutoML does not touch' table is still a human's job. The reviewer role just became one of the most leveraged seats in the building.",
+      "rubric": {
+        "keyPoints": [
+          "AUC 0.99 read as a leakage smell, with the two post-outcome columns explicitly identified and the production failure mode explained (fields absent/different at decision time)",
+          "Gate distinguishes exploration (open to all) from shipping into a real decision (leakage review, baseline, holdout validation, business-metric mapping, sign-off, named owner)",
+          "The stakeholder answer defends the gate while preserving the citizen-DS upside — gate, don't ban",
+          "Staffing/build-vs-buy: modelling is commodity, build budget and hiring move to framing/data/validation/integration; the validation bar itself is unchanged"
+        ],
+        "pitfalls": [
+          "Accepting the leaderboard because 'the platform cross-validates' — internal CV validates the leak beautifully; it cannot question the matrix",
+          "Responding with a ban on analyst-built models — it forfeits real value and pushes modelling into the shadows",
+          "Designing a gate with no named owner — review without ownership still leaves an unaccountable model in production",
+          "Judging the model on AUC rather than the business decision (net retention value of discounts) — the metric-to-KPI mapping is exactly the judgment automation lacks"
+        ],
+        "takeaways": [
+          "AutoML makes it trivial to produce *a* model and dangerously easy to produce a *bad* one that looks good — the skills it doesn't automate are the ones the gate enforces",
+          "The governance answer to citizen data science is a gate, not a ban: free exploration, qualified review and a named owner before any real decision"
+        ],
+        "transfer": "This is the universal pattern for governing any capability that automation suddenly democratises: low-code app platforms (anyone can build, IT reviews before customer data flows), self-serve BI (anyone can chart, certified datasets gate the board pack), and LLM tools today (anyone can prototype a prompt, a review gates what answers customers). The constant: separate the sandbox from the ship-gate, staff the gate with judgment, and name an owner — because the tool lowered the cost of *producing* the artefact, not the cost of being wrong with it."
+      }
+    }
+  ]
+}

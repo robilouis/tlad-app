@@ -1,0 +1,523 @@
+{
+ "id": "09",
+ "title": "Large Language Models in Practice",
+ "weeks": [
+  18,
+  19
+ ],
+ "part": "III — Deep Learning & Modern AI",
+ "partIndex": 3,
+ "addon": false,
+ "pitchHtml": "<p>Large language models are the capability clients ask for by name — \"an AI assistant\", \"summarise our documents\", \"extract data from these PDFs\". Your job as a tech lead is not to build one (you'll rent it) but to make four decisions well: <strong>how to adapt it</strong> (prompt vs RAG vs fine-tune vs bigger model vs pretrain), <strong>what it will cost</strong> at the volume the client actually has, <strong>which model</strong> to put behind the feature, and <strong>how to know it works</strong>. This module is the decision spine. The value is enormous and the commodity is cheap — but the failure modes (hallucination, runaway cost, \"it worked in the demo\") are exactly the ones that lose client trust. Get the <em>when</em> and the <em>what it costs</em> right and you've done 80% of the leadership job; the maths of why these models work lives in the AI Scientist path.</p>",
+ "prev": "08",
+ "next": "10",
+ "sectionCount": 8,
+ "quizCount": 8,
+ "exerciseCount": 3,
+ "sections": [
+  {
+   "id": "learning-objectives",
+   "kind": "objectives",
+   "title": "Learning Objectives",
+   "blocks": [
+    {
+     "type": "checklist",
+     "checklistId": "09/learning-objectives/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Explain, without transformer maths, what an LLM is and where its capability and its failure modes come from"
+      },
+      {
+       "id": "1",
+       "html": "Walk the <strong>prompt → RAG → fine-tune → stronger model → pretrain</strong> decision tree and stop at the cheapest rung that clears the bar"
+      },
+      {
+       "id": "2",
+       "html": "Estimate the <strong>monthly token cost and latency</strong> of an LLM feature before quoting a client"
+      },
+      {
+       "id": "3",
+       "html": "Decide between a <strong>hosted API and open-weight/self-hosted</strong> on privacy, cost-at-scale, control, and data residency"
+      },
+      {
+       "id": "4",
+       "html": "Judge when <strong>fine-tuning</strong> is justified — and articulate why it usually isn't yet"
+      },
+      {
+       "id": "5",
+       "html": "Design an <strong>evaluation and guardrail</strong> approach for a non-deterministic system"
+      },
+      {
+       "id": "6",
+       "html": "Scope and price an LLM mission with a concrete deliverable and an honest \"what not to promise\""
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "key-concepts",
+   "kind": "concepts",
+   "title": "Key Concepts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "what-an-llm-is-intuitively",
+     "number": 1,
+     "title": "What an LLM Is (Intuitively)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>A large language model is a <strong>next-token predictor</strong>. Trained on a vast amount of text, it learns one thing extremely well: given a sequence of text, what token (≈ word-piece) is most likely to come next. Generation is just doing that repeatedly — predict a token, append it, predict the next. Everything else (answering questions, writing code, summarising) is an <em>emergent</em> consequence of being very good at that one task at enormous scale.</p>\n<p>Two intuitions a tech lead must hold:</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "capability comes from scale, and so do the limits",
+       "html": "<p>The model has no database and no notion of truth. It has a compressed, lossy statistical impression of its training text. That's why it is fluent and broadly knowledgeable, and <em>also</em> why it confidently invents plausible-but-false details (<strong>hallucination</strong>), can't reliably cite a source it wasn't given, and knows nothing past its training cut-off. Fluency is not accuracy. Treat output as a <em>draft from a knowledgeable but unaccountable junior</em>, not as a fact.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "\"emergent\" means unpredictable, not magic",
+       "html": "<p>Capabilities appear as models get bigger, but <em>which</em> capability appears at <em>what</em> reliability is empirical, not designed. This is why <strong>evaluation is non-optional</strong> (Concept 8): you cannot reason your way to \"it will work\" — you measure it.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>The one knob you'll actually tune: temperature.</strong> At each step the model produces a raw score (a <strong>logit</strong> <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>z</mi><mi>i</mi></msub></mrow><annotation encoding=\"application/x-tex\">z_i</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.5806em;vertical-align:-0.15em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.044em;\">z</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:-0.044em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span>) for every candidate token; these are turned into probabilities by the <strong>softmax</strong>, scaled by a <strong>temperature</strong> <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>T</mi><mo>></mo><mn>0</mn></mrow><annotation encoding=\"application/x-tex\">T > 0</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.7224em;vertical-align:-0.0391em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0</span></span></span></span>:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "P(\\text{token}_i) = \\frac{e^{z_i / T}}{\\sum_j e^{z_j / T}}",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mi>P</mi><mo stretchy=\"false\">(</mo><msub><mtext>token</mtext><mi>i</mi></msub><mo stretchy=\"false\">)</mo><mo>=</mo><mfrac><msup><mi>e</mi><mrow><msub><mi>z</mi><mi>i</mi></msub><mi mathvariant=\"normal\">/</mi><mi>T</mi></mrow></msup><mrow><munder><mo>∑</mo><mi>j</mi></munder><msup><mi>e</mi><mrow><msub><mi>z</mi><mi>j</mi></msub><mi mathvariant=\"normal\">/</mi><mi>T</mi></mrow></msup></mrow></mfrac></mrow><annotation encoding=\"application/x-tex\">P(\\text{token}_i) = \\frac{e^{z_i / T}}{\\sum_j e^{z_j / T}}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mopen\">(</span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">token</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.7209em;vertical-align:-1.1559em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.565em;\"><span style=\"top:-2.2799em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mop\"><span class=\"mop op-symbol small-op\" style=\"position:relative;top:0em;\">∑</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.162em;\"><span style=\"top:-2.4003em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\" style=\"margin-right:0.0572em;\">j</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.4358em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">e</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.8301em;\"><span style=\"top:-3.0051em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\" style=\"margin-right:0.044em;\">z</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3281em;\"><span style=\"top:-2.357em;margin-left:-0.044em;margin-right:0.0714em;\"><span class=\"pstrut\" style=\"height:2.5em;\"></span><span class=\"sizing reset-size3 size1 mtight\"><span class=\"mord mathnormal mtight\" style=\"margin-right:0.0572em;\">j</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2819em;\"><span></span></span></span></span></span></span><span class=\"mord mtight\">/</span><span class=\"mord mathnormal mtight\" style=\"margin-right:0.1389em;\">T</span></span></span></span></span></span></span></span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathnormal\">e</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.888em;\"><span style=\"top:-3.063em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\" style=\"margin-right:0.044em;\">z</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3281em;\"><span style=\"top:-2.357em;margin-left:-0.044em;margin-right:0.0714em;\"><span class=\"pstrut\" style=\"height:2.5em;\"></span><span class=\"sizing reset-size3 size1 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.143em;\"><span></span></span></span></span></span></span><span class=\"mord mtight\">/</span><span class=\"mord mathnormal mtight\" style=\"margin-right:0.1389em;\">T</span></span></span></span></span></span></span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.1559em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>where <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>z</mi><mi>i</mi></msub></mrow><annotation encoding=\"application/x-tex\">z_i</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.5806em;vertical-align:-0.15em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.044em;\">z</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:-0.044em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> is the logit for token <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>i</mi></mrow><annotation encoding=\"application/x-tex\">i</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6595em;\"></span><span class=\"mord mathnormal\">i</span></span></span></span> (higher = the model favours it) and <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>T</mi></mrow><annotation encoding=\"application/x-tex\">T</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span></span></span></span> controls how sharp or flat the resulting distribution is. <strong>Low <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>T</mi></mrow><annotation encoding=\"application/x-tex\">T</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span></span></span></span></strong> (→ 0) sharpens it onto the top tokens → near-deterministic, repeatable output (extraction, classification, anything you'll validate). <strong>High <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>T</mi></mrow><annotation encoding=\"application/x-tex\">T</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span></span></span></span></strong> (≈ 1+) flattens it → more diverse, creative, surprising output (brainstorming, copy). It pairs with <strong>top-p / top-k</strong>, which instead cap <em>which</em> tokens are eligible (the smallest set covering probability mass <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>p</mi></mrow><annotation encoding=\"application/x-tex\">p</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord mathnormal\">p</span></span></span></span>, or the top <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>k</mi></mrow><annotation encoding=\"application/x-tex\">k</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0315em;\">k</span></span></span></span>) before sampling.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "temperature rescales confidence before the dice roll",
+       "html": "<p>Dividing every logit by <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>T</mi></mrow><annotation encoding=\"application/x-tex\">T</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span></span></span></span> stretches or compresses the gaps between them: a small <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>T</mi></mrow><annotation encoding=\"application/x-tex\">T</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span></span></span></span> exaggerates the lead of the best token until it almost always wins; a large <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>T</mi></mrow><annotation encoding=\"application/x-tex\">T</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">T</span></span></span></span> shrinks those gaps so long-shot tokens get a real chance. You're not making the model smarter — you're dialling how much it gambles. Set it low when you want the same answer twice, high when you want variety.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>No transformer or attention maths here by design. If you need <em>why</em> next-token prediction yields these behaviours, scaling laws, or RLHF → <strong><span class=\"vault-ref\" title=\"In the Obsidian vault: 16 - Large Language Models\">Large Language Models</span></strong> (AI Scientist Path).</p>"
+      }
+     ]
+    },
+    {
+     "id": "the-central-decision-tree-how-to-adapt-an-llm",
+     "number": 2,
+     "title": "The Central Decision Tree: How to Adapt an LLM",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>This is the spine of the whole module. When an LLM \"doesn't do what we need yet\", there are five levers, in increasing order of cost, time, and risk. <strong>Try them cheapest-first.</strong> Make stakeholders justify each step <em>up</em>, never each step down.</p>"
+      },
+      {
+       "type": "diagram",
+       "text": "   Problem: the base model's output isn't good enough yet\n        │\n        ▼\n   1. Better PROMPT ........... hours    · clearer instructions, examples, structure\n        │  not enough?\n        ▼\n   2. RAG ..................... days-wks  · give it YOUR documents at query time → [[10 - RAG & Knowledge Systems]]\n        │  not enough?\n        ▼\n   3. Use a STRONGER MODEL .... minutes   · swap Haiku→Sonnet→Opus; costs more per call\n        │  not enough?\n        ▼\n   4. FINE-TUNE .............. wks + data · teach a durable style/format/skill (LoRA)\n        │  not enough?\n        ▼\n   5. PRETRAIN ............... months+ €€ · almost never; only foundation-model builders"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Lever</th><th align=\"left\">Fixes</th><th align=\"left\">Cost &#x26; time</th><th align=\"left\">Reach for it when</th><th align=\"left\">Don't, when</th></tr></thead><tbody><tr><td align=\"left\"><strong>Better prompt</strong></td><td align=\"left\">Vague, unstructured, or unreliable output</td><td align=\"left\">Hours; ~free</td><td align=\"left\">Always the first move</td><td align=\"left\">— (always try first)</td></tr><tr><td align=\"left\"><strong>RAG</strong></td><td align=\"left\">\"It doesn't know <em>our</em> facts / can't cite\"</td><td align=\"left\">Days-weeks</td><td align=\"left\">Answers depend on your private/changing knowledge</td><td align=\"left\">The knowledge is already in the prompt budget</td></tr><tr><td align=\"left\"><strong>Stronger model</strong></td><td align=\"left\">\"It's not smart enough for this task\"</td><td align=\"left\">Minutes to swap</td><td align=\"left\">A harder reasoning/quality bar; volume is low-medium</td><td align=\"left\">Cost per call matters more than the quality gap</td></tr><tr><td align=\"left\"><strong>Fine-tune</strong></td><td align=\"left\">\"It won't reliably match our <em>style/format</em>\", high volume</td><td align=\"left\">Weeks + labelled data</td><td align=\"left\">A durable, narrow, repeated need at scale</td><td align=\"left\">You haven't exhausted prompt + RAG (the usual case)</td></tr><tr><td align=\"left\"><strong>Pretrain</strong></td><td align=\"left\">Nothing a normal client has</td><td align=\"left\">Months, €€€€</td><td align=\"left\">You <em>are</em> a foundation-model company</td><td align=\"left\">Essentially always, for a consulting pole</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>The rule to repeat to clients:</strong> <em>better prompt → RAG → fine-tune → (almost never) pretrain</em>, and \"use a stronger model\" is a cheap dial you can turn at almost any rung. The two most expensive mistakes are jumping straight to fine-tuning (\"we'll just train it on our data\") and confusing the two middle rungs — <strong>RAG injects <em>knowledge</em>; fine-tuning teaches <em>behaviour</em>.</strong> If the complaint is \"it doesn't know X\", that's RAG. If it's \"it doesn't <em>sound</em> like us / format like us\", that's fine-tuning. They are not interchangeable.</p>"
+      }
+     ]
+    },
+    {
+     "id": "prompt-engineering-essentials",
+     "number": 3,
+     "title": "Prompt Engineering Essentials",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Prompting is the highest-leverage, lowest-cost lever — and the one teams skip too fast on the way to expensive solutions. The reliable building blocks:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Technique</th><th align=\"left\">What it does</th><th align=\"left\">Use when</th></tr></thead><tbody><tr><td align=\"left\"><strong>System prompt</strong></td><td align=\"left\">Sets role, rules, tone, constraints for the whole session</td><td align=\"left\">Always — your standing instructions</td></tr><tr><td align=\"left\"><strong>Few-shot examples</strong></td><td align=\"left\">2-5 input→output examples in the prompt</td><td align=\"left\">The task is fuzzy or the format is specific; examples beat description</td></tr><tr><td align=\"left\"><strong>Structured / JSON output</strong></td><td align=\"left\">Force a machine-readable schema</td><td align=\"left\">The output feeds code (extraction, classification, pipelines)</td></tr><tr><td align=\"left\"><strong>Decomposition</strong></td><td align=\"left\">Break one hard prompt into a chain of simple steps</td><td align=\"left\">Multi-step tasks where one mega-prompt is unreliable</td></tr><tr><td align=\"left\"><strong>\"Think step by step\" / reasoning</strong></td><td align=\"left\">Let the model reason before answering</td><td align=\"left\">Maths, logic, multi-constraint problems</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>Reliability tricks that earn their keep in production:</p>\n<ul>\n<li><strong>Be explicit about the failure case.</strong> Tell it what to do when unsure (\"If the document doesn't contain the answer, reply exactly <code>NOT_FOUND</code>\") — this is your first line against hallucination.</li>\n<li><strong>Constrain the output, then validate it.</strong> Modern APIs can <em>guarantee</em> a JSON schema; still validate the parse on your side and have a retry/fallback path.</li>\n<li><strong>Pin behaviour with examples, not adjectives.</strong> One good example of the desired output is worth a paragraph of \"be concise and professional\".</li>\n<li><strong>Keep instructions stable.</strong> Volatile content (today's date, the user's question) goes at the <em>end</em> — this also makes caching work (Concept 4).</li>\n</ul>\n<p>For production prompt-engineering code, evaluation harnesses, and library specifics → <strong><span class=\"vault-ref\" title=\"In the Obsidian vault: 08 - NLP &#x26; LLMs\">NLP &#x26; LLMs</span></strong> (ML Engineer Path).</p>"
+      }
+     ]
+    },
+    {
+     "id": "context-windows--why-just-stuff-it-all-in-costs-money",
+     "number": 4,
+     "title": "Context Windows & Why \"Just Stuff It All In\" Costs Money",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The <strong>context window</strong> is the maximum amount of text (measured in <strong>tokens</strong> — roughly ¾ of a word in English) the model can consider at once: your system prompt + history + retrieved documents + the user's message + the model's reply, all counted together. As of 2026 the frontier hosted models offer very large windows (on the order of 200K to 1M tokens), which tempts teams to paste in entire knowledge bases.</p>\n<p>Two reasons not to:</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "context is rented by the token, every single call",
+       "html": "<p>You pay for <em>input</em> tokens on <strong>every</strong> request. A 100-page manual stuffed into the prompt is re-billed each time someone asks a question, even a one-line one. RAG exists precisely to send only the <em>relevant</em> few pages instead of all of them — it's a cost and quality optimisation, not just an accuracy one. This is the direct bridge to <a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a>.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The second reason is quality: very long contexts can dilute attention (\"lost in the middle\" — the model under-weights material buried in a huge prompt), so more context is not monotonically better. <strong>Caching</strong> (Concept 5) softens the cost of a large, <em>stable</em> prefix — but not of a large <em>variable</em> one.</p>"
+      }
+     ]
+    },
+    {
+     "id": "cost--latency-model--the-tech-lead-core",
+     "number": 5,
+     "title": "Cost & Latency Model — the Tech-Lead Core",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>This is the section that separates a credible LLM proposal from a hopeful one. The cost model is simple and you must be able to do it on a whiteboard.</p>\n<p><strong>The unit is the token.</strong> Providers bill per million tokens, and <strong>output is typically priced several times higher than input</strong> (the model does more work generating than reading). A single request's cost is:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\text{cost} = \\frac{\\text{input tokens}}{10^6}\\times p_{\\text{in}} \\;+\\; \\frac{\\text{output tokens}}{10^6}\\times p_{\\text{out}}",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mtext>cost</mtext><mo>=</mo><mfrac><mtext>input tokens</mtext><msup><mn>10</mn><mn>6</mn></msup></mfrac><mo>×</mo><msub><mi>p</mi><mtext>in</mtext></msub><mtext>  </mtext><mo>+</mo><mtext>  </mtext><mfrac><mtext>output tokens</mtext><msup><mn>10</mn><mn>6</mn></msup></mfrac><mo>×</mo><msub><mi>p</mi><mtext>out</mtext></msub></mrow><annotation encoding=\"application/x-tex\">\\text{cost} = \\frac{\\text{input tokens}}{10^6}\\times p_{\\text{in}} \\;+\\; \\frac{\\text{output tokens}}{10^6}\\times p_{\\text{out}}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6151em;\"></span><span class=\"mord text\"><span class=\"mord\">cost</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.0574em;vertical-align:-0.686em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3714em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\">1</span><span class=\"mord\"><span class=\"mord\">0</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.7401em;\"><span style=\"top:-2.989em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\">6</span></span></span></span></span></span></span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">input tokens</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">×</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.7778em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">p</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3175em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">in</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.0574em;vertical-align:-0.686em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3714em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\">1</span><span class=\"mord\"><span class=\"mord\">0</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.7401em;\"><span style=\"top:-2.989em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\">6</span></span></span></span></span></span></span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">output tokens</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">×</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">p</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">out</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>Multiply by requests/day × days/month and you have the monthly bill. That's the entire model — the skill is <em>estimating the token counts</em> and <em>knowing the levers</em>.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "worked-example",
+       "title": "a customer-support drafting assistant",
+       "html": "<p>Estimate the monthly cost before quoting.</p>\n<ul>\n<li>Volume: <strong>2,000 requests/day</strong>, ~22 working days → ~44,000 requests/month.</li>\n<li>Per request: ~<strong>1,500 input tokens</strong> (system prompt + ticket + a couple of examples) and ~<strong>400 output tokens</strong> (a drafted reply).</li>\n<li>Take a mid-tier model at, say, <strong>$3 / 1M input</strong> and <strong>$15 / 1M output</strong> (<em>illustrative 2026 mid-tier pricing — see Tools table and re-check before quoting</em>).</li>\n</ul>\n<p>Per request: (1,500 / 1e6 × $3) + (400 / 1e6 × $15) = $0.0045 + $0.0060 = <strong>$0.0105</strong>, ~1 cent.\nMonthly: 44,000 × $0.0105 ≈ <strong>$460/month</strong>. Annual ≈ $5.5K.</p>\n<p>Now the levers a tech lead pulls on that number:</p>\n<ul>\n<li><strong>Model choice.</strong> A cheaper/faster tier (e.g. ~$1/$5) roughly halves it; a top tier (e.g. ~$5/$25) multiplies it. Match the tier to the <em>hardest</em> request, not the average (Concept 9).</li>\n<li><strong>Prompt caching.</strong> If the 1,500-token prefix is mostly a stable system prompt + examples, caching it cuts the repeated input cost dramatically — cache <em>reads</em> cost roughly a tenth of normal input, <em>writes</em> a bit more than normal. Big win for chat/assistant workloads with a fat fixed preamble.</li>\n<li><strong>Batching.</strong> Non-urgent, bulk jobs (classify 50K documents overnight) run through a <strong>batch API at ~half price</strong>. Use it whenever latency doesn't matter.</li>\n<li><strong>Shorter outputs.</strong> Output is the expensive half — cap <code>max_tokens</code>, ask for terse answers, and you cut the dominant cost.</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "the bill scales with usage, and output dominates",
+       "html": "<p>Two numbers decide everything: requests × tokens-per-request. A feature that's cheap per call can be expensive at scale, and a \"free\" pilot can become a five-figure line item at production volume. <em>Always model the production volume, not the demo's.</em> Quote a range, name your assumptions, and put a usage cap or alert in the contract.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Latency vs quality</strong> is the other axis. Bigger models and longer reasoning are slower; <strong>streaming</strong> the response (showing tokens as they generate) makes a slow model <em>feel</em> fast in a UI. For an interactive assistant, a fast mid-tier model that streams often beats a slow top-tier one. For a batch extraction job, nobody's watching — optimise pure cost. Decide per use case.</p>"
+      }
+     ]
+    },
+    {
+     "id": "hosted-api-vs-open-weight--self-hosted",
+     "number": 6,
+     "title": "Hosted API vs Open-Weight / Self-Hosted",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The build-vs-buy of LLMs. For almost every client mission, <strong>start with a hosted API</strong> — it's the commodity. Self-hosting an open-weight model is a deliberate escalation justified by privacy, scale, or control, not a default.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Dimension</th><th align=\"left\">Hosted API (rent)</th><th align=\"left\">Open-weight / self-hosted (run)</th></tr></thead><tbody><tr><td align=\"left\"><strong>Time to value</strong></td><td align=\"left\">Minutes — an API key</td><td align=\"left\">Weeks — infra, GPUs, MLOps</td></tr><tr><td align=\"left\"><strong>Up-front cost</strong></td><td align=\"left\">~Zero</td><td align=\"left\">Real (GPUs, engineering)</td></tr><tr><td align=\"left\"><strong>Cost at low/medium volume</strong></td><td align=\"left\">Cheap (pay per token)</td><td align=\"left\">Expensive (idle GPUs)</td></tr><tr><td align=\"left\"><strong>Cost at very high volume</strong></td><td align=\"left\">Can dominate</td><td align=\"left\">Can win — fixed infra amortised</td></tr><tr><td align=\"left\"><strong>Best models</strong></td><td align=\"left\">Yes — frontier models are hosted</td><td align=\"left\">Trails the frontier, gap narrowing</td></tr><tr><td align=\"left\"><strong>Data residency / privacy</strong></td><td align=\"left\">Data leaves your perimeter (check terms, regions, no-train clauses)</td><td align=\"left\">Data never leaves; full control</td></tr><tr><td align=\"left\"><strong>Control / customisation</strong></td><td align=\"left\">Limited to the API surface</td><td align=\"left\">Total (weights, fine-tuning, versions)</td></tr><tr><td align=\"left\"><strong>Ops burden</strong></td><td align=\"left\">Provider's problem</td><td align=\"left\">Yours (uptime, scaling, upgrades)</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>The honest decision rule:</strong> rent unless a <em>specific</em> constraint forces you to run. The constraints that actually force self-hosting are: (1) <strong>data cannot leave the perimeter</strong> for legal/contractual reasons — health, defence, some public-sector and banking work; (2) <strong>extreme, steady volume</strong> where per-token economics lose to amortised GPUs; (3) a need for <strong>model permanence/control</strong> (no surprise deprecations, pinned versions, on-prem). Privacy and residency are governance questions, not just technical ones — tie the decision to <strong><a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a></strong> (lawful basis, no-train guarantees, EU data regions, pseudonymisation <em>before</em> text leaves your systems). For most European clients, a hosted provider with an EU region and a contractual no-training clause clears the bar without the cost of self-hosting.</p>"
+      }
+     ]
+    },
+    {
+     "id": "fine-tuning-when-justified",
+     "number": 7,
+     "title": "Fine-Tuning When Justified",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Fine-tuning continues training a base model on your examples so it internalises a behaviour — a house style, a strict output format, a narrow classification, a domain tone. <strong>LoRA / PEFT</strong> (parameter-efficient fine-tuning) is the modern, cheap way to do it: instead of retraining all the model's billions of weights, you train a small set of \"adapter\" weights bolted onto the frozen model. It's far cheaper, faster, and you can keep many adapters for one base model.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "fine-tuning teaches behaviour, not facts",
+       "html": "<p>It's for \"always answer in this format / this voice / this taxonomy\", not \"know our latest product catalogue\" (that's RAG). Fine-tuning on changing facts is a trap: the moment the facts change, your model is stale and you're retraining. Reach for it only when a <em>stable, narrow, high-volume</em> behaviour resists prompting.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The honest line for a tech lead: <strong>you probably don't need it yet.</strong> Prompting plus RAG handles the large majority of missions. Fine-tuning adds a data-collection burden (you need quality labelled examples), an MLOps burden (versioning, eval, redeploy on each base-model change), and lock-in. Justify it only when: the behaviour is durable and repeated, you have (or can cheaply create) the examples, prompting has demonstrably plateaued, and the volume makes a smaller fine-tuned model cheaper than a big prompted one. Deeper LoRA/PEFT maths → <strong><span class=\"vault-ref\" title=\"In the Obsidian vault: 16 - Large Language Models\">Large Language Models</span></strong>; production fine-tuning code → <strong><span class=\"vault-ref\" title=\"In the Obsidian vault: 08 - NLP &#x26; LLMs\">NLP &#x26; LLMs</span></strong> (ML Engineer Path).</p>"
+      }
+     ]
+    },
+    {
+     "id": "llm-evaluation--reliability",
+     "number": 8,
+     "title": "LLM Evaluation & Reliability",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Evaluating an LLM feature is <em>harder</em> than evaluating a classifier, and skipping it is the most common way LLM projects quietly fail in production. The output is open-ended (many valid phrasings), non-deterministic (the same prompt can give different answers), and the worst failures are <em>confident and plausible</em>.</p>\n<p>Why classical metrics don't fully transfer: there's rarely one right answer to score against, so accuracy/F1 only apply to the constrained cases (classification, extraction). Note that classical evaluation discipline — train/test splits, leakage, the metrics themselves — lives in <strong><a class=\"wikilink\" data-module=\"05\" href=\"#/module/05\">Model Evaluation, Validation &#x26; Experimentation</a></strong>; this is the LLM-specific layer on top.</p>\n<p><strong>The base quality signal: perplexity.</strong> Before any task-level scoring, the canonical <em>intrinsic</em> measure of how well a model predicts text is <strong>perplexity</strong> — the exponential of the cross-entropy (the average negative log-likelihood the model assigns to the held-out tokens):</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\text{PPL} = e^{H}, \\qquad H = -\\frac{1}{N}\\sum_{t=1}^{N} \\log P(\\text{token}_t \\mid \\text{context})",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mtext>PPL</mtext><mo>=</mo><msup><mi>e</mi><mi>H</mi></msup><mo separator=\"true\">,</mo><mspace width=\"2em\"/><mi>H</mi><mo>=</mo><mo>−</mo><mfrac><mn>1</mn><mi>N</mi></mfrac><munderover><mo>∑</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mi>log</mi><mo>⁡</mo><mi>P</mi><mo stretchy=\"false\">(</mo><msub><mtext>token</mtext><mi>t</mi></msub><mo>∣</mo><mtext>context</mtext><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">\\text{PPL} = e^{H}, \\qquad H = -\\frac{1}{N}\\sum_{t=1}^{N} \\log P(\\text{token}_t \\mid \\text{context})</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord text\"><span class=\"mord\">PPL</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.0858em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">e</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.8913em;\"><span style=\"top:-3.113em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\" style=\"margin-right:0.0813em;\">H</span></span></span></span></span></span></span></span></span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:2em;\"></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0813em;\">H</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:3.0954em;vertical-align:-1.2671em;\"></span><span class=\"mord\">−</span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3214em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.109em;\">N</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\">1</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mop op-limits\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.8283em;\"><span style=\"top:-1.8829em;margin-left:0em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">t</span><span class=\"mrel mtight\">=</span><span class=\"mord mtight\">1</span></span></span></span><span style=\"top:-3.05em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span><span class=\"mop op-symbol large-op\">∑</span></span></span><span style=\"top:-4.3em;margin-left:0em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\" style=\"margin-right:0.109em;\">N</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.2671em;\"><span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mop\">lo<span style=\"margin-right:0.0139em;\">g</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mopen\">(</span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">token</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">∣</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\"><span class=\"mord\">context</span></span><span class=\"mclose\">)</span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>where <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>H</mi></mrow><annotation encoding=\"application/x-tex\">H</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0813em;\">H</span></span></span></span> is the average negative log-likelihood per token over <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>N</mi></mrow><annotation encoding=\"application/x-tex\">N</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.109em;\">N</span></span></span></span> tokens, and <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>P</mi><mo stretchy=\"false\">(</mo><mo>⋅</mo><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">P(\\cdot)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mopen\">(</span><span class=\"mord\">⋅</span><span class=\"mclose\">)</span></span></span></span> is the probability the model gave the token that actually appeared. In plain terms it's <strong>\"how surprised the model is by the text\"</strong>: lower = less surprised = better. <em>Use case:</em> a quick comparative signal for base/pre-trained models and for fine-tuning checkpoints — not a measure of whether your <em>feature</em> is correct. Task-level evaluation (LLM-as-judge, eval sets, human review) is what tells you the product works, and lives in this module and in <strong><a class=\"wikilink\" data-module=\"05\" href=\"#/module/05\">Model Evaluation, Validation &#x26; Experimentation</a></strong>.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "perplexity is the model's branching factor",
+       "html": "<p>A perplexity of 10 means the model is, on average, as uncertain as if it were choosing uniformly among 10 equally likely next tokens. Shrinking that number means it's narrowing its guesses toward the text it actually sees — useful for comparing models on the <em>same</em> data, but a low perplexity says nothing about factual correctness, so never quote it to a client as \"accuracy\".</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The practical toolkit:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Technique</th><th align=\"left\">What it is</th><th align=\"left\">Use for</th></tr></thead><tbody><tr><td align=\"left\"><strong>Eval set</strong></td><td align=\"left\">A fixed, curated set of representative inputs + known-good/expected outputs</td><td align=\"left\">Your regression baseline — the single most valuable asset you build</td></tr><tr><td align=\"left\"><strong>LLM-as-judge</strong></td><td align=\"left\">A (often stronger) model scores outputs against a rubric you define</td><td align=\"left\">Open-ended outputs at scale, where human review can't keep up</td></tr><tr><td align=\"left\"><strong>Human review</strong></td><td align=\"left\">SMEs rate a sample</td><td align=\"left\">Ground truth, calibrating the judge, high-stakes outputs</td></tr><tr><td align=\"left\"><strong>Regression testing</strong></td><td align=\"left\">Re-run the eval set on every prompt/model change</td><td align=\"left\">Catching silent regressions when you \"improve\" a prompt or a provider updates a model</td></tr><tr><td align=\"left\"><strong>Guardrails</strong></td><td align=\"left\">Input/output filters: schema validation, PII redaction, topic/jailbreak filters, \"I don't know\" paths</td><td align=\"left\">Bounding the blast radius of a wrong or unsafe output</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "you can't prove an LLM correct, so you bound it and watch it",
+       "html": "<p>You will never get a non-deterministic, open-ended system to a guaranteed-correct state. The job is to (a) measure quality on a representative eval set, (b) catch regressions automatically, (c) put guardrails around the failure modes you can't eliminate, and (d) keep a human in the loop where the cost of being wrong is high. <strong>Hallucination is managed, not solved</strong> — RAG with citations, \"say I don't know\" instructions, and human review reduce it; nothing removes it.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The commercial implication: <strong>never promise an accuracy number before you've built an eval set on the client's real data.</strong> Promise the <em>method</em> (an eval harness, a human-in-the-loop, a regression suite) and a process for improving the number.</p>"
+      }
+     ]
+    },
+    {
+     "id": "choosing-a-model",
+     "number": 9,
+     "title": "Choosing a Model",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Model selection is a four-way trade-off, re-checked per use case (and re-checked over time — the landscape moves fast).</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Criterion</th><th align=\"left\">Question</th><th align=\"left\">Bias toward</th></tr></thead><tbody><tr><td align=\"left\"><strong>Capability</strong></td><td align=\"left\">Can it do the <em>hardest</em> request reliably?</td><td align=\"left\">The task's ceiling, not its average</td></tr><tr><td align=\"left\"><strong>Cost</strong></td><td align=\"left\">What does it cost at production volume? (Concept 5)</td><td align=\"left\">The cheapest tier that clears the quality bar</td></tr><tr><td align=\"left\"><strong>Latency</strong></td><td align=\"left\">Interactive (user waiting) or batch?</td><td align=\"left\">Faster/smaller for interactive; streaming helps</td></tr><tr><td align=\"left\"><strong>Data terms</strong></td><td align=\"left\">No-train guarantee? EU region? residency?</td><td align=\"left\">Whatever governance requires (<a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>)</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>A pattern that works: <strong>prototype on the strongest model</strong> (remove capability as a variable — find out if the task is solvable at all), then <strong>step down</strong> to the cheapest tier that still passes your eval set. Tiering also works <em>within</em> a feature — route easy requests to a cheap/fast model and escalate only the hard ones to an expensive one. Don't over-engineer this early; a single mid-tier model is the right default until cost or quality data tells you otherwise.</p>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "client-mission-patterns--commercial-angle",
+   "kind": "missions",
+   "title": "Client Mission Patterns / Commercial Angle",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>This is the capability clients ask for most by name. Keep every mission framed around an outcome and a guardrailed scope — the commodity is the model, the value you sell is the <em>judgment, the integration, the evaluation, and the trust</em>.</p>\n<ul>\n<li>\n<p><strong>LLM Drafting / Summarisation Assistant</strong> — <em>Problem:</em> a team spends hours writing repetitive first drafts (support replies, meeting notes, report summaries, proposals). <em>Deliverable:</em> an assistant that produces a <strong>human-reviewed first draft</strong> wired into their tool (helpdesk, CRM, intranet), with a system prompt tuned to their voice, a cost model, and an eval set. <em>Scope:</em> 3-6 weeks. <em>Who buys:</em> support/ops lead, marketing, a COO chasing productivity. <em>Don't promise:</em> unattended sending — it drafts, a human approves.</p>\n</li>\n<li>\n<p><strong>Structured Extraction from Documents</strong> — <em>Problem:</em> data trapped in unstructured docs (invoices, contracts, CVs, forms) is keyed in by hand. <em>Deliverable:</em> a pipeline that returns <strong>validated structured JSON per document</strong> against an agreed schema, with confidence/uncertainty handling and a human-review queue for low-confidence cases. <em>Scope:</em> 4-8 weeks. <em>Who buys:</em> finance, legal ops, HR, back-office. <em>Why it sells:</em> the ROI is a clean headcount-hours number. <em>Don't promise:</em> 100% accuracy — promise a measured accuracy on <em>their</em> documents plus a review path for the rest. (Often runs cheaply via the batch API — Concept 5.)</p>\n</li>\n<li>\n<p><strong>LLM-Based Triage / Classification</strong> — <em>Problem:</em> high-volume inbound (tickets, emails, reviews, leads) is manually sorted/routed/prioritised. <em>Deliverable:</em> a classifier that <strong>tags, routes, and prioritises</strong> each item, integrated into the queue, with an eval set and a fallback-to-human path. <em>Scope:</em> 3-6 weeks. <em>Who buys:</em> support, ops, sales ops. <em>Note:</em> if the categories are stable and you have labels, a <strong>classical classifier may be cheaper and more reliable</strong> — say so (see When Is This Overkill).</p>\n</li>\n<li>\n<p><strong>Build-vs-Buy Advisory on an Off-the-Shelf Copilot</strong> — <em>Problem:</em> \"Should we buy Vendor X's copilot, build our own, or do nothing?\" <em>Deliverable:</em> a <strong>scored recommendation</strong> — capability fit, cost-at-our-volume model, data/privacy review, lock-in assessment, and a build-vs-buy verdict with a phased plan. <em>Scope:</em> 2-3 weeks, fixed price. <em>Who buys:</em> CTO/CDO, COMEX. <em>Why it sells:</em> it's repeatable IP and a low-risk door-opener into delivery. <em>Don't promise:</em> a verdict before you've seen their data volumes and constraints.</p>\n</li>\n</ul>\n<p><strong>Buy-vs-build for the client:</strong> rent the model, buy the generic copilot if one fits 80% of the need; build only the differentiator — the integration, the proprietary prompt/RAG layer, the eval harness, the workflow. <strong>What to charge for:</strong> the integration, the evaluation/guardrail framework, and the cost-engineering — <em>not</em> the model (it's a pass-through commodity). <strong>What not to promise (ever):</strong> a fixed accuracy number before seeing real data; unattended action in a high-stakes flow; that hallucination is \"solved\"; a flat monthly cost without a usage cap.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "tools--vendor-landscape",
+   "kind": "tools",
+   "title": "Tools & Vendor Landscape",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p><em>As of 2026 — treat names/prices as perishable; re-check provider pricing pages before quoting a client.</em></p>"
+    },
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Tool / Category</th><th align=\"left\">Use here</th><th align=\"left\">OSS / Paid</th><th align=\"left\">Note (lock-in / caveat)</th></tr></thead><tbody><tr><td align=\"left\">Hosted LLM APIs (Anthropic Claude, OpenAI, Google Gemini, Mistral)</td><td align=\"left\">Commodity language capability</td><td align=\"left\">Paid (per-token)</td><td align=\"left\">Compare on capability, price, latency, <strong>data terms &#x26; EU region</strong>. Indicative 2026 pricing per 1M tokens: top tier ~$5 in / ~$25 out; mid tier ~$3 / ~$15; small/fast tier ~$1 / ~$5. Context windows commonly 200K–1M. <em>Verify on the live pricing page.</em></td></tr><tr><td align=\"left\">Cloud-hosted model gardens (AWS Bedrock, Azure AI Foundry, Google Vertex)</td><td align=\"left\">One provider, many models, in your cloud</td><td align=\"left\">Paid (consumption)</td><td align=\"left\">Convenience + data-residency options; watch lock-in &#x26; egress</td></tr><tr><td align=\"left\">Open-weight models (Llama, Mistral, Qwen, etc.)</td><td align=\"left\">Self-hosting, privacy, control</td><td align=\"left\">OSS (run-cost)</td><td align=\"left\">You own ops; trails the frontier; needs GPUs + MLOps</td></tr><tr><td align=\"left\">Self-host serving (vLLM, TGI, Ollama)</td><td align=\"left\">Run open-weight models efficiently</td><td align=\"left\">OSS</td><td align=\"left\">Real infra/MLOps burden — see <a class=\"wikilink\" data-module=\"13\" href=\"#/module/13\">MLOps &#x26; Productionization</a></td></tr><tr><td align=\"left\">Batch APIs</td><td align=\"left\">Bulk, non-urgent jobs at ~half price</td><td align=\"left\">Paid</td><td align=\"left\">Latency in minutes-to-hours, not seconds</td></tr><tr><td align=\"left\">Prompt-caching features</td><td align=\"left\">Cut cost of a large stable prefix</td><td align=\"left\">Paid (provider feature)</td><td align=\"left\">Cache reads ~0.1×, writes a bit above input; only helps <em>stable</em> prefixes</td></tr><tr><td align=\"left\">Eval &#x26; observability (LangSmith, Langfuse, Braintrust, promptfoo)</td><td align=\"left\">Eval sets, LLM-as-judge, regression, tracing</td><td align=\"left\">Mixed (OSS + paid)</td><td align=\"left\">The unglamorous tooling that makes the feature trustworthy</td></tr><tr><td align=\"left\">Orchestration / app frameworks (LangChain, LlamaIndex, the providers' SDKs)</td><td align=\"left\">Wiring prompts, RAG, tools together</td><td align=\"left\">OSS</td><td align=\"left\">Useful but easy to over-adopt; plain SDK calls are often enough → <a class=\"wikilink\" data-module=\"11\" href=\"#/module/11\">Agentic Architectures &#x26; LLM App Patterns</a></td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The heavy lifting is the model (rented) plus the eval/observability layer (built). Quarantine perishable names here.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "when-is-this-overkill",
+   "kind": "overkill",
+   "title": "When Is This Overkill?",
+   "blocks": [
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Situation</th><th align=\"left\">An LLM is overkill — do this instead</th></tr></thead><tbody><tr><td align=\"left\">Stable categories + labelled data</td><td align=\"left\">A classical classifier — cheaper, faster, deterministic (<a class=\"wikilink\" data-module=\"04\" href=\"#/module/04\">Classical ML &#x26; Forecasting in Practice</a>)</td></tr><tr><td align=\"left\">Fixed, rule-expressible logic</td><td align=\"left\">Rules / regex / SQL — no model, no token bill</td></tr><tr><td align=\"left\">A €30/month SaaS already does it</td><td align=\"left\">Buy it; integrate; move on</td></tr><tr><td align=\"left\">The task is pure lookup of structured data</td><td align=\"left\">A query / search — no generation needed</td></tr><tr><td align=\"left\">You reached for fine-tuning first</td><td align=\"left\">Exhaust prompting + RAG before training anything</td></tr><tr><td align=\"left\">You're stuffing the whole knowledge base in the prompt</td><td align=\"left\">RAG — send only the relevant chunks (<a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a>)</td></tr><tr><td align=\"left\">High-stakes decision, no human in the loop</td><td align=\"left\">Add the human, or don't ship it — the failure mode is unacceptable</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The most senior thing you can say is \"this doesn't need an LLM\" — or \"this needs a <em>smaller</em> one than you think\". It builds the trust that wins the missions where an LLM genuinely is the answer.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "resources",
+   "kind": "resources",
+   "title": "Resources",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "books",
+     "number": null,
+     "title": "Books",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Chip Huyen — <em>AI Engineering</em> — the pragmatic reference for building LLM products: cost, evaluation, the build-vs-buy stack. <em>(Paid)</em></li>\n<li>Phoenix / various — applied prompt-engineering and LLM-eval guides — for the hands-on patterns. <em>(Mixed)</em></li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "courses--articles-free",
+     "number": null,
+     "title": "Courses & Articles (Free)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Provider documentation &#x26; cookbooks (Anthropic, OpenAI, Mistral, the cloud gardens) — prompting, structured output, caching, batch, and <strong>current pricing</strong>. <em>Date everything.</em></li>\n<li>Vendor model-pricing and context-window pages — the perishable cost landscape; the source of truth for any quote.</li>\n<li>Writing on LLM evaluation and \"LLM-as-judge\" — for building a credible eval harness.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "go-deeper",
+     "number": null,
+     "title": "Go Deeper",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Deeper math (next-token prediction, scaling laws, RLHF, LoRA internals) → <strong><span class=\"vault-ref\" title=\"In the Obsidian vault: 16 - Large Language Models\">Large Language Models</span></strong> (AI Scientist Path).</li>\n<li>Deeper code (prompting, fine-tuning, serving, eval harnesses in practice) → <strong><span class=\"vault-ref\" title=\"In the Obsidian vault: 08 - NLP &#x26; LLMs\">NLP &#x26; LLMs</span></strong> (ML Engineer Path).</li>\n<li>Cross-link: once a feature needs tools, multi-step workflows, or autonomy → <strong><a class=\"wikilink\" data-module=\"11\" href=\"#/module/11\">Agentic Architectures &#x26; LLM App Patterns</a></strong>; once it needs your private knowledge → <strong><a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a></strong>.</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "practical-artifacts",
+   "kind": "artifacts",
+   "title": "Practical Artifacts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "decision-checklist--how-should-we-adapt-this-llm",
+     "number": null,
+     "title": "Decision Checklist — \"How should we adapt this LLM?\"",
+     "blocks": [
+      {
+       "type": "checklist",
+       "checklistId": "09/practical-artifacts/1",
+       "items": [
+        {
+         "id": "0",
+         "html": "Have we exhausted <strong>prompt engineering</strong> (system prompt, few-shot, structured output, decomposition)?"
+        },
+        {
+         "id": "1",
+         "html": "Is the gap \"it doesn't know <strong>our facts</strong>\"? → RAG, not fine-tuning (<a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a>)"
+        },
+        {
+         "id": "2",
+         "html": "Is the gap \"it's not <strong>smart enough</strong>\"? → try a stronger model before anything structural"
+        },
+        {
+         "id": "3",
+         "html": "Is the gap \"it won't match our <strong>style/format</strong> reliably, at volume\"? → <em>maybe</em> fine-tune"
+        },
+        {
+         "id": "4",
+         "html": "Have we <strong>modelled the cost at production volume</strong> (requests × tokens, input vs output)?"
+        },
+        {
+         "id": "5",
+         "html": "Have we picked the <strong>cheapest model</strong> that passes our eval set, not the strongest by reflex?"
+        },
+        {
+         "id": "6",
+         "html": "Do <strong>data terms / residency</strong> allow a hosted API, or do we need self-hosting? (<a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>)"
+        },
+        {
+         "id": "7",
+         "html": "Do we have an <strong>eval set on real data</strong> and a <strong>human-in-the-loop</strong> for high-stakes outputs?"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "red-flags",
+     "number": null,
+     "title": "Red Flags",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"We'll just fine-tune it on our data.\" (Almost always RAG or a better prompt — and a hidden data/MLOps cost.)</li>\n<li>A cost estimate based on the <strong>pilot's</strong> volume, not production's.</li>\n<li>No eval set — \"it looked good when we tried it.\" (Demos hide the long tail.)</li>\n<li>A promised accuracy number <strong>before</strong> seeing the client's real data.</li>\n<li>Unattended action (auto-send, auto-approve) in a flow where a wrong answer is expensive.</li>\n<li>Stuffing an entire corpus into the context window \"because the window is big enough\".</li>\n<li>Self-hosting chosen for prestige, not for a real privacy/scale/control constraint.</li>\n<li>\"Hallucination won't be a problem for us.\" (It is always a problem; the question is how you bound it.)</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "scoping-prompts-ask-the-client",
+     "number": null,
+     "title": "Scoping Prompts (ask the client)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"How many requests per day at full rollout — and how long is a typical input and a typical output?\"</li>\n<li>\"When the model is wrong, what's the consequence, and who catches it?\"</li>\n<li>\"Can this data leave our perimeter / the EU, contractually and legally?\"</li>\n<li>\"What does success look like as a number, and on what set of real examples will we measure it?\"</li>\n<li>\"Is there an off-the-shelf copilot that already does 80% of this?\"</li>\n<li>\"Does the answer depend on knowledge that changes, or only on general language ability?\"</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "self-assessment",
+   "kind": "self-assessment",
+   "title": "Self-Assessment",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Before moving on, you should be able to:</p>"
+    },
+    {
+     "type": "checklist",
+     "checklistId": "09/self-assessment/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Explain an LLM and its failure modes to a stakeholder without any maths"
+      },
+      {
+       "id": "1",
+       "html": "Route an LLM gap to prompt / RAG / stronger-model / fine-tune / pretrain with a one-line justification"
+      },
+      {
+       "id": "2",
+       "html": "Produce a defensible monthly cost-and-latency estimate for an LLM feature, with named assumptions"
+      },
+      {
+       "id": "3",
+       "html": "Decide hosted-vs-self-hosted from privacy, cost-at-scale, control, and residency constraints"
+      },
+      {
+       "id": "4",
+       "html": "Say when fine-tuning is (and isn't) justified, and why \"we'll just fine-tune\" is usually wrong"
+      },
+      {
+       "id": "5",
+       "html": "Design an eval-and-guardrail approach for a non-deterministic feature, and scope an LLM mission with an honest \"what not to promise\""
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  }
+ ]
+}

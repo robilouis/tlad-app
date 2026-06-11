@@ -1,0 +1,387 @@
+{
+ "moduleId": "18",
+ "quiz": [
+  {
+   "id": "q1",
+   "conceptRef": "what-makes-time-series-special",
+   "prompt": "<p>A data scientist reports 96% accuracy on a demand-forecasting model, validated with a standard random 80/20 train/test split. Why is that number fiction?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Shuffling time-indexed data lets the model train on the future and predict the past — autocorrelated neighbours of each test point sit in the training set, so the score measures leakage, not forecasting skill.",
+     "correct": true,
+     "explanation": "Exactly. In a time series the order <em>is</em> information, and rows are not independent and interchangeable. The model effectively read tomorrow's newspaper. The only honest evaluation is walk-forward: train on the past, predict the next window, roll forward."
+    },
+    {
+     "id": "b",
+     "text": "An 80/20 split leaves too little test data — with 90/10 the estimate would be reliable.",
+     "correct": false,
+     "explanation": "The split <em>ratio</em> isn't the problem; the <em>shuffling</em> is. Any random split, at any ratio, lets future information leak into training. You could test on 50% of the data and the score would still be fiction."
+    },
+    {
+     "id": "c",
+     "text": "Accuracy is the wrong word for regression — once they report MAPE instead, the validation is fine.",
+     "correct": false,
+     "explanation": "Swapping the metric doesn't fix the protocol. A leaky random split produces a flattering MAPE just as easily as a flattering accuracy. Metric choice matters (§7), but only <em>after</em> the validation respects time order."
+    },
+    {
+     "id": "d",
+     "text": "It's fine as long as duplicate rows were removed before splitting.",
+     "correct": false,
+     "explanation": "Deduplication addresses literal copies, not temporal dependence. Yesterday and today aren't duplicates — they're <em>correlated</em>, which is precisely what the model exploits and what a random split lets it cheat with."
+    }
+   ],
+   "takeaway": "Time order is information: a random train/test split lets the model train on the future, so forecasts must be validated walk-forward — train on the past, predict the next window, roll forward.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q2",
+   "conceptRef": "what-makes-time-series-special",
+   "prompt": "<p>A retailer's December peak gets bigger every year as the business grows. Which decomposition treatment fits?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Multiplicative decomposition (<span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>y</mi><mi>t</mi></msub><mo>=</mo><mtext>trend</mtext><mo>×</mo><mtext>seasonal</mtext><mo>×</mo><mtext>residual</mtext></mrow><annotation encoding=\"application/x-tex\">y_t = \\text{trend} \\times \\text{seasonal} \\times \\text{residual}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.7778em;vertical-align:-0.0833em;\"></span><span class=\"mord text\"><span class=\"mord\">trend</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">×</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.7778em;vertical-align:-0.0833em;\"></span><span class=\"mord text\"><span class=\"mord\">seasonal</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">×</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord text\"><span class=\"mord\">residual</span></span></span></span></span>) — or model <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>log</mi><mo>⁡</mo><msub><mi>y</mi><mi>t</mi></msub></mrow><annotation encoding=\"application/x-tex\">\\log y_t</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mop\">lo<span style=\"margin-right:0.0139em;\">g</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span>, which turns multiplicative structure back into additive.",
+     "correct": true,
+     "explanation": "Seasonal swings that <em>grow with the level</em> of the series are the signature of multiplicative structure. The log transform is the standard trick: it converts 'the peak scales with the business' into constant-size additive seasonality."
+    },
+    {
+     "id": "b",
+     "text": "Additive decomposition — trend plus a fixed seasonal pattern plus noise.",
+     "correct": false,
+     "explanation": "Additive assumes the seasonal swing stays the <em>same size</em> every year. Fit it here and the model under-forecasts every December a little worse than the last, because the fixed seasonal term can't keep up with the growing peak."
+    },
+    {
+     "id": "c",
+     "text": "Neither — a growing December effect has no fixed period, so it's a cycle, not seasonality.",
+     "correct": false,
+     "explanation": "This confuses the two on purpose-built grounds: seasonality repeats on a <em>fixed, known</em> period (every December — you can set your watch by it); cycles are long swings with <em>no</em> fixed period. The peak growing in size doesn't change its period."
+    },
+    {
+     "id": "d",
+     "text": "Difference the series first — differencing removes seasonality, so the question disappears.",
+     "correct": false,
+     "explanation": "Plain differencing (<span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>y</mi><mi>t</mi></msub><mo>−</mo><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub></mrow><annotation encoding=\"application/x-tex\">y_t - y_{t-1}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.7778em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6389em;vertical-align:-0.2083em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3011em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">t</span><span class=\"mbin mtight\">−</span><span class=\"mord mtight\">1</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2083em;\"><span></span></span></span></span></span></span></span></span></span>) targets trend/stationarity, not the seasonal shape; seasonal differencing (<span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>y</mi><mi>t</mi></msub><mo>−</mo><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mi>m</mi></mrow></msub></mrow><annotation encoding=\"application/x-tex\">y_t - y_{t-m}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.7778em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6389em;vertical-align:-0.2083em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">t</span><span class=\"mbin mtight\">−</span><span class=\"mord mathnormal mtight\">m</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2083em;\"><span></span></span></span></span></span></span></span></span></span>) removes a repeating pattern but doesn't answer whether the swings scale with the level — which is the modelling question here."
+    }
+   ],
+   "takeaway": "The one decomposition question to ask: do the seasonal swings stay the same size, or grow with the business? Constant → additive; growing → multiplicative (or model the log).",
+   "difficulty": "core"
+  },
+  {
+   "id": "q3",
+   "conceptRef": "autocorrelation-acf--pacf-how-much-does-the-past-predict-the-present",
+   "prompt": "<p>A junior proposes lag features at 1, 7 and 30 days \"because that's the standard set.\" As tech lead, what should you ask for before this goes further?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "A look at the ACF/PACF — they show how long the series' memory actually is and which lags add signal; proposing lag features with no look at autocorrelation is guessing.",
+     "correct": true,
+     "explanation": "This is the note's verbatim warning. ACF answers 'does last week predict this week?'; PACF answers 'does it <em>still</em> add anything once I know yesterday?'. A spike at lag 12 tells you the series is annual before any model is fit — and tells you which lags to engineer."
+    },
+    {
+     "id": "b",
+     "text": "Skip the diagnostics — feed the model every lag from 1 to 365 and let the boosted tree learn which ones matter.",
+     "correct": false,
+     "explanation": "Tempting, but feature engineering is where the forecast is won or lost — shovelling in 365 mostly-noise columns invites overfitting and makes leakage harder to spot. The diagnostics are cheap; the cleanup of a bloated feature set is not."
+    },
+    {
+     "id": "c",
+     "text": "Switch to auto-ARIMA, which searches <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mo stretchy=\"false\">(</mo><mi>p</mi><mo separator=\"true\">,</mo><mi>d</mi><mo separator=\"true\">,</mo><mi>q</mi><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">(p, d, q)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mopen\">(</span><span class=\"mord mathnormal\">p</span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\">d</span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">q</span><span class=\"mclose\">)</span></span></span></span> automatically and makes the lag question irrelevant.",
+     "correct": false,
+     "explanation": "Auto-ARIMA's search is <em>guided by the same ACF/PACF intuition</em> — it doesn't make the question irrelevant, it answers it for one model family. And if the plan is boosted trees with external drivers, you still have to choose lag features yourself."
+    },
+    {
+     "id": "d",
+     "text": "More history — with enough data, any reasonable lag set works equally well.",
+     "correct": false,
+     "explanation": "More data doesn't reveal which lags carry signal <em>for this series</em> — that's exactly what the ACF/PACF show in minutes. A weekly-seasonal series wants lag 7 and 52-week structure; a 30-day lag may be pure noise no matter how much history you have."
+    }
+   ],
+   "takeaway": "ACF/PACF tell you how long the series' memory is and which lags to feed a model — if someone proposes lag features without looking at autocorrelation, they're guessing.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q4",
+   "conceptRef": "classical-methods-moving-average-exponential-smoothing-arima",
+   "prompt": "<p>What does the \"I\" in ARIMA actually do, and why is it there?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "It differences the series <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>d</mi></mrow><annotation encoding=\"application/x-tex\">d</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord mathnormal\">d</span></span></span></span> times — modelling the <em>change</em> rather than the level — so a trending, non-stationary series becomes roughly stationary, which is what the AR and MA parts require.",
+     "correct": true,
+     "explanation": "Right. Differencing is 'stop modelling where you are, model how fast you're moving': a staircase looks non-stationary, but the step size is constant and predictable. The 'I' (integrated) is exactly that differencing step, applied before AR and MA do their work."
+    },
+    {
+     "id": "b",
+     "text": "It \"integrates\" external drivers like price, weather and promotions into the model.",
+     "correct": false,
+     "explanation": "A documented confusion worth killing: ARIMA is notoriously <em>bad</em> at absorbing external drivers — that limitation is exactly where boosted trees on lag + driver features take over. The 'I' is about differencing, not exogenous inputs."
+    },
+    {
+     "id": "c",
+     "text": "It interpolates missing values so the AR terms have a complete history to regress on.",
+     "correct": false,
+     "explanation": "Missing-value handling is data preparation, not part of the ARIMA recipe. The three letters are the recipe: AR (regress on past values), I (difference to stationarity), MA (correct using past forecast errors)."
+    },
+    {
+     "id": "d",
+     "text": "It iteratively refits the model each period, which is what makes ARIMA suitable for production.",
+     "correct": false,
+     "explanation": "Refitting cadence is an operational choice (the retraining cadence of §8), separate from the model definition. ARIMA's 'I' describes a transform of the series, not a deployment loop."
+    }
+   ],
+   "takeaway": "ARIMA = AR (the future is a function of the recent past) + I (model the change, not the level) + MA (learn from how wrong I just was) — and its blind spot is external drivers.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q5",
+   "conceptRef": "modern-methods-deep-learning--foundation-models",
+   "prompt": "<p>When is a 2026 time-series foundation model (TimeGPT, Chronos, Moirai) genuinely the right reach?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "For a fast zero-shot baseline, cold-start situations with little history, or breadth across many series — always validated against a classical baseline before anyone trusts it.",
+     "correct": true,
+     "explanation": "That's the honest 2026 position: genuinely useful for instant forecasts and no-history cases, but <em>not</em> an automatic win. The note pairs every foundation-model recommendation with 'validate before trusting it'."
+    },
+    {
+     "id": "b",
+     "text": "Almost always — they're pre-trained on huge corpora of series, so they dominate hand-tuned ETS the way LLMs dominate hand-written rules.",
+     "correct": false,
+     "explanation": "The analogy flatters them. On a single well-behaved series with clear seasonality, a tuned ETS or a boosted tree on good features still frequently matches or beats them — at a fraction of the cost, with full transparency."
+    },
+    {
+     "id": "c",
+     "text": "Never on client work — they're marketing hype with no validated use case.",
+     "correct": false,
+     "explanation": "Too cynical: 'need a forecast <em>now</em>, little/no history' is a real routing row in the note, and zero-shot is exactly what serves it. The error is treating them as a default, not using them at all."
+    },
+    {
+     "id": "d",
+     "text": "When you have thousands of related series and years of history — that's where pre-training pays off most.",
+     "correct": false,
+     "explanation": "Thousands of related series with long history is the <em>global deep model</em> case (DeepAR, N-BEATS, TFT) — you have enough data to train on your own domain. Zero-shot's distinctive edge is the opposite end: no history, no time."
+    }
+   ],
+   "takeaway": "Foundation models buy you a forecast <em>now</em> — fast baselines and cold starts — but on a well-behaved series, tuned classical methods still frequently match or beat them at a fraction of the cost.",
+   "difficulty": "stretch"
+  },
+  {
+   "id": "q6",
+   "conceptRef": "probabilistic-forecasting-ranges-beat-points",
+   "prompt": "<p>A retailer's stockout cost (lost sale, empty shelf) far exceeds its holding cost. What should the forecasting deliverable be?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Quantile forecasts (e.g. P10/P50/P90) so the planner can order to the high percentile that matches the cost asymmetry — a point forecast hides that choice and quietly makes it for them.",
+     "correct": true,
+     "explanation": "This is the whole argument of §6: the decision is asymmetric, so the client must pick the percentile matching <em>their</em> cost trade-off. 'Plan for the P90 demand so you don't stock out' is exactly what quantile forecasts exist for."
+    },
+    {
+     "id": "b",
+     "text": "The most accurate point forecast achievable — accuracy is what determines reorder quality.",
+     "correct": false,
+     "explanation": "A single number is almost always wrong and says nothing about <em>how</em> wrong. Even a very accurate point forecast forces a symmetric bet on an asymmetric decision — and selling a point as certainty is the fastest way to lose trust when reality lands outside it."
+    },
+    {
+     "id": "c",
+     "text": "A symmetric 95% prediction interval, with replenishment planned to the central (mean) forecast.",
+     "correct": false,
+     "explanation": "Half right: producing a band is good, but <em>planning to the mean</em> throws the asymmetry away. When under-forecasting costs far more than over-forecasting, the order point belongs at a high percentile, not the centre."
+    },
+    {
+     "id": "d",
+     "text": "A point forecast inflated by a 20% safety buffer, which is simpler to operate than quantiles.",
+     "correct": false,
+     "explanation": "An arbitrary buffer is an uncalibrated quantile in disguise — you don't know whether +20% is P70 or P99, and it can't vary by SKU volatility. Quantile forecasts give the same operational simplicity with known coverage per item."
+    }
+   ],
+   "takeaway": "Ranges beat points: deliver quantiles and let the client order to the percentile that matches their cost asymmetry — a point estimate hides that decision and makes it for them.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q7",
+   "conceptRef": "evaluation-done-right",
+   "prompt": "<p>A vendor's demand model backtests at MAPE ≈ 11% — and MASE = 1.15. What does this combination actually tell you?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "The model <em>lost</em> to the seasonal-naïve rule: MASE > 1 means \"same as last season\" was more accurate, so the 11% MAPE sounds good but proves nothing — ship the one-line rule or fix the model.",
+     "correct": true,
+     "explanation": "MASE bakes the baseline into the number: &#x3C; 1 beats seasonal-naïve, > 1 loses to it. An 11% MAPE with no baseline comparison is exactly how 'AI forecasting' projects flatter themselves — a shocking number fail to beat the trivial rule."
+    },
+    {
+     "id": "b",
+     "text": "MASE above 1 just means the series is noisy; MAPE is the real verdict, and 11% is strong.",
+     "correct": false,
+     "explanation": "Backwards. Noise affects the naïve baseline too — MASE is a <em>ratio</em> against it, so noise alone doesn't push it past 1. MAPE has no baseline in it at all: 11% might be brilliant on a volatile series and embarrassing on a stable one. MASE is the verdict here."
+    },
+    {
+     "id": "c",
+     "text": "The two metrics contradict each other, so one of them must have been computed incorrectly.",
+     "correct": false,
+     "explanation": "No contradiction — they measure different things. MAPE is an absolute '% off' with no reference point; MASE is relative to the seasonal-naïve. A model can easily be 11% off while the naïve rule is only ~9.5% off. Both numbers can be right; only one answers 'was it worth building?'."
+    },
+    {
+     "id": "d",
+     "text": "Acceptable — MASE within ~15% of 1.0 is effectively at parity with the baseline, which is fine for a v1.",
+     "correct": false,
+     "explanation": "There is no tolerance band: the bar is <em>beating</em> the free rule, because the model carries real cost (build, compute, maintenance) and the rule carries none. Paying for a model that loses to 'same as last December' is negative value, not parity."
+    }
+   ],
+   "takeaway": "MASE &#x3C; 1 means you beat the seasonal-naïve baseline; MASE > 1 means you lost to it — it's the one metric that tells you both how good the forecast is and whether it was worth building.",
+   "difficulty": "stretch"
+  },
+  {
+   "id": "q8",
+   "conceptRef": "evaluation-done-right",
+   "prompt": "<p>A stakeholder wants to open a monthly-sales forecasting project with a Transformer, \"because that's the state of the art.\" What does the M-competition evidence say?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Simple statistical methods — and especially combinations/ensembles of them — routinely match or beat complex methods on real series; deep learning pulls clearly ahead only with many related series and abundant data. Start with seasonal-naïve and ETS, try a simple average of methods, escalate only on backtested evidence.",
+     "correct": true,
+     "explanation": "That's the repeatedly-confirmed finding from the large public M-competitions (Makridakis et al.), and the note turns it into a roadmap rule. A single monthly sales line will never give a Transformer enough to beat 'same as last December, adjusted for trend'."
+    },
+    {
+     "id": "b",
+     "text": "The competitions show deep learning winning overall, so the Transformer is the evidence-based opening move.",
+     "correct": false,
+     "explanation": "The competitions found close to the opposite for typical business series: cheap, transparent methods win or tie on most of them. Deep methods earn their place only in the many-series, data-rich regime — which one monthly line is not."
+    },
+    {
+     "id": "c",
+     "text": "The M-competitions are academic bake-offs on toy data, so they say nothing about a real client roadmap.",
+     "correct": false,
+     "explanation": "They're large public bake-offs on real series — that's why the module says the lesson 'should shape every forecasting roadmap.' Dismissing the strongest empirical evidence in the field to justify the fashionable architecture is precisely the failure the lesson exists to prevent."
+    },
+    {
+     "id": "d",
+     "text": "Ensembles should be avoided — combining methods multiplies maintenance cost, so pick the single best model from the start.",
+     "correct": false,
+     "explanation": "The competitions specifically found <em>combinations</em> of simple methods to be among the strongest performers — and a simple average of ETS, naïve and ARIMA costs almost nothing to run. The maintenance-cost worry applies to complex stacks, not to averaging three cheap forecasters."
+    }
+   ],
+   "takeaway": "The M-competition lesson: simple methods and ensembles routinely beat complex ones on real series — don't open with a Transformer; start classical and escalate only on backtested evidence.",
+   "difficulty": "core"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "title": "Backtest verdict: does the vendor's model earn its fee?",
+   "estimatedMinutes": 25,
+   "scenario": "<p>A retail client is about to sign a yearly licence for a vendor's \"AI demand forecasting\" product. The vendor's pitch claims <strong>\"~88% forecast accuracy\"</strong> (their phrasing for MAPE ≈ 12%). The client asks you for a second opinion before signing.</p>\n<p>You run an honest walk-forward backtest on one representative high-volume SKU over a 5-week holdout, recording the vendor model's forecasts alongside the <strong>seasonal-naïve</strong> forecast (\"this week = same week last year\"). You also pull one intermittent, low-volume SKU to check how the vendor's headline metric behaves there.</p>",
+   "givens": [
+    "High-volume SKU, 5-week holdout — actuals: 100, 120, 80, 110, 90",
+    "Vendor model forecasts: 90, 130, 95, 95, 100",
+    "Seasonal-naïve forecasts (same week last year): 110, 105, 90, 105, 100",
+    "Intermittent SKU actuals over the same weeks: 0, 2, 1, 0, 3 (vendor forecasts ~1 unit/week)",
+    "Working definition: compare the model's MAE to the seasonal-naïve MAE on the same holdout — this ratio is the spirit of MASE (the textbook version scales by in-sample naïve error; the verdict logic is identical)"
+   ],
+   "tasks": [
+    "Compute the MAE of the vendor model and of the seasonal-naïve forecast on the high-volume SKU, and the resulting MASE-style ratio.",
+    "Compute the vendor's MAPE and the naïve MAPE on the same SKU. Does the \"88% accuracy\" claim survive contact with the baseline?",
+    "Explain what happens when you try to quote MAPE on the intermittent SKU, and name the metric you'd use instead.",
+    "Write the two-sentence verdict you'd give the client about signing the licence."
+   ],
+   "solution": "<p><strong>Step 1 — MAE and the MASE-style ratio.</strong></p>\n<p>Vendor absolute errors: |100−90|, |120−130|, |80−95|, |110−95|, |90−100| = 10, 10, 15, 15, 10 → <strong>MAE = 60/5 = 12</strong>.</p>\n<p>Seasonal-naïve absolute errors: |100−110|, |120−105|, |80−90|, |110−105|, |90−100| = 10, 15, 10, 5, 10 → <strong>MAE = 50/5 = 10</strong>.</p>\n<p>Ratio (model MAE / naïve MAE) = 12/10 = <strong>1.2</strong>. MASE-style reading: <strong>greater than 1 → the vendor's model <em>lost</em> to the free one-line rule</strong> \"same week last year.\"</p>\n<p><strong>Step 2 — the MAPE check.</strong> Vendor: 10/100, 10/120, 15/80, 15/110, 10/90 = 10%, 8.3%, 18.8%, 13.6%, 11.1% → <strong>MAPE ≈ 12.4%</strong> — consistent with the \"~88% accuracy\" pitch. Seasonal-naïve: 10/100, 15/120, 10/80, 5/110, 10/90 = 10%, 12.5%, 12.5%, 4.5%, 11.1% → <strong>MAPE ≈ 10.1%</strong>. The free rule beats the licensed product on the vendor's own metric. \"88% accurate\" was never evidence of value — it was a number quoted with no baseline, which is exactly how forecasting projects flatter themselves.</p>\n<p><strong>Step 3 — the intermittent SKU.</strong> MAPE divides each error by the actual <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi mathvariant=\"normal\">∣</mi><msub><mi>y</mi><mi>i</mi></msub><mi mathvariant=\"normal\">∣</mi></mrow><annotation encoding=\"application/x-tex\">|y_i|</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">∣</span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mord\">∣</span></span></span></span>; with actuals of <strong>0</strong>, the terms are undefined (division by zero), and with actuals of 1-3, single-unit errors register as 50-100%+ — the metric explodes and means nothing. This is the documented red flag: <em>MAPE quoted on intermittent / near-zero series</em>. Judge those items on <strong>MASE</strong> (scale-free without dividing by the actual, baseline built in), and consider specialised intermittent methods (e.g. Croston) or a simple rule rather than chasing MAPE on zeros.</p>\n<p><strong>Step 4 — the verdict.</strong> <em>\"On an honest walk-forward backtest, the product loses to the zero-cost rule 'same week last year' (MASE ≈ 1.2), and its headline accuracy metric is meaningless on your intermittent long tail. Don't sign until the vendor demonstrates MASE &#x3C; 1 against a seasonal-naïve baseline on your own data, holdout weeks they didn't choose.\"</em></p>",
+   "rubric": {
+    "keyPoints": [
+     "Both MAEs computed correctly (model 12, naïve 10) and the ratio read as a MASE: > 1 means the model lost to seasonal-naïve",
+     "MAPE computed for both (≈12.4% vs ≈10.1%) and the insight stated: an accuracy number without a baseline comparison proves nothing",
+     "Intermittent SKU: MAPE undefined/exploding near zero, MASE (and possibly Croston-style methods) named as the alternative",
+     "Verdict demands a baseline-beating demonstration (MASE &#x3C; 1) on the client's own data before purchase"
+    ],
+    "pitfalls": [
+     "Accepting \"88% accuracy\" at face value — the cheapest insight in any forecasting project is the seasonal-naïve comparison, and skipping it is the most common self-deception",
+     "Quoting MAPE on near-zero series, where it explodes and rewards nobody",
+     "Evaluating on a random split or on vendor-chosen periods instead of walk-forward holdout weeks",
+     "Concluding 'forecasting is hopeless here' — losing to the naïve rule may mean the problem is flat-predictable, in which case ship the rule and save the licence fee"
+    ],
+    "takeaways": [
+     "Every forecast must beat the seasonal-naïve baseline before it can claim success — MASE builds that test into a single number",
+     "Pick the metric for the series: MAPE for stakeholder communication on healthy-volume series, MASE for the verdict and for anything intermittent"
+    ],
+    "transfer": "The \"beat the trivial baseline or you've built nothing\" discipline applies wherever models replace rules: a churn model must beat 'flag everyone whose contract ends this month', a fraud model must beat the existing rulebook, an LLM router must beat 'send everything to the cheap model'. And the vendor-evaluation pattern — demand performance on <em>your</em> data against <em>your</em> baseline on holdouts <em>they didn't choose</em> — is the universal procurement defence against benchmark theatre."
+   }
+  },
+  {
+   "id": "ex2",
+   "title": "Scope the forecasting mission — and reset the 18-month expectation",
+   "estimatedMinutes": 30,
+   "scenario": "<p>The CEO of a beverage distributor wants \"AI that predicts our exact sales 18 months out, per product, so we can plan the warehouse build.\" The company has <strong>3,000 SKUs</strong>, four years of weekly sales history, and clean data on price changes, promotions and public holidays. Planning currently runs on a spreadsheet of last year's numbers plus gut feel.</p>\n<p>You're scoping the mission and writing the proposal. The CEO's framing contains both a real, sellable need and two promises you must not make.</p>",
+   "givens": [
+    "3,000 SKUs × ~208 weeks of history; price, promotion and holiday data available",
+    "Real decisions at stake: weekly replenishment per SKU (short horizon) and a warehouse-capacity decision (~12-18 months out)",
+    "Demand is seasonal (summer peaks) and promo-driven; a long tail of SKUs sells near zero most weeks",
+    "Market rate for this archetype: 8-12 weeks build, much of it data and feature work, plus an optional run retainer"
+   ],
+   "tasks": [
+    "Identify what's wrong with \"exact sales 18 months out\" and write the one-paragraph expectation reset you'd deliver to the CEO — without losing the deal.",
+    "Design the phased method plan (baseline → classical → ML), naming the gate that must be passed before each escalation and the method you'd expect to win here.",
+    "Specify the evaluation protocol: validation scheme, headline metric (and why not MAPE everywhere), and the baseline.",
+    "Define the deliverable, the horizon/cadence choices, and what goes in the retainer."
+   ],
+   "solution": "<p><strong>Step 1 — the expectation reset.</strong> Two promises to refuse: <em>exact</em> (point forecasts sold as certainty) and <em>18 months</em> (accuracy decays with horizon; precise long-horizon points are the named thing never to promise). The paragraph: <em>\"Nobody can give you exact numbers 18 months out, and anyone who promises that is selling you a coin flip in a suit. What we can deliver is two different forecasts for your two different decisions: sharp weekly ranges per SKU for replenishment — where the money is — and an honest 12-18-month range at total and category level for the warehouse decision, with the uncertainty stated, which is what a capacity decision actually needs. You'll see backtested evidence for both before you rely on either.\"</em> This reframes the ask into the two real decisions and sells ranges in decision terms.</p>\n<p><strong>Step 2 — the phased method plan.</strong> Phase 0 — <strong>seasonal-naïve baseline</strong> (\"this week = same week last year\"), backtested walk-forward: the bar everything must beat, and the cheapest insight in the project. Phase 1 — <strong>ETS/Holt-Winters</strong> per series on the high-volume seasonal SKUs; expect it to win on steady sellers. Phase 2 — <strong>one LightGBM across all 3,000 series</strong> with lag features (1, 52 weeks), rolling means, calendar/holiday flags, and the price/promo columns — the levers ETS can't absorb; this is the expected practical winner given many series + external drivers. The long near-zero tail gets intermittent treatment (Croston-style or a simple rule), not the main model. <strong>Gate at every escalation: beat the previous phase on the walk-forward backtest (MASE), or stop.</strong> No deep learning phase is proposed: one distributor's catalogue with strong drivers is squarely the boosted-trees row of the routing table, and the M-competition lesson says escalate only on evidence.</p>\n<p><strong>Step 3 — evaluation protocol.</strong> <strong>Walk-forward validation only</strong> — train on the past, predict the next window, roll forward; never a random split. Headline metric <strong>MASE</strong> (scale-free across 3,000 series of wildly different magnitudes, never explodes on the near-zero tail, baseline built in); <strong>MAPE reported alongside for stakeholder communication on healthy-volume SKUs only</strong>. Baseline: seasonal-naïve, by definition MASE = 1. Every feature computed from information available at forecast time — the rolling-mean leak is the classic backtest-flatters-production failure.</p>\n<p><strong>Step 4 — deliverable, horizon, cadence, retainer.</strong> Deliverable is <strong>not a model</strong> — it's a <em>weekly forecasting service</em>: P10/P50/P90 per SKU-week feeding the replenishment workflow (order to the percentile matching each item's stockout-vs-holding asymmetry), plus a quarterly aggregate-level range for the capacity decision. Horizon: 1-8 weeks at SKU grain; 12-18 months only at aggregate grain with wide, honest bands. Retraining cadence: weekly refresh for replenishment (fast-moving retail demand), with drift monitoring. Retainer: monitoring, retraining, backtest re-runs, and forecast-vs-actual review — series drift is real, so the recurring revenue is justified, and \"set and forget\" is a refusal. Scope: 8-12 weeks, the majority on data and feature work, fixed price after a short discovery.</p>",
+   "rubric": {
+    "keyPoints": [
+     "The reset refuses both 'exact' and 'long-horizon points', and converts the ask into two decision-grade deliverables (weekly SKU ranges + aggregate capacity range) framed in the client's decision terms",
+     "Phased plan starts at seasonal-naïve, escalates ETS → LightGBM-on-features with a backtest gate at each step, and routes the intermittent tail separately",
+     "Evaluation: walk-forward only, MASE as headline across heterogeneous series, MAPE confined to healthy-volume communication, leakage discipline named",
+     "Deliverable framed as an operated service with horizon, retraining cadence and a monitoring/retraining retainer priced in"
+    ],
+    "pitfalls": [
+     "Promising a specific accuracy number before seeing the data — commit to the method for finding and proving the number, never the number",
+     "Proposing deep learning or a foundation model as the headline because the client said 'AI' — this problem is the boosted-trees row, and the M-competition lesson gates escalation on evidence",
+     "One global MAPE across 3,000 SKUs — it explodes on the intermittent tail and rewards gaming the big sellers",
+     "Selling SKU-level precision at 18 months — accuracy decays with horizon; long-horizon honesty means aggregate grain and wide ranges"
+    ],
+    "takeaways": [
+     "Sell the decision the forecast powers (reorder, capacity), as ranges and as a maintained service — not 'a model'",
+     "The method ladder with a baseline gate is the whole scoping discipline: prove seasonal-naïve isn't good enough before paying for anything fancier"
+    ],
+    "transfer": "The reset-then-ladder pattern works on any over-specified prediction request: \"predict exactly which employees will quit\" becomes attrition-risk ranges feeding retention budgets; \"tell us exactly what the market will do\" becomes scenario bands feeding hedging policy. The deeper transferable move is converting an impossible promise into the <em>decision</em> behind it — every unrealistic ask hides a legitimate decision that a humbler, honest deliverable can genuinely improve, and the consultant who reframes rather than refuses keeps the deal."
+   }
+  },
+  {
+   "id": "ex3",
+   "title": "Order to the right percentile: pricing the asymmetry",
+   "estimatedMinutes": 25,
+   "scenario": "<p>A consumer-electronics retailer replenishes a popular accessory weekly. The planning team currently orders exactly the point forecast (\"the P50\") and is frustrated: stockouts keep costing them sales. Your forecasting service now produces quantiles, and you want to show — with arithmetic, not adjectives — why ordering to a higher percentile is worth money.</p>\n<p>To make the point on a whiteboard, simplify next week's demand to two equally likely scenarios.</p>",
+   "givens": [
+    "Next week's demand: 800 units (probability 0.5) or 1,200 units (probability 0.5) — the P50 point forecast is 1,000",
+    "Cost of under-forecasting (stockout): €10 lost margin per unit short",
+    "Cost of over-forecasting (overstock): €2 holding/markdown cost per unit of excess",
+    "Two candidate order quantities: 1,000 units (current policy: order the point forecast) vs 1,200 units (order to the high scenario)",
+    "This SKU is one of ~200 with a similar profile, replenished 52 weeks a year"
+   ],
+   "tasks": [
+    "Compute the expected weekly cost of ordering 1,000 units.",
+    "Compute the expected weekly cost of ordering 1,200 units, and the expected saving per week.",
+    "Using the cost ratio, state roughly which percentile this SKU should be planned to, and connect it to the note's 'order to this percentile' policy.",
+    "Write the one-sentence explanation for the planning team of why the point forecast was 'quietly making the choice for them'."
+   ],
+   "solution": "<p><strong>Step 1 — order 1,000 (the point forecast).</strong> If demand is 800 (p = 0.5): excess of 200 units × €2 = €400. If demand is 1,200 (p = 0.5): short 200 units × €10 = €2,000. Expected cost = 0.5 × 400 + 0.5 × 2,000 = 200 + 1,000 = <strong>€1,200/week</strong>.</p>\n<p><strong>Step 2 — order 1,200 (the high scenario).</strong> If demand is 800 (p = 0.5): excess of 400 × €2 = €800. If demand is 1,200 (p = 0.5): exactly met, €0. Expected cost = 0.5 × 800 + 0 = <strong>€400/week</strong>. Expected saving: 1,200 − 400 = <strong>€800 per SKU-week</strong>. Across ~200 similar SKUs × 52 weeks, the <em>order-of-magnitude</em> opportunity is in the millions — even discounting heavily for SKUs where the asymmetry is milder, this is real money produced by exactly the same forecast, used at a different percentile.</p>\n<p><strong>Step 3 — which percentile?</strong> The under-forecast unit cost (€10) is five times the over-forecast unit cost (€2). The classic newsvendor logic says order up to the demand percentile equal to the <strong>critical ratio</strong> <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mfrac><msub><mi>c</mi><mi>u</mi></msub><mrow><msub><mi>c</mi><mi>u</mi></msub><mo>+</mo><msub><mi>c</mi><mi>o</mi></msub></mrow></mfrac><mo>=</mo><mfrac><mn>10</mn><mrow><mn>10</mn><mo>+</mo><mn>2</mn></mrow></mfrac><mo>≈</mo><mn>0.83</mn></mrow><annotation encoding=\"application/x-tex\">\\frac{c_u}{c_u + c_o} = \\frac{10}{10+2} \\approx 0.83</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1.1566em;vertical-align:-0.4451em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.7115em;\"><span style=\"top:-2.655em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">c</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1645em;\"><span style=\"top:-2.357em;margin-left:0em;margin-right:0.0714em;\"><span class=\"pstrut\" style=\"height:2.5em;\"></span><span class=\"sizing reset-size3 size1 mtight\"><span class=\"mord mathnormal mtight\">u</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.143em;\"><span></span></span></span></span></span></span><span class=\"mbin mtight\">+</span><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">c</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1645em;\"><span style=\"top:-2.357em;margin-left:0em;margin-right:0.0714em;\"><span class=\"pstrut\" style=\"height:2.5em;\"></span><span class=\"sizing reset-size3 size1 mtight\"><span class=\"mord mathnormal mtight\">o</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.143em;\"><span></span></span></span></span></span></span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.4101em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">c</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1645em;\"><span style=\"top:-2.357em;margin-left:0em;margin-right:0.0714em;\"><span class=\"pstrut\" style=\"height:2.5em;\"></span><span class=\"sizing reset-size3 size1 mtight\"><span class=\"mord mathnormal mtight\">u</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.143em;\"><span></span></span></span></span></span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.4451em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.2484em;vertical-align:-0.4033em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.8451em;\"><span style=\"top:-2.655em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">10</span><span class=\"mbin mtight\">+</span><span class=\"mord mtight\">2</span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.394em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">10</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.4033em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">≈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.83</span></span></span></span> — roughly the <strong>P83</strong>. That's the principled version of the note's guidance: deliver P10/P50/P90 per SKU-week and let the planner <em>order to the percentile that matches the item's cost trade-off</em> — here, a high percentile close to P80-P90, which is why \"plan for the P90 so you don't stock out\" is the standard asymmetric-demand policy.</p>\n<p><strong>Step 4 — the sentence for the planners.</strong> <em>\"Ordering the point forecast looks neutral, but it silently assumes a €1 stockout hurts exactly as much as €1 of overstock — your costs say a stockout hurts five times more, so the right order sits at a high percentile of the range, and a forecast that only gives you one number was hiding that choice from you.\"</em></p>",
+   "rubric": {
+    "keyPoints": [
+     "Expected costs computed correctly: €1,200/week at order 1,000 vs €400/week at order 1,200, saving €800 per SKU-week",
+     "The asymmetry (€10 vs €2) identified as the <em>reason</em> the higher order wins — not 'more stock is safer' in general",
+     "Critical ratio ≈ 0.83 → plan to roughly P83 (a high percentile), explicitly linked to the quantile-forecast deliverable and the 'order to this percentile' policy",
+     "Clear articulation that a point forecast hides the percentile choice and implicitly makes it (symmetrically) for the client"
+    ],
+    "pitfalls": [
+     "Concluding 'always order more' — if holding costs dominated (perishables, fashion markdowns), the same arithmetic would push the order <em>below</em> the median; the percentile follows the cost ratio, not optimism",
+     "Treating the point forecast as 'neutral' — it's an implicit P50 policy, which is only optimal when the two error costs happen to be equal",
+     "Selling the quantiles without the decision rule — the deliverable is forecast <em>plus</em> the per-SKU percentile policy, or the planner is back to guessing",
+     "Forgetting that the quantiles must be backtested and calibrated (walk-forward) before anyone orders against the P83 — an uncalibrated 'P90' is just a number"
+    ],
+    "takeaways": [
+     "Probabilistic forecasts are only valuable when wired to the decision: the percentile to plan against comes from the cost asymmetry, not from the forecast itself",
+     "The same forecast used at the right percentile can be worth more than a better forecast used at the wrong one"
+    ],
+    "transfer": "This is newsvendor logic, and it appears wherever an asymmetric one-shot quantity decision meets uncertainty: staffing a call centre (under-staffing breaches SLAs, over-staffing wastes wages → staff to a high service-level percentile), cloud capacity reservation (outage vs idle compute), vaccine or cash-in-ATM stocking, even sprint planning buffers. The transferable move: price both error directions first, then pick the quantile from the ratio — any system that plans to the average is silently asserting the two mistakes cost the same."
+   }
+  }
+ ]
+}

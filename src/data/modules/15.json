@@ -1,0 +1,476 @@
+{
+ "id": "15",
+ "title": "Responsible AI: Interpretability, Fairness, Safety & the EU AI Act",
+ "weeks": null,
+ "part": "V — Governance, Risk & Responsible AI",
+ "partIndex": 5,
+ "addon": false,
+ "pitchHtml": "<p>\"Responsible AI\" used to be a slide near the end of the deck — values, a code of ethics, something the client nodded at and ignored. As of 2026 it is an <strong>operational and legal requirement</strong> with deadlines and fines attached. A model that can't be explained, that treats two groups unequally, that hallucinates or can be jailbroken, or that can't tell you when it doesn't know, is now not just a reputational risk — for a growing class of use cases it's an <strong>unlawful</strong> one. This module is the tech lead's working knowledge of four hard things you must operationalise — interpretability, fairness, robustness/safety, uncertainty — and the regulation that now forces them: the <strong>EU AI Act</strong>. The maths behind each lives in the AI Scientist path; here you get the intuition, the decision frameworks, and what you actually build and sell. The recurring stance: <strong>responsible AI is a design constraint you price in from day one, not a cleanup you bolt on at the end.</strong></p>",
+ "prev": null,
+ "next": null,
+ "sectionCount": 8,
+ "quizCount": 8,
+ "exerciseCount": 2,
+ "sections": [
+  {
+   "id": "learning-objectives",
+   "kind": "objectives",
+   "title": "Learning Objectives",
+   "blocks": [
+    {
+     "type": "checklist",
+     "checklistId": "15/learning-objectives/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Explain <em>why</em> interpretability matters commercially and legally, and choose between intrinsic and post-hoc, global and local explanations for a given decision system"
+      },
+      {
+       "id": "1",
+       "html": "Say in plain language what <strong>SHAP</strong> and <strong>LIME</strong> each tell a stakeholder — and why explaining an LLM is a different, harder problem"
+      },
+      {
+       "id": "2",
+       "html": "Locate where bias enters a system, and articulate the <strong>fairness impossibility result</strong> to a client as a values choice, not a bug"
+      },
+      {
+       "id": "3",
+       "html": "Name the LLM-specific safety risks (jailbreaks, prompt injection, hallucination) and the role of red-teaming"
+      },
+      {
+       "id": "4",
+       "html": "Explain calibration and conformal prediction well enough to set a sane human-in-the-loop confidence threshold"
+      },
+      {
+       "id": "5",
+       "html": "Classify a client system into an <strong>EU AI Act risk tier</strong> and list the obligations that follow — without promising legal certainty"
+      },
+      {
+       "id": "6",
+       "html": "Scope a responsible-AI mission (gap assessment, bias audit, explainability layer, governance framework) and stand up the operating model a tech lead is accountable for"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "key-concepts",
+   "kind": "concepts",
+   "title": "Key Concepts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "interpretability--explainability--why-and-which-kind",
+     "number": 1,
+     "title": "Interpretability & Explainability — Why, and Which Kind",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>A prediction nobody can explain is a liability in three concrete ways, and only the third is optional:</p>\n<ul>\n<li><strong>Legal.</strong> RGPD already grants a right to \"meaningful information about the logic involved\" in significant automated decisions (see <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>); the EU AI Act adds explainability and transparency duties for high-risk systems. For credit, hiring, insurance, and similar decisions, <em>\"the model said so\"</em> is not a defensible answer.</li>\n<li><strong>Commercial &#x26; trust.</strong> Stakeholders don't deploy what they can't understand. An explanation is often what turns a pilot into a signed rollout — the domain expert needs to see the model reasoning the way they would.</li>\n<li><strong>Debugging.</strong> Knowing <em>why</em> a model is wrong is the first step to fixing it, and to catching that it's \"right for the wrong reason\" (keying off an artefact, a proxy, a leak).</li>\n</ul>\n<p>Two axes organise every method. Get these straight and the tooling choices follow.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Axis</th><th align=\"left\">Option A</th><th align=\"left\">Option B</th></tr></thead><tbody><tr><td align=\"left\"><strong>Where the explanation comes from</strong></td><td align=\"left\"><strong>Intrinsic</strong> — the model is simple enough to read directly (linear/logistic regression, a shallow decision tree, a scorecard, a GAM)</td><td align=\"left\"><strong>Post-hoc</strong> — a separate technique explains an opaque model after the fact (SHAP, LIME, attention maps)</td></tr><tr><td align=\"left\"><strong>What it explains</strong></td><td align=\"left\"><strong>Global</strong> — how the model behaves <em>overall</em> (which features matter across all cases)</td><td align=\"left\"><strong>Local</strong> — why <em>this one</em> prediction came out as it did</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>The cheapest interpretability is to <em>not need post-hoc tools at all</em>: if a transparent model (a logistic regression, a small tree) clears the accuracy bar, you get explanation for free and a much easier regulatory story. Reach for post-hoc explanation only when a black-box model's extra accuracy genuinely justifies the added complexity — the same value-vs-complexity trade this whole path runs on. \"We used a neural net for a 200-row tabular problem and now need SHAP to explain it\" is a self-inflicted wound.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>A useful framing for clients: a regulator or an unhappy applicant almost always wants a <strong>local</strong> explanation (\"why was <em>I</em> refused?\"); a model-risk team or an auditor wants a <strong>global</strong> one (\"is this model relying on something it shouldn't?\"). You usually need both.</p>"
+      }
+     ]
+    },
+    {
+     "id": "shap-and-lime--what-each-tells-you-no-maths",
+     "number": 2,
+     "title": "SHAP and LIME — What Each Tells You (No Maths)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>These are the two post-hoc explainers you'll hear named in every regulated-ML conversation. You don't implement them; you know what each <em>says</em> and where each fits.</p>\n<ul>\n<li><strong>SHAP</strong> answers, for a single prediction: <em>\"How much did each feature push this result up or down, away from the average prediction?\"</em> It hands you a per-feature contribution that <strong>adds up</strong> to the gap between this prediction and the baseline — e.g. \"approval probability is 0.20 below average: income contributed +0.05, existing debt −0.18, age −0.07.\" The whole point is captured in one <strong>additive attribution</strong> equation:\n<span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>f</mi><mo stretchy=\"false\">(</mo><mi>x</mi><mo stretchy=\"false\">)</mo><mo>=</mo><msub><mi>ϕ</mi><mn>0</mn></msub><mo>+</mo><msub><mo>∑</mo><mi>i</mi></msub><msub><mi>ϕ</mi><mi>i</mi></msub></mrow><annotation encoding=\"application/x-tex\">f(x) = \\phi_0 + \\sum_i \\phi_i</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1076em;\">f</span><span class=\"mopen\">(</span><span class=\"mord mathnormal\">x</span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">ϕ</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3011em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\">0</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.0497em;vertical-align:-0.2997em;\"></span><span class=\"mop\"><span class=\"mop op-symbol small-op\" style=\"position:relative;top:0em;\">∑</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.162em;\"><span style=\"top:-2.4003em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2997em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">ϕ</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span>\nThe prediction <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>f</mi><mo stretchy=\"false\">(</mo><mi>x</mi><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">f(x)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1076em;\">f</span><span class=\"mopen\">(</span><span class=\"mord mathnormal\">x</span><span class=\"mclose\">)</span></span></span></span> equals a <strong>base value</strong> <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>ϕ</mi><mn>0</mn></msub></mrow><annotation encoding=\"application/x-tex\">\\phi_0</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">ϕ</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3011em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\">0</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> (the average prediction over the data) plus one <strong>contribution</strong> <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>ϕ</mi><mi>i</mi></msub></mrow><annotation encoding=\"application/x-tex\">\\phi_i</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">ϕ</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> per feature. A positive <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>ϕ</mi><mi>i</mi></msub></mrow><annotation encoding=\"application/x-tex\">\\phi_i</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">ϕ</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> pushed <em>this</em> prediction toward the outcome; a negative <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>ϕ</mi><mi>i</mi></msub></mrow><annotation encoding=\"application/x-tex\">\\phi_i</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">ϕ</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> pushed it away; their sizes rank how much each feature mattered for this case. Its appeal is exactly that the contributions reconcile to the actual output, which auditors like. Its cost is compute — it can be slow on large models, and it's a <em>correlational</em> attribution, not a causal one.</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Because the <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>ϕ</mi><mi>i</mi></msub></mrow><annotation encoding=\"application/x-tex\">\\phi_i</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">ϕ</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> are forced to sum to the prediction, SHAP can never \"lose\" or double-count an effect — every part of the gap from average is assigned to <em>some</em> feature. That conservation is what makes a SHAP explanation auditable: \"income +0.05, debt −0.18, age −0.07\" provably reconstructs the score, so an applicant's reason and the model's output can't silently disagree. (The game-theory foundation — Shapley values and the uniqueness axioms that pin down <em>which</em> split of credit you get — is derived in <span class=\"vault-ref\" title=\"In the Obsidian vault: 22 - Interpretability &#x26; Uncertainty Quantification\">Interpretability &#x26; Uncertainty Quantification</span>; you don't need it to use the output.)</p>"
+      },
+      {
+       "type": "html",
+       "html": "<ul>\n<li><strong>LIME</strong> answers a subtly different question: <em>\"If I wiggle the inputs around this one case, what simple, readable model best mimics the black box right here?\"</em> It fits a tiny local surrogate (often a sparse linear model) in the neighbourhood of one prediction and reads off that. It's fast and intuitive and works on text and images too (highlighting the words or pixels that drove a call). Its cost is <strong>stability</strong> — the explanation can shift depending on how you sample around the point, so two runs can disagree.</li>\n</ul>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Question you're answering</th><th align=\"left\">Reach for</th><th align=\"left\">Caveat to flag</th></tr></thead><tbody><tr><td align=\"left\">\"Which features drive the model overall?\" (global)</td><td align=\"left\">SHAP (aggregated across cases); intrinsic feature importance</td><td align=\"left\">Correlation, not causation</td></tr><tr><td align=\"left\">\"Why this specific decision?\" (local, regulated)</td><td align=\"left\">SHAP (local), LIME</td><td align=\"left\">SHAP slower but reconciles; LIME faster but can be unstable</td></tr><tr><td align=\"left\">\"Which words/pixels triggered this?\"</td><td align=\"left\">LIME, attention/saliency maps</td><td align=\"left\">Attention is suggestive, not a faithful explanation</td></tr><tr><td align=\"left\">\"Can a non-technical person read it directly?\"</td><td align=\"left\">An intrinsic model in the first place</td><td align=\"left\">If accuracy allows, this beats both</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>SHAP and LIME are <em>approximations of a model you chose to make hard to read.</em> They're genuinely useful, but treat them as <strong>evidence for a conversation</strong>, not as ground truth about the model's \"reasoning.\" The honest sentence for a client: \"this shows what the model is keying on for this case — enough to spot-check it and to give an applicant a reason — but it is not a proof of why.\"</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>The special difficulty of explaining LLMs.</strong> Everything above was built for models with a tidy set of input features. A large language model has billions of parameters and an input that is free-form text; there is no clean \"feature 3 contributed +0.05.\" Post-hoc tools degrade badly here, and the things that <em>look</em> like explanations are traps:</p>\n<ul>\n<li><strong>Chain-of-thought is not an explanation.</strong> When an LLM \"shows its reasoning,\" that text is generated output, not a faithful trace of the computation that produced the answer. It can be fluent, confident, and unrelated to what actually drove the result. Do not present it to a regulator as the model's logic.</li>\n<li><strong>Attention weights aren't faithful either.</strong> They show where the model looked, not why it decided — suggestive at best.</li>\n<li><strong>What you can honestly offer</strong> for an LLM feature is <em>traceability rather than interpretability</em>: cite sources via <a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a> so a human can verify the claim against a real document, log prompts and outputs, and keep a human in the loop on consequential calls. For LLMs, \"explainability\" in practice means <strong>grounding + citation + human review</strong>, not a SHAP plot. (Mechanistic interpretability of LLMs is an active research field — pointer in <span class=\"vault-ref\" title=\"In the Obsidian vault: 22 - Interpretability &#x26; Uncertainty Quantification\">Interpretability &#x26; Uncertainty Quantification</span> — not a 2026 production tool.)</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "fairness--bias--where-it-comes-from-and-the-choice-you-cant-avoid",
+     "number": 3,
+     "title": "Fairness & Bias — Where It Comes From, and the Choice You Can't Avoid",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Bias in a model is rarely a bug in the code; it's almost always a property of the <strong>data and the labels</strong>, faithfully learned. Know the sources, because the fix differs for each:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Source of bias</th><th align=\"left\">What happens</th><th align=\"left\">Example</th></tr></thead><tbody><tr><td align=\"left\"><strong>Historical</strong></td><td align=\"left\">Data faithfully records a biased past</td><td align=\"left\">Hiring model trained on years of skewed promotion decisions</td></tr><tr><td align=\"left\"><strong>Representation</strong></td><td align=\"left\">A group is under-represented in the data</td><td align=\"left\">Vision/medical model trained mostly on one demographic, worse on others</td></tr><tr><td align=\"left\"><strong>Measurement / proxy</strong></td><td align=\"left\">A feature stands in for a protected trait</td><td align=\"left\">Postcode as a proxy for ethnicity or income</td></tr><tr><td align=\"left\"><strong>Label</strong></td><td align=\"left\">The \"ground truth\" is itself biased</td><td align=\"left\">Arrest rates used as a proxy for crime rates</td></tr><tr><td align=\"left\"><strong>Feedback loop</strong></td><td align=\"left\">The model's own outputs shape future data</td><td align=\"left\">A fraud model flags a group more, which produces more \"fraud\" labels for that group, which trains the next model to flag them more</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>Two things follow that clients consistently get wrong. First, <strong>dropping the protected attribute does not make a model fair</strong> — other features (postcode, name, school, purchase history) correlate with it, and the model rediscovers it. \"Fairness through unawareness\" is a comforting myth. Second, and more fundamental:</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "the fairness impossibility result, in plain words",
+       "html": "<p>There are several reasonable, mutually incompatible definitions of \"fair.\" The two you'll cite most have a one-line formula each (with <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mover accent=\"true\"><mi>Y</mi><mo>^</mo></mover></mrow><annotation encoding=\"application/x-tex\">\\hat{Y}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.9468em;\"></span><span class=\"mord accent\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.9468em;\"><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.2222em;\">Y</span></span><span style=\"top:-3.2523em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"accent-body\" style=\"left:-0.25em;\"><span class=\"mord\">^</span></span></span></span></span></span></span></span></span></span> the model's decision, <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>Y</mi></mrow><annotation encoding=\"application/x-tex\">Y</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.2222em;\">Y</span></span></span></span> the true label, and <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>A</mi></mrow><annotation encoding=\"application/x-tex\">A</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\">A</span></span></span></span> the protected attribute, e.g. group <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>a</mi></mrow><annotation encoding=\"application/x-tex\">a</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mord mathnormal\">a</span></span></span></span> vs <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>b</mi></mrow><annotation encoding=\"application/x-tex\">b</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord mathnormal\">b</span></span></span></span>):</p>\n<ul>\n<li><strong>Demographic parity</strong> — the model approves each group at the <em>same rate</em>:\n<span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>P</mi><mo stretchy=\"false\">(</mo><mover accent=\"true\"><mi>Y</mi><mo>^</mo></mover><mo>=</mo><mn>1</mn><mo>∣</mo><mi>A</mi><mo>=</mo><mi>a</mi><mo stretchy=\"false\">)</mo><mo>=</mo><mi>P</mi><mo stretchy=\"false\">(</mo><mover accent=\"true\"><mi>Y</mi><mo>^</mo></mover><mo>=</mo><mn>1</mn><mo>∣</mo><mi>A</mi><mo>=</mo><mi>b</mi><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">P(\\hat{Y}=1 \\mid A=a) = P(\\hat{Y}=1 \\mid A=b)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1.1968em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mopen\">(</span><span class=\"mord accent\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.9468em;\"><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.2222em;\">Y</span></span><span style=\"top:-3.2523em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"accent-body\" style=\"left:-0.25em;\"><span class=\"mord\">^</span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">1</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">∣</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\">A</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\">a</span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.1968em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mopen\">(</span><span class=\"mord accent\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.9468em;\"><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.2222em;\">Y</span></span><span style=\"top:-3.2523em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"accent-body\" style=\"left:-0.25em;\"><span class=\"mord\">^</span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">1</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">∣</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\">A</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\">b</span><span class=\"mclose\">)</span></span></span></span>\ni.e. equal selection rates across groups, ignoring whether the groups differ in the outcome.</li>\n<li><strong>Equalised odds</strong> — the model is <em>equally accurate</em> for each group: equal <strong>true-positive rates</strong> and equal <strong>false-positive rates</strong> across groups, <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>P</mi><mo stretchy=\"false\">(</mo><mover accent=\"true\"><mi>Y</mi><mo>^</mo></mover><mo>=</mo><mn>1</mn><mo>∣</mo><mi>Y</mi><mo>=</mo><mi>y</mi><mo separator=\"true\">,</mo><mi>A</mi><mo>=</mo><mi>a</mi><mo stretchy=\"false\">)</mo><mo>=</mo><mi>P</mi><mo stretchy=\"false\">(</mo><mover accent=\"true\"><mi>Y</mi><mo>^</mo></mover><mo>=</mo><mn>1</mn><mo>∣</mo><mi>Y</mi><mo>=</mo><mi>y</mi><mo separator=\"true\">,</mo><mi>A</mi><mo>=</mo><mi>b</mi><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">P(\\hat{Y}=1 \\mid Y=y, A=a) = P(\\hat{Y}=1 \\mid Y=y, A=b)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1.1968em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mopen\">(</span><span class=\"mord accent\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.9468em;\"><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.2222em;\">Y</span></span><span style=\"top:-3.2523em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"accent-body\" style=\"left:-0.25em;\"><span class=\"mord\">^</span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">1</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">∣</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.2222em;\">Y</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.8778em;vertical-align:-0.1944em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\">A</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\">a</span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.1968em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mopen\">(</span><span class=\"mord accent\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.9468em;\"><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.2222em;\">Y</span></span><span style=\"top:-3.2523em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"accent-body\" style=\"left:-0.25em;\"><span class=\"mord\">^</span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">1</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">∣</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.2222em;\">Y</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.8778em;vertical-align:-0.1944em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\">A</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\">b</span><span class=\"mclose\">)</span></span></span></span> for <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>y</mi><mo>∈</mo><mo stretchy=\"false\">{</mo><mn>0</mn><mo separator=\"true\">,</mo><mn>1</mn><mo stretchy=\"false\">}</mo></mrow><annotation encoding=\"application/x-tex\">y \\in \\{0,1\\}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.7335em;vertical-align:-0.1944em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">∈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mopen\">{</span><span class=\"mord\">0</span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\">1</span><span class=\"mclose\">}</span></span></span></span>. This allows approval rates to differ if the groups genuinely differ.</li>\n</ul>\n<p>A mathematical result (Chouldechova; Kleinberg–Mullainathan–Raghavan) proves that <strong>whenever two groups have different base rates and the model isn't perfect, you cannot satisfy demographic parity, equalised odds, and calibration all at once.</strong> Improving one necessarily worsens another. This is not a modelling failure you can engineer away — it is a <strong>values choice about which fairness you care about for this use case</strong>, and it must be made deliberately, documented, and ideally owned by someone other than the engineer. (The proof is in <span class=\"vault-ref\" title=\"In the Obsidian vault: 23 - Fairness, Robustness &#x26; AI Safety\">Fairness, Robustness &#x26; AI Safety</span>; you state it, you don't derive it.) The leader's job is to <em>force this choice into the open</em> — \"for a lending model, regulators usually care most about equal error rates; for outreach, equal reach may matter more\" — rather than letting a default threshold quietly decide it.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Bias audits</strong> are how you turn this from philosophy into a deliverable. A bias audit (1) names the protected groups and the fairness definition chosen <em>with the client</em>, (2) measures the relevant metrics per group (acceptance rate, error rates, calibration), (3) reports the gaps, and (4) proposes mitigations with their accuracy cost. Mitigations come in three flavours — fix the data (re-weight, re-sample), constrain training (fairness-aware objectives), or adjust thresholds per group afterwards — each a trade-off, none free. The audit's value is the <em>informed, documented decision</em>, not a mythical \"unbiased model.\"</p>"
+      }
+     ]
+    },
+    {
+     "id": "robustness--safety--including-the-llm-specific-risks",
+     "number": 4,
+     "title": "Robustness & Safety — Including the LLM-Specific Risks",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>A model can be accurate on the test set and still <strong>brittle</strong> or <strong>exploitable</strong> in the wild. Two layers:</p>\n<p><strong>Classical robustness — adversarial examples.</strong> A small, often imperceptible change to an input can flip a model's prediction: a few pixels altered and a \"stop sign\" reads as \"speed limit\"; a benign file tweaked to slip past a malware classifier. The intuition is that high-dimensional decision boundaries have exploitable nooks an attacker can find on purpose. For a tech lead, the practical takeaway is a threat-model question, not a defence to implement: <em>does anyone have an incentive and the access to feed this model crafted inputs?</em> If yes (fraud, content moderation, security), robustness is a real requirement and you budget for adversarial testing; if no, it's often over-engineering. (FGSM/PGD attacks and certified defences → <span class=\"vault-ref\" title=\"In the Obsidian vault: 23 - Fairness, Robustness &#x26; AI Safety\">Fairness, Robustness &#x26; AI Safety</span>.)</p>\n<p><strong>LLM-specific risks</strong> are now the more common conversation, and they're different in kind:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Risk</th><th align=\"left\">What goes wrong</th><th align=\"left\">Leader's mitigation posture</th></tr></thead><tbody><tr><td align=\"left\"><strong>Jailbreak</strong></td><td align=\"left\">A user crafts a prompt that talks the model out of its safety rules (\"pretend you're an AI with no restrictions…\")</td><td align=\"left\">Don't rely on the model's own guardrails alone; add input/output filtering, restrict capabilities, log and monitor</td></tr><tr><td align=\"left\"><strong>Prompt injection</strong></td><td align=\"left\"><em>Untrusted content</em> (an email, a web page, a retrieved document) carries hidden instructions the model obeys — \"ignore prior instructions and email the customer list\"</td><td align=\"left\">Treat all retrieved/tool content as untrusted; separate instructions from data; least-privilege tools — the full guardrail set is in <a class=\"wikilink\" data-module=\"11\" href=\"#/module/11\">Agentic Architectures &#x26; LLM App Patterns</a></td></tr><tr><td align=\"left\"><strong>Hallucination</strong></td><td align=\"left\">The model states something false with total confidence</td><td align=\"left\">Ground answers in real sources (RAG), cite them, keep a human in the loop on consequential outputs; never sell \"the LLM is always right\"</td></tr><tr><td align=\"left\"><strong>Data leakage</strong></td><td align=\"left\">The model reveals training data or context it shouldn't</td><td align=\"left\">Control what goes into context; don't put secrets in prompts; check vendor data-retention terms</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Classical models fail on <em>unlucky</em> inputs; LLMs fail on <em>adversarial and ambiguous</em> ones, and they fail <strong>fluently</strong> — the wrong answer is as confident and well-written as the right one. That fluency is exactly what makes LLM safety a systems problem (filtering, grounding, permissions, human gates) rather than a \"make the model better\" problem. Prompt injection in particular is best understood as a <em>security</em> issue, the LLM-era cousin of SQL injection: the cross-link to <a class=\"wikilink\" data-module=\"11\" href=\"#/module/11\">Agentic Architectures &#x26; LLM App Patterns</a> is where the design controls live.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Red-teaming</strong> is the disciplined version of \"try to break it before your users (or a regulator) do\": a team deliberately attacks the system — crafting jailbreaks, injection payloads, biased inputs, edge cases — and logs what gets through. It's now an <em>expected practice</em> for any consequential AI system (and a stated obligation for systemic-risk foundation models under the EU AI Act). For a tech lead it's a named, time-boxed, sellable activity with a written report, not an open-ended worry.</p>"
+      }
+     ]
+    },
+    {
+     "id": "uncertainty--calibration--knowing-when-the-model-doesnt-know",
+     "number": 5,
+     "title": "Uncertainty & Calibration — Knowing When the Model Doesn't Know",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The most dangerous model is one that is <strong>confidently wrong</strong>. A responsible system distinguishes \"I'm sure\" from \"I'm guessing\" and routes the guesses to a human. Three ideas, in plain terms:</p>\n<ul>\n<li><strong>Calibration.</strong> A model is <em>calibrated</em> if its confidence means what it says: of all the cases where it claims \"80% sure,\" about 80% should actually be correct. Formally, for a predicted probability <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mover accent=\"true\"><mi>p</mi><mo>^</mo></mover></mrow><annotation encoding=\"application/x-tex\">\\hat{p}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord accent\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6944em;\"><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord mathnormal\">p</span></span><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"accent-body\" style=\"left:-0.1667em;\"><span class=\"mord\">^</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1944em;\"><span></span></span></span></span></span></span></span></span>:\n<span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>P</mi><mo stretchy=\"false\">(</mo><mi>Y</mi><mo>=</mo><mn>1</mn><mo>∣</mo><mover accent=\"true\"><mi>p</mi><mo>^</mo></mover><mo>=</mo><mi>p</mi><mo stretchy=\"false\">)</mo><mo>≈</mo><mi>p</mi></mrow><annotation encoding=\"application/x-tex\">P(Y=1 \\mid \\hat{p}=p) \\approx p</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">P</span><span class=\"mopen\">(</span><span class=\"mord mathnormal\" style=\"margin-right:0.2222em;\">Y</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">1</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">∣</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord accent\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6944em;\"><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord mathnormal\">p</span></span><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"accent-body\" style=\"left:-0.1667em;\"><span class=\"mord\">^</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1944em;\"><span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\">p</span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">≈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord mathnormal\">p</span></span></span></span>\nread as \"among all predictions of value <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>p</mi></mrow><annotation encoding=\"application/x-tex\">p</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord mathnormal\">p</span></span></span></span>, the fraction that turn out positive is about <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>p</mi></mrow><annotation encoding=\"application/x-tex\">p</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord mathnormal\">p</span></span></span></span>\" — so among the cases scored \"70%\", about 70% are genuinely positive. A <strong>calibration (reliability) curve</strong> plots exactly this — predicted probability on one axis, observed frequency on the other — and a perfectly calibrated model sits on the diagonal. Many models — especially deep nets — are <strong>over-confident</strong>: they say 99% when they're right 85% of the time, so their curve bows below the diagonal. That gap quietly destroys any human-in-the-loop scheme, because the \"high-confidence, send it straight through\" bucket is dirtier than the number implies. Calibration is cheap to check (that reliability plot) and often cheap to fix (a post-hoc rescaling), and it's the first thing to verify before you trust a confidence threshold. This ties directly to <a class=\"wikilink\" data-module=\"05\" href=\"#/module/05\">Model Evaluation, Validation &#x26; Experimentation</a> — calibration is part of evaluating a model honestly, not an afterthought.</li>\n<li><strong>Knowing what it doesn't know.</strong> Genuine \"I don't know\" handling means the system can abstain or escalate on inputs unlike anything it was trained on (a new claim type, an out-of-distribution image). Abstention is a <em>feature</em>, and clients undervalue it — \"answers 90% confidently and flags the hard 10% for a human\" is usually worth more than \"answers 100% of the time, wrong on the hard 10%.\"</li>\n<li><strong>Conformal prediction.</strong> A practical technique that, instead of a single answer, returns a <em>set</em> or <em>range</em> with a <strong>guaranteed coverage level</strong> — e.g. \"this loan belongs to {approve, refer} and the true label is inside this set 95% of the time.\" The guarantee holds under mild assumptions and doesn't require retraining the model. Why a tech lead cares: it gives a principled way to set the <strong>human-in-the-loop threshold</strong>. When the prediction set is a single label, automate; when it contains several, route to a human. It turns \"how confident is confident enough?\" into a tunable, defensible knob. (Its coverage guarantee is derived in <span class=\"vault-ref\" title=\"In the Obsidian vault: 22 - Interpretability &#x26; Uncertainty Quantification\">Interpretability &#x26; Uncertainty Quantification</span> — here it's a design tool.)</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Calibration and conformal prediction are how you make automation <em>safe at the boundary</em>. They don't make the model more accurate; they make its <strong>confidence trustworthy</strong>, which is what lets you automate the easy cases and escalate the hard ones with a number you can defend to a regulator or an auditor. \"We automate when the model's calibrated confidence exceeds X, validated to mean what it says\" is a far stronger control than a hand-picked threshold nobody can justify.</p>"
+      }
+     ]
+    },
+    {
+     "id": "the-eu-ai-act--the-regulation-that-now-forces-all-of-this",
+     "number": 6,
+     "title": "The EU AI Act — The Regulation That Now Forces All of This",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The <strong>EU AI Act (Regulation 2024/1689)</strong> is the first comprehensive, horizontal AI law, and it is the reason responsible AI moved from \"nice\" to \"required.\" It is <strong>risk-based</strong>: obligations scale with how much harm a system can do, not with how clever it is. It applies extraterritorially — like RGPD, if your system's output is used in the EU, it can reach you regardless of where you're built. Treat it as the AI sibling of RGPD: <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a> and the AI Act now apply <em>together</em> to most real systems, and they overlap (data governance, documentation, the right to an explanation) without replacing each other.</p>\n<p><strong>The four risk tiers</strong> — the first thing to teach any stakeholder:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Tier</th><th align=\"left\">What it is</th><th align=\"left\">Examples</th><th align=\"left\">Consequence</th></tr></thead><tbody><tr><td align=\"left\"><strong>Unacceptable</strong></td><td align=\"left\">Practices the EU bans outright</td><td align=\"left\">Social scoring by public authorities; manipulative/subliminal systems; most real-time public biometric ID; emotion recognition at work/school</td><td align=\"left\"><strong>Prohibited</strong> — you cannot deploy it</td></tr><tr><td align=\"left\"><strong>High-risk</strong></td><td align=\"left\">Permitted but heavily regulated; can materially affect people's rights or safety</td><td align=\"left\">Recruitment &#x26; worker management; credit scoring &#x26; access to essential services; biometric ID; safety components; some education, law-enforcement, migration uses</td><td align=\"left\">The full obligation stack (below) before and after market</td></tr><tr><td align=\"left\"><strong>Limited</strong></td><td align=\"left\">Interaction/transparency risk</td><td align=\"left\">Chatbots, emotion/biometric categorisation, <strong>AI-generated content &#x26; deepfakes</strong></td><td align=\"left\"><strong>Transparency</strong>: tell users they're dealing with AI; label synthetic content</td></tr><tr><td align=\"left\"><strong>Minimal</strong></td><td align=\"left\">Everything else</td><td align=\"left\">Spam filters, recommenders, most internal tooling, game AI</td><td align=\"left\">No mandatory obligations (voluntary codes encouraged)</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Obligations for high-risk systems</strong> — this is where the engineering lives, and it maps almost one-to-one onto the rest of this module:</p>\n<ul>\n<li><strong>Risk management system</strong> across the lifecycle; <strong>data governance</strong> (representative, relevant, bias-examined training data — §3 and <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>).</li>\n<li><strong>Technical documentation</strong> and <strong>record-keeping / logging</strong> so the system's operation is traceable and auditable.</li>\n<li><strong>Transparency</strong> to deployers and <strong>human oversight</strong> designed in — a person can understand, intervene, and override (§5, §7).</li>\n<li><strong>Accuracy, robustness, and cybersecurity</strong> appropriate to the use (§4).</li>\n<li>A <strong>conformity assessment</strong> before going to market, often <strong>registration</strong> in an EU database, and <strong>post-market monitoring</strong> plus serious-incident reporting after.</li>\n</ul>\n<p><strong>General-purpose / foundation models (GPAI)</strong> get their own track, because they aren't tied to one use case. <em>All</em> GPAI providers owe <strong>technical documentation</strong>, <strong>instructions for downstream deployers</strong>, a <strong>copyright policy</strong>, and a <strong>public summary of training-data content</strong>. Models deemed to pose <strong>systemic risk</strong> (the largest, most capable) owe more: <strong>model evaluations and adversarial testing (red-teaming, §4)</strong>, serious-incident tracking and reporting, and cybersecurity protections. For a tech lead this clarifies the buy-vs-build line: if you <em>use</em> a hosted model you inherit some assurances from the provider but remain responsible for your <em>application's</em> tier; if you'd ever <em>be</em> a GPAI provider, the bar is much higher.</p>\n<p><strong>Rough timeline (as of mid-2026)</strong> — the deadlines are staggered, and the big one is now imminent:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Date</th><th align=\"left\">What applies</th></tr></thead><tbody><tr><td align=\"left\"><strong>Feb 2025</strong></td><td align=\"left\">Bans on unacceptable-risk practices; AI-literacy duty — <em>in force</em></td></tr><tr><td align=\"left\"><strong>Aug 2025</strong></td><td align=\"left\">GPAI obligations; national authorities; penalty framework — <em>in force</em></td></tr><tr><td align=\"left\"><strong>Aug 2026</strong></td><td align=\"left\"><strong>High-risk systems (Annex III) obligations</strong> — the deadline most organisations are racing toward <em>right now</em></td></tr><tr><td align=\"left\"><strong>Aug 2027</strong></td><td align=\"left\">Remaining high-risk categories; GPAI models placed before Aug 2025 must be compliant</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Penalties</strong> are tiered and RGPD-scale (whichever is higher of a euro amount or a % of global annual turnover):</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Breach</th><th align=\"left\">Maximum fine</th></tr></thead><tbody><tr><td align=\"left\">Prohibited (unacceptable-risk) practices</td><td align=\"left\"><strong>€35M or 7%</strong> of global turnover</td></tr><tr><td align=\"left\">High-risk / most other obligation breaches</td><td align=\"left\"><strong>€15M or 3%</strong></td></tr><tr><td align=\"left\">Supplying incorrect/misleading information to authorities</td><td align=\"left\"><strong>€7.5M or 1%</strong></td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "worked-example",
+       "title": "\"Is my system high-risk, and what must I do?\"",
+       "html": "<p>A retail-bank client wants an ML model that <em>recommends approve/refuse on consumer loan applications</em>.</p>\n<ol>\n<li><strong>Tier it.</strong> Credit scoring / access to essential financial services is named <strong>high-risk</strong> (Annex III). Not minimal, not merely \"limited.\" → the full stack applies.</li>\n<li><strong>Data governance.</strong> Document data sources, check the training data for bias across protected groups (§3 bias audit), record lineage (ties to <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>).</li>\n<li><strong>Explainability + human oversight.</strong> Provide per-decision local explanations (§2 — SHAP/LIME, plus a reason an applicant can read) and design a human-override path; a person must be able to see why and intervene (§5).</li>\n<li><strong>Robustness, accuracy, calibration.</strong> Validate accuracy per group, check calibration, and adversarially test (§4, §5).</li>\n<li><strong>Documentation + conformity + monitoring.</strong> Produce technical documentation and a model card, run the conformity assessment, register the system, and stand up post-market monitoring with incident reporting.</li>\n<li><strong>Don't promise certainty.</strong> You scope the engineering that makes the system <em>assessable</em>; the legal sign-off that it <em>is compliant</em> is made with the client's legal/DPO function. (See the commercial section — this boundary is non-negotiable.)</li>\n</ol>"
+      },
+      {
+       "type": "html",
+       "html": "<blockquote>\n<p>The same system, re-scoped as an <em>internal analytics dashboard that a banker reads but that takes no automated decision</em>, likely drops out of high-risk. <strong>The tier follows the use, not the algorithm</strong> — which is exactly the lever you use to de-risk a client's roadmap.</p>\n</blockquote>"
+      }
+     ]
+    },
+    {
+     "id": "the-responsible-ai-operating-model--what-a-tech-lead-actually-puts-in-place",
+     "number": 7,
+     "title": "The Responsible-AI Operating Model — What a Tech Lead Actually Puts in Place",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Principles don't ship; mechanisms do. The concrete, recurring artefacts and structures you stand up:</p>\n<ul>\n<li><strong>Model cards</strong> — a one-to-few-page standard fact sheet per model: what it does, intended <em>and</em> out-of-scope uses, training data summary, performance <em>broken down by group</em>, known limitations, and the date/owner. It is the single most useful responsible-AI artefact: it doubles as developer documentation, client-facing transparency, and EU AI Act technical-documentation input. (Data has a sibling: the <strong>datasheet/data card</strong> — see <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>.)</li>\n<li><strong>Documentation &#x26; logging by default</strong> — lineage, decisions, evaluation results, and prompt/output logs, captured <em>as you build</em> (it's a high-risk obligation and an audit lifesaver), not reconstructed under deadline. Connects to the monitoring discipline you'll see in production work.</li>\n<li><strong>Human oversight, designed not assumed</strong> — for every consequential decision, a named human who can understand the output, has a real override, and isn't just rubber-stamping under volume pressure (the \"automation complicity\" failure). This is the through-line of <a class=\"wikilink\" data-module=\"11\" href=\"#/module/11\">Agentic Architectures &#x26; LLM App Patterns</a> and the AI Act alike.</li>\n<li><strong>An AI governance / review board</strong> — a lightweight, cross-functional gate (legal/DPO, a domain owner, an engineer, a risk voice) that reviews use cases <em>before</em> build for tier and risk, signs off the fairness/values choices, and owns the model inventory. Not bureaucracy for its own sake — it's how the <em>values choices</em> (which fairness, what oversight) get an owner who isn't the person under delivery pressure.</li>\n<li><strong>A model inventory &#x26; lifecycle</strong> — you can't govern what you can't list. Know every model in production, its tier, owner, last review, and monitoring status.</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>The operating model is just the value/complexity budget applied to risk: <strong>size the governance to the tier.</strong> A minimal-risk recommender needs a line in the inventory and nothing more; a high-risk credit model needs the full stack. The failure modes are symmetric — drowning a spam filter in paperwork is as wrong as shipping a hiring model with no oversight. Your job is to put the <em>right</em> weight in the <em>right</em> place, and to make sure the hardest choices have an owner above the build team.</p>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "client-mission-patterns--commercial-angle",
+   "kind": "missions",
+   "title": "Client Mission Patterns / Commercial Angle",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Responsible AI is, as of 2026, one of the easiest-to-justify spends in the whole offer — there's a regulation with a deadline and a fine behind it. Sell <em>assessable, documented, defensible</em> systems — never \"certified compliant,\" which only a lawyer can say.</p>\n<ul>\n<li><strong>EU AI Act Readiness / Gap Assessment</strong> — <em>Problem:</em> a client with AI in production (or in flight) doesn't know which systems are high-risk or what the Aug 2026 deadline means for them. <em>Deliverable:</em> an <strong>inventory of AI systems classified by risk tier</strong>, a per-system gap analysis against the obligation stack, and a prioritised, costed remediation roadmap. <em>Scope:</em> 3–6 weeks, fixed price, scaling with the number of systems. <em>Who buys:</em> CTO/CDO, Chief Risk/Compliance Officer, DPO — often the same buyer as the RGPD work in <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>, which is why these two sell as a bundle.</li>\n<li><strong>Bias &#x26; Fairness Audit of a Model</strong> — <em>Problem:</em> a client deploys a consequential model (hiring, lending, pricing, churn-based treatment) and needs to know — and document — whether it treats groups fairly. <em>Deliverable:</em> a <strong>written fairness audit</strong>: protected groups and the fairness definition chosen <em>with the client</em>, per-group metrics, the gaps, mitigations with their accuracy cost, and the documented values decision. <em>Scope:</em> 3–5 weeks per model. <em>Who buys:</em> the model owner, Head of Data Science, or a risk/compliance function needing evidence.</li>\n<li><strong>Explainability Layer for a Regulated Decision System</strong> — <em>Problem:</em> a high-risk system makes automated decisions but can't tell an applicant or a regulator <em>why</em>. <em>Deliverable:</em> a <strong>per-decision explanation capability</strong> — SHAP/LIME (or an intrinsic-model rebuild where viable) wired into the product, generating human-readable reasons and an audit trail, plus a human-override path. <em>Scope:</em> 5–9 weeks including integration. <em>Who buys:</em> product owner of the decision system, under pressure from legal or a regulator.</li>\n<li><strong>Responsible-AI Governance Framework &#x26; Model-Card Templates</strong> — <em>Problem:</em> a scaling client has models everywhere and no consistent way to review, document, or oversee them. <em>Deliverable:</em> a lightweight <strong>governance framework</strong> — review-board charter and intake gate, a model inventory, <strong>model-card and data-card templates</strong>, a human-oversight pattern, and a risk-tiering decision guide. <em>Scope:</em> 4–8 weeks; high repeatable-IP content. <em>Who buys:</em> CTO/CDO building the function; assembled into the offer in <a class=\"wikilink\" data-module=\"17\" href=\"#/module/17\">Building the AI &#x26; Data Offer &#x26; Leading the Pole</a>.</li>\n</ul>\n<p><strong>Buy-vs-build for the client:</strong> the <em>techniques</em> are commodities — SHAP, LIME, fairness and conformal libraries are open source and free to rent. What you build and charge for is the <strong>judgment</strong>: the correct tier classification, the fairness <em>values</em> conversation, the integration into <em>their</em> decision system, and the documentation that makes them auditable. That's the defensible work. <strong>What to charge for:</strong> the assessment, audit, and governance framework as fixed-price, named deliverables — they're repeatable IP and exactly what de-risks the client. <strong>What NOT to promise — and this is the hard line:</strong> <em>legal compliance certainty.</em> You can deliver a system that is documented, explainable, fairness-audited, and <em>assessable against the AI Act</em>; you cannot certify that it <em>is</em> compliant — that's a legal opinion. <strong>Partner with legal/the DPO</strong>, scope to \"AI Act readiness\" not \"AI Act compliance,\" and put that distinction in writing. The other things never to promise: an \"unbiased\" model (impossible — see §3), or that the explanation is the model's true reasoning.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "tools--vendor-landscape",
+   "kind": "tools",
+   "title": "Tools & Vendor Landscape",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p><em>As of 2026 — treat names/capabilities as perishable; re-check before quoting.</em></p>"
+    },
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Tool / Category</th><th align=\"left\">Use here</th><th align=\"left\">OSS / Paid</th><th align=\"left\">Note</th></tr></thead><tbody><tr><td align=\"left\"><strong>SHAP</strong>, <strong>LIME</strong> (libraries)</td><td align=\"left\">Post-hoc local/global explanations for tabular &#x26; text models</td><td align=\"left\">OSS</td><td align=\"left\">The de-facto standard; free — the value is in <em>using</em> them well, not the tool</td></tr><tr><td align=\"left\">Fairness toolkits (Fairlearn, AIF360, What-If Tool)</td><td align=\"left\">Measuring &#x26; mitigating group fairness gaps</td><td align=\"left\">OSS</td><td align=\"left\">Metrics are easy; the <em>values choice</em> is the hard, billable part</td></tr><tr><td align=\"left\">Uncertainty / conformal libraries (MAPIE, TorchUncertainty, calibration utilities)</td><td align=\"left\">Calibration checks, conformal prediction sets</td><td align=\"left\">OSS</td><td align=\"left\">Turns a confidence threshold into a defensible knob</td></tr><tr><td align=\"left\">LLM eval &#x26; guardrail tooling (Guardrails, NeMo Guardrails, Llama Guard, promptfoo)</td><td align=\"left\">Output filtering, jailbreak/injection testing, red-team harnesses</td><td align=\"left\">OSS / freemium</td><td align=\"left\">Layer <em>around</em> the model; vendor guardrails alone are not enough</td></tr><tr><td align=\"left\">LLM observability (LangSmith, Langfuse, Arize, Braintrust)</td><td align=\"left\">Prompt/output logging, traceability for LLM features</td><td align=\"left\">Paid / OSS mix</td><td align=\"left\">Doubles as your AI-Act record-keeping for LLM apps</td></tr><tr><td align=\"left\">Governance / model-risk platforms (Credo AI, Holistic AI, Fairly, cloud \"Responsible AI\" suites)</td><td align=\"left\">Model inventory, risk tiering, AI-Act documentation workflows</td><td align=\"left\">Paid</td><td align=\"left\">Useful at scale; for a first engagement, a structured doc + spreadsheet often beats a platform</td></tr><tr><td align=\"left\">Official sources (EUR-Lex, EU AI Office, CNIL, national authorities)</td><td align=\"left\">The actual law and regulator guidance</td><td align=\"left\">Free</td><td align=\"left\">The non-perishable source of truth — <strong>read these, not vendor summaries</strong></td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The path's rule holds: <strong>buy/rent the commodity (the explainer, the fairness metric, the guardrail), build the differentiator (the tiering judgment, the values decision, the integration and documentation).</strong> Perishable names live here; the judgment doesn't.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "when-is-this-overkill",
+   "kind": "overkill",
+   "title": "When Is This Overkill?",
+   "blocks": [
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Situation</th><th align=\"left\">The heavy responsible-AI stack is overkill — do this instead</th></tr></thead><tbody><tr><td align=\"left\">The model takes no consequential decision (internal dashboard, exploratory analysis)</td><td align=\"left\">Likely minimal-risk: a line in the model inventory, basic documentation, done</td></tr><tr><td align=\"left\">You used a black-box model on a simple tabular problem</td><td align=\"left\">Rebuild with an <strong>intrinsic</strong> model — explanation becomes free and the AI-Act story easy</td></tr><tr><td align=\"left\">No one has an incentive or access to attack the inputs</td><td align=\"left\">Skip adversarial robustness work; spend the budget on data quality instead</td></tr><tr><td align=\"left\">The use case is genuinely minimal-risk under the Act</td><td align=\"left\">Don't build a governance cathedral; meet the (light) transparency duty and move on</td></tr><tr><td align=\"left\">A €X/month vendor already ships explainability/guardrails for your use</td><td align=\"left\">Buy it; integrate; reserve build budget for the tiering and documentation</td></tr><tr><td align=\"left\">Stakeholder wants an \"unbiased model\"</td><td align=\"left\">Reframe: there's no such thing — deliver a <em>fairness audit and a documented values choice</em></td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The most senior thing you can say here is \"this system is minimal-risk — here's the one page it needs, and let's spend the rest of the budget where the risk actually is.\" Right-sizing governance <em>is</em> the responsible-AI skill.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "resources",
+   "kind": "resources",
+   "title": "Resources",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "books--long-form",
+     "number": null,
+     "title": "Books & Long-Form",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Christoph Molnar — <em>Interpretable Machine Learning</em> — the standard practical reference for intrinsic models, SHAP, LIME (free online).</li>\n<li>Barocas, Hardt &#x26; Narayanan — <em>Fairness and Machine Learning</em> — the canonical text on fairness definitions and the impossibility result, in readable form (free online).</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "official--regulatory-free--the-source-of-truth",
+     "number": null,
+     "title": "Official & Regulatory (Free — the source of truth)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li><strong>EU AI Act — official text, Regulation (EU) 2024/1689 — EUR-Lex.</strong> The actual law: risk tiers, high-risk obligations, GPAI rules, timeline, penalties. <em>Read the articles and annexes, not third-party summaries, before quoting a client.</em></li>\n<li><strong>EU AI Office</strong> and the <strong>European Commission AI policy pages</strong> — official guidance, codes of practice, and the rolling implementation timeline.</li>\n<li><strong>CNIL</strong> — French regulator's practical sheets on AI and how the AI Act meets RGPD (ties to <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>).</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "courses--articles-free",
+     "number": null,
+     "title": "Courses & Articles (Free)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Google's <strong>People + AI Guidebook</strong> and <strong>Model Card</strong> templates — practical responsible-AI design and documentation patterns.</li>\n<li>OWASP <strong>Top 10 for LLM Applications</strong> — the working vocabulary for jailbreaks, prompt injection, and LLM safety (cross-links <a class=\"wikilink\" data-module=\"11\" href=\"#/module/11\">Agentic Architectures &#x26; LLM App Patterns</a>).</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "go-deeper",
+     "number": null,
+     "title": "Go Deeper",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Deeper math behind explainability, calibration, and conformal prediction → <span class=\"vault-ref\" title=\"In the Obsidian vault: 22 - Interpretability &#x26; Uncertainty Quantification\">Interpretability &#x26; Uncertainty Quantification</span> (AI Scientist Path).</li>\n<li>Deeper math behind fairness, the impossibility proof, adversarial robustness, and AI safety → <span class=\"vault-ref\" title=\"In the Obsidian vault: 23 - Fairness, Robustness &#x26; AI Safety\">Fairness, Robustness &#x26; AI Safety</span> (AI Scientist Path).</li>\n<li>Adjacent leader modules: privacy &#x26; data governance → <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>; honest evaluation &#x26; calibration → <a class=\"wikilink\" data-module=\"05\" href=\"#/module/05\">Model Evaluation, Validation &#x26; Experimentation</a>; LLM/agent guardrails → <a class=\"wikilink\" data-module=\"11\" href=\"#/module/11\">Agentic Architectures &#x26; LLM App Patterns</a>.</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "practical-artifacts",
+   "kind": "artifacts",
+   "title": "Practical Artifacts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "decision-checklist--is-this-system-responsible-ai-ready",
+     "number": null,
+     "title": "Decision Checklist — \"Is this system responsible-AI ready?\"",
+     "blocks": [
+      {
+       "type": "checklist",
+       "checklistId": "15/practical-artifacts/1",
+       "items": [
+        {
+         "id": "0",
+         "html": "Have we classified it into an <strong>EU AI Act risk tier</strong>, and does the tier match the <em>use</em> (not just the model)?"
+        },
+        {
+         "id": "1",
+         "html": "If consequential, can we produce a <strong>local explanation</strong> a human (and an applicant) can read?"
+        },
+        {
+         "id": "2",
+         "html": "Have we run a <strong>fairness audit</strong> and <em>explicitly chosen and documented</em> a fairness definition with the client?"
+        },
+        {
+         "id": "3",
+         "html": "Is the model's <strong>confidence calibrated</strong>, and is the human-in-the-loop threshold defensible?"
+        },
+        {
+         "id": "4",
+         "html": "Is there a <strong>named human</strong> with a real override on every consequential decision?"
+        },
+        {
+         "id": "5",
+         "html": "For any LLM feature: are outputs <strong>grounded and cited</strong>, and have we tested jailbreaks/injection?"
+        },
+        {
+         "id": "6",
+         "html": "Is there a <strong>model card</strong>, lineage/logging, and a line in the <strong>model inventory</strong>?"
+        },
+        {
+         "id": "7",
+         "html": "Is legal/DPO in the loop, and have we scoped to <em>readiness</em>, not <em>certified compliance</em>?"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "red-flags",
+     "number": null,
+     "title": "Red Flags",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"We'll add explainability/governance later.\" (For high-risk, \"later\" can be unlawful — and it's the project.)</li>\n<li>\"Just remove the protected attribute and it's fair.\" (Proxies make this a myth.)</li>\n<li>\"Give me an unbiased model.\" (Impossible — there's a values choice; surface it.)</li>\n<li>The LLM's chain-of-thought presented as its \"reasoning\" to a regulator. (It isn't faithful.)</li>\n<li>A confidence threshold nobody can justify, on an uncalibrated model.</li>\n<li>\"We're EU AI Act compliant.\" — claimed by an engineer with no legal sign-off.</li>\n<li>No human override, or a human \"approving\" thousands of decisions a day (rubber-stamping).</li>\n<li>Vendor summary of the law quoted to a client instead of the actual EUR-Lex text.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "scoping-prompts-ask-the-client",
+     "number": null,
+     "title": "Scoping Prompts (ask the client)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"What decision does this system make about a person, and is that decision automated?\" (Drives the tier.)</li>\n<li>\"If someone is refused/flagged, what reason can we give them — today?\"</li>\n<li>\"Which groups must this treat fairly, and <em>which kind</em> of fairness matters most here?\"</li>\n<li>\"Who is the named human who can see why and override it — and do they have the time to?\"</li>\n<li>\"Is this in scope for the EU AI Act, and who in legal/compliance owns that judgement?\"</li>\n<li>\"What's the worst thing this system could output, and what's our control for it?\"</li>\n<li>\"Do we have the data governance and documentation to survive an audit?\" (Bridges to <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>.)</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "self-assessment",
+   "kind": "self-assessment",
+   "title": "Self-Assessment",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Before moving on, you should be able to:</p>"
+    },
+    {
+     "type": "checklist",
+     "checklistId": "15/self-assessment/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Choose intrinsic vs post-hoc and global vs local explanation for a given decision system, and say what SHAP and LIME each tell a stakeholder"
+      },
+      {
+       "id": "1",
+       "html": "Explain why explaining an LLM is different, and what \"explainability\" honestly means for an LLM feature (grounding + citation + human review)"
+      },
+      {
+       "id": "2",
+       "html": "State the fairness impossibility result to a client as a values choice, and scope a bias audit that ends in a documented decision"
+      },
+      {
+       "id": "3",
+       "html": "Name the LLM-specific risks (jailbreak, prompt injection, hallucination) and the role of red-teaming, cross-linking the agent guardrails"
+      },
+      {
+       "id": "4",
+       "html": "Explain calibration and conformal prediction well enough to set and defend a human-in-the-loop threshold"
+      },
+      {
+       "id": "5",
+       "html": "Classify a system into an EU AI Act risk tier, list the high-risk obligations, and state plainly what you will <em>not</em> promise (compliance certainty — partner with legal)"
+      },
+      {
+       "id": "6",
+       "html": "Stand up the operating model — model cards, logging, human oversight, a governance/review board, a model inventory — sized to the risk"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  }
+ ]
+}

@@ -1,0 +1,385 @@
+{
+  "moduleId": "10",
+  "quiz": [
+    {
+      "id": "q1",
+      "conceptRef": "the-problem-rag-solves",
+      "prompt": "A client asks why RAG makes an LLM trustworthy on their internal policies without any retraining. What is the accurate explanation?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "RAG fetches relevant passages from their documents at query time and injects them into the prompt — shifting the model's job from *recall* (which it's bad at and can't update) to *reading comprehension over supplied text* (which it's excellent at), with citations for verification.",
+          "correct": true,
+          "explanation": "Right. The model's parametric knowledge is frozen and public; RAG grounds it in current, private text per question. Knowledge updates by updating an index, not the model — which is why it's the default, cheapest path to \"an AI that knows our stuff.\""
+        },
+        {
+          "id": "b",
+          "text": "RAG continuously retrains the model on the client's documents overnight, keeping its weights current.",
+          "correct": false,
+          "explanation": "No retraining is involved — that's the whole point. Weights are never touched; the index is updated instead. Continuous retraining describes (expensive, stale-by-morning) fine-tuning, the approach RAG exists to avoid for knowledge."
+        },
+        {
+          "id": "c",
+          "text": "RAG eliminates hallucination — once the documents are connected, the model can no longer produce wrong answers.",
+          "correct": false,
+          "explanation": "Never promise zero hallucination — explicitly on the module's do-not-promise list. RAG *reduces* it sharply and makes it *checkable* via citations; the generator can still misread or embellish, which is why evaluation (faithfulness) exists."
+        },
+        {
+          "id": "d",
+          "text": "RAG works by giving the model a bigger context window so the whole knowledge base fits in every prompt.",
+          "correct": false,
+          "explanation": "That's the *long-context* approach — viable only when the corpus is small, and you pay per token every call. RAG sends only the relevant chunks, which is exactly how it scales to large corpora at reasonable cost."
+        }
+      ],
+      "takeaway": "RAG turns recall into reading comprehension: retrieve, inject, answer-only-from-context, cite — and update knowledge by updating an index, never the model.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q2",
+      "conceptRef": "chunking--the-quiet-determinant-of-quality",
+      "prompt": "A RAG system retrieves passages that contain the right answer buried among three unrelated topics, and retrieval often ranks them poorly. What is the most likely cause?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Chunks are too large — a whole-page chunk crams several topics, which dilutes its meaning vector (harder to retrieve) and adds noise for the generator to read.",
+          "correct": true,
+          "explanation": "Exactly the chunking tension. Too-large chunks are index cards with four topics crammed on: the filing system can't tell what's on them. The fix is a chunking sweep (size, overlap, strategy) evaluated against retrieval metrics on the client's own data."
+        },
+        {
+          "id": "b",
+          "text": "Chunks are too small — single sentences lack the context to answer.",
+          "correct": false,
+          "explanation": "Too-small chunks produce the *opposite* symptom: precisely relevant fragments that lack surrounding context. Here the passages contain the answer *plus* unrelated material — the signature of oversized chunks."
+        },
+        {
+          "id": "c",
+          "text": "The LLM is too weak — a stronger generator would extract the answer from the noisy passages.",
+          "correct": false,
+          "explanation": "A stronger model reads noise slightly better, but retrieval quality is the ceiling on the whole system — the diluted vectors mean the right passages often aren't retrieved or ranked well at all. Most of the quality budget belongs in chunking and retrieval, not a cleverer LLM."
+        },
+        {
+          "id": "d",
+          "text": "Nothing — there's a universal best chunk size (~500 tokens), so if that's set, the problem lies elsewhere.",
+          "correct": false,
+          "explanation": "There is no universal best size — it depends on the documents and the embedding model, which is precisely why you evaluate chunking on the client's own data rather than copying a number from a blog post."
+        }
+      ],
+      "takeaway": "Chunking is the quiet determinant of RAG quality: too small loses context, too large dilutes meaning — treat size and overlap as dials and sweep them against retrieval metrics on real data.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q3",
+      "conceptRef": "vector-databases--when-you-actually-need-one",
+      "prompt": "A client already running Postgres wants a RAG assistant over ~200,000 chunks. Their architect has shortlisted dedicated managed vector databases. What should you recommend?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "pgvector — at thousands-to-low-millions of chunks on an existing Postgres estate, it means no new system to run, back up, or secure; a dedicated vector DB here is a classic over-build.",
+          "correct": true,
+          "explanation": "Right. Dedicated vector DBs earn their place at tens of millions of chunks, high QPS, and tight latency SLAs. \"Vector DB chosen before anyone counted the chunks\" is a named red flag — and recommending the simpler thing buys credibility."
+        },
+        {
+          "id": "b",
+          "text": "A dedicated managed vector database — RAG requires one as its canonical storage layer.",
+          "correct": false,
+          "explanation": "Canonical ≠ required. The module is explicit that a vector DB is *not* always needed and recommending one reflexively is a classic over-build. 200k chunks is comfortable pgvector territory."
+        },
+        {
+          "id": "c",
+          "text": "Neither — fine-tune the model on the corpus so no retrieval store is needed.",
+          "correct": false,
+          "explanation": "Fine-tuning doesn't reliably inject facts and goes stale the moment documents change — it's the field's most expensive misconception, not a storage strategy. The knowledge problem still needs retrieval."
+        },
+        {
+          "id": "d",
+          "text": "An in-memory index — vector databases of any kind are unnecessary below a million chunks.",
+          "correct": false,
+          "explanation": "In-memory/file indexes suit a few-hundred-document *prototype*. A production assistant over 200k chunks needs persistence, updates, backups, and access control — which is what makes pgvector (a real database they already operate) the fit."
+        }
+      ],
+      "takeaway": "Count the chunks before choosing the store: pgvector or an existing search platform covers most clients; a dedicated vector DB is for tens of millions of chunks and strict SLAs.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q4",
+      "conceptRef": "retrieval-quality--keyword-vs-semantic-vs-hybrid-and-reranking",
+      "prompt": "A support-docs RAG system answers paraphrased questions well but fails whenever users search exact part numbers or error codes. What's the right fix?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Hybrid retrieval — add keyword/lexical search alongside the vector search and merge the lists, then rerank a generous candidate set down to the best few.",
+          "correct": true,
+          "explanation": "Right. Semantic search's mirror-image weakness is missing exact tokens; keyword search nails codes and IDs but is blind to synonyms. Hybrid gets both and higher recall than either alone — then a reranker (the expensive final interview on the shortlist) pushes the genuinely best passages to the top."
+        },
+        {
+          "id": "b",
+          "text": "A better embedding model — strong embeddings encode part numbers as precisely as natural language.",
+          "correct": false,
+          "explanation": "Exact identifiers are precisely where meaning-based representations stay weak — \"PX-4471\" has no semantics for a vector to capture. The structural fix is lexical matching alongside the vectors, not a heavier embedding."
+        },
+        {
+          "id": "c",
+          "text": "Switch entirely to keyword search, since the failures are keyword-shaped.",
+          "correct": false,
+          "explanation": "That trades one blind spot for the other: the paraphrase and synonym queries the system currently handles (\"how do I fix error 403\" → \"HTTP Forbidden responses\") would start failing. The corpus serves both query styles — that's exactly the hybrid case."
+        },
+        {
+          "id": "d",
+          "text": "Retrieve only the single top chunk so the generator isn't distracted by noise.",
+          "correct": false,
+          "explanation": "Shrinking K does nothing for queries where the right chunk was never in the candidate list — that's a recall problem. The funnel works the other way: retrieve a *wide* candidate set, then rerank sharply."
+        }
+      ],
+      "takeaway": "Hybrid search (keyword + semantic) is the reliable enterprise default, and reranking a wide candidate set is the cheap accuracy multiplier — wide net, then sharp filter.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q5",
+      "conceptRef": "rag-evaluation--catching-a-system-thats-confidently-wrong",
+      "prompt": "On a 50-question gold set, a RAG system scores context recall **0.95** but faithfulness **0.60**. What does this tell you to fix?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Retrieval is fine — the right passages are being found — but the generator is inventing claims not supported by them: fix the prompt (e.g. \"quote the exact figure; if absent, say you cannot confirm\") and re-test.",
+          "correct": true,
+          "explanation": "This is the module's worked example almost exactly (the HR bot inventing \"10 leave days\"). The metric decomposition is what makes evaluation *actionable*: high recall + low faithfulness points at the generation half, not the retriever."
+        },
+        {
+          "id": "b",
+          "text": "Fix chunking and the embedding model — low faithfulness means the retriever is feeding the model the wrong text.",
+          "correct": false,
+          "explanation": "That's the diagnosis for *low context recall*. Here recall is 0.95 — the needed passages are present. Spending weeks rebuilding retrieval would optimise the half of the pipeline that's already working — \"don't optimise blind\" is the point of the split."
+        },
+        {
+          "id": "c",
+          "text": "The demo answers look great and cite real pages, so the metrics are probably miscomputed.",
+          "correct": false,
+          "explanation": "Fluent, well-cited, *plausible-but-wrong* answers are RAG's most dangerous failure mode — exactly what eyeballing a demo can never catch and what the gold set exists to expose. Distrust the demo before the metric."
+        },
+        {
+          "id": "d",
+          "text": "Move to a dedicated vector database to improve answer groundedness.",
+          "correct": false,
+          "explanation": "The vector store affects retrieval speed and scale, not whether the generator sticks to the retrieved text. With recall at 0.95, storage is demonstrably not the bottleneck — this is a prompt/model-behaviour fix."
+        }
+      ],
+      "takeaway": "Decompose RAG quality — faithfulness, answer relevance, context precision, context recall — because the split tells you which half of the pipeline to fix instead of guessing.",
+      "difficulty": "stretch"
+    },
+    {
+      "id": "q6",
+      "conceptRef": "common-failure-modes",
+      "prompt": "An internal RAG assistant's corpus mixes company-wide docs with HR and M&A documents restricted to a few people. Which design is the only acceptable one?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Filter retrieval by the asking user's entitlements *before* generation — the index respects permissions, so restricted chunks are never retrieved for unauthorised users.",
+          "correct": true,
+          "explanation": "Right. This is the failure mode that turns a quality bug into a *security incident*: without index-level filtering, the bot becomes a confidential-data exfiltration tool that helpfully quotes its sources. Access control is a day-one requirement for any mixed-audience corpus, not a phase-two feature."
+        },
+        {
+          "id": "b",
+          "text": "Add a system-prompt instruction: \"Do not reveal confidential information to unauthorised users.\"",
+          "correct": false,
+          "explanation": "A prompt constrains what's *intended*, not what's *possible* — models are non-deterministic and injectable. If the restricted chunk reaches the context, it can leak. The control must be structural, applied before the model ever sees the text."
+        },
+        {
+          "id": "c",
+          "text": "Post-filter generated answers, scanning for confidential keywords before display.",
+          "correct": false,
+          "explanation": "Output scanning is a porous last line: paraphrased or partially quoted confidential content slips past keyword filters. The reliable boundary is upstream — restricted documents must not enter retrieval results for that user at all."
+        },
+        {
+          "id": "d",
+          "text": "Rely on SSO — if users authenticate to the app, the corpus behind it is appropriately protected.",
+          "correct": false,
+          "explanation": "SSO answers \"who are you?\", not \"which documents may *you* see?\". Every authenticated employee querying one undifferentiated index is precisely the mixed-permission scenario the module flags as a security incident waiting to happen."
+        }
+      ],
+      "takeaway": "On a mixed-permission corpus, retrieval must filter by the user's entitlements before generation — structural access control, not prompts or post-hoc filters.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q7",
+      "conceptRef": "rag-vs-fine-tuning-vs-long-context",
+      "prompt": "A client's entire knowledge base is ~60 pages, changes about once a year, and they've requested \"a RAG build with a vector database.\" What's the senior recommendation?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Skip RAG: the corpus fits comfortably in a modern context window and rarely changes — put it in the prompt (long-context) and spend nothing on a retrieval pipeline.",
+          "correct": true,
+          "explanation": "The module calls this the most senior move: recommending long-context or plain search when the corpus is small costs the client less and earns you the credibility that wins the genuinely hard mission later. RAG is for knowledge that is large, private, or changes often."
+        },
+        {
+          "id": "b",
+          "text": "Build the RAG pipeline anyway — it future-proofs the client for when the corpus grows.",
+          "correct": false,
+          "explanation": "Building a pipeline for ten PDFs' worth of content is the named overkill case. If the corpus genuinely grows later, you build then — with real requirements — instead of running ingestion, indexing, and re-indexing machinery for a static booklet now."
+        },
+        {
+          "id": "c",
+          "text": "Fine-tune the model on the 60 pages so the knowledge is permanently baked in.",
+          "correct": false,
+          "explanation": "\"Just fine-tune it on our docs\" is the field's most expensive misconception: fine-tuning teaches behaviour, not facts; it's slow, costly, goes stale on the next edit, and still hallucinates. For knowledge injection it loses to simply pasting the text in."
+        },
+        {
+          "id": "d",
+          "text": "RAG is still required because only a vector index can provide citations.",
+          "correct": false,
+          "explanation": "Citations come from instructing the model to reference the supplied text — with the whole corpus in the prompt, it can quote sections just as well. Mandatory-citation needs at *scale* favour RAG; at 60 static pages they don't justify a pipeline."
+        }
+      ],
+      "takeaway": "RAG injects changing knowledge at scale, fine-tuning teaches behaviour, long-context handles small static corpora — and recommending the cheaper one when it suffices is what buys trust.",
+      "difficulty": "core"
+    },
+    {
+      "id": "q8",
+      "conceptRef": "cost--freshness",
+      "prompt": "Scoping a RAG assistant, you quote indexing costs and per-query run costs. Which third item do clients most routinely forget — with what consequence?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The re-indexing pipeline and its owner — a RAG index is a snapshot, so without scheduled or event-triggered re-ingestion the system is accurate on launch day and quietly wrong a month later.",
+          "correct": true,
+          "explanation": "Right. Freshness is an *obligation with a cost*: someone must own re-indexing, and \"how fresh must answers be?\" is a scoping question (near-real-time is materially more engineering than a nightly batch). Quote it as a line item or inherit the blame for stale answers."
+        },
+        {
+          "id": "b",
+          "text": "The embedding spend at build time, which usually dominates the total cost of ownership.",
+          "correct": false,
+          "explanation": "For most corpora the initial embedding bill is modest — the indexing phase is dominated by *ingestion engineering* effort, not embedding spend. The build-time token cost is the line clients can usually afford to forget."
+        },
+        {
+          "id": "c",
+          "text": "The vector database licence, which grows faster than usage.",
+          "correct": false,
+          "explanation": "Storage is a known, quoted line — and often avoidable entirely (pgvector). The recurring surprise isn't the store; it's generation tokens scaling with adoption and the unowned freshness obligation."
+        },
+        {
+          "id": "d",
+          "text": "The LLM provider's training costs, passed through to API customers as usage grows.",
+          "correct": false,
+          "explanation": "Provider training costs are baked into per-token pricing — not a separate line a client budgets. The forgotten items live on the client's side: who re-indexes, how often, and what query volume does at full adoption."
+        }
+      ],
+      "takeaway": "RAG has two cost lines — indexing (renovation) and per-query (utility bill) — plus a freshness obligation: quote the re-indexing pipeline and name its owner, or ship a system that goes quietly stale.",
+      "difficulty": "stretch"
+    }
+  ],
+  "exercises": [
+    {
+      "id": "ex1",
+      "title": "Cost and freshness model for an internal knowledge assistant",
+      "estimatedMinutes": 30,
+      "scenario": "A professional-services firm wants an internal Q&A assistant over its methodology library and policies: **30,000 documents**, chunking to roughly **120,000 chunks of ~400 tokens** each. The pilot serves one department (**~400 questions/working day**); full adoption is forecast at **~2,500 questions/day**. About **4% of documents change each month**. The COO wants a cost picture that won't embarrass anyone at adoption time, and asks: \"What does it cost to build, what does it cost to run, and what does it cost to keep honest?\"",
+      "givens": [
+        "Corpus: 120,000 chunks × ~400 tokens ≈ 48M tokens to embed; embedding price \\$0.10 / 1M tokens",
+        "Per question: ~5 retrieved chunks × 400 tokens + ~300 tokens of instructions + ~100-token question ≈ 2,400 input tokens; ~250 output tokens; query embedding negligible",
+        "Generation pricing: \\$3 / 1M input, \\$15 / 1M output; 22 working days/month",
+        "Churn: 4% of documents change per month (re-embed those chunks); changing the embedding model would force a full re-index"
+      ],
+      "tasks": [
+        "Compute the one-off indexing (embedding) cost — and say what *actually* dominates the build budget.",
+        "Compute the per-question cost and the monthly run cost at pilot (400/day) and at adoption (2,500/day).",
+        "Compute the monthly re-embedding cost for the 4% churn, and name the freshness cost that the token arithmetic misses.",
+        "Write the two or three proposal sentences that quote both cost lines plus the freshness obligation."
+      ],
+      "solution": "**Step 1 — indexing.** 48M tokens × \\$0.10/1M = **\\$4.80 one-off**. That's the headline lesson: for a corpus this size, embedding spend is a rounding error. The build budget is dominated by **ingestion engineering** — parsing messy PDFs and SharePoint exports, chunking strategy, metadata, permissions — plus the evaluation harness. Quote people-days, not tokens, for the build.\n\n**Step 2 — query economics.** Per question: input 2,400/10⁶ × \\$3 = \\$0.0072; output 250/10⁶ × \\$15 = \\$0.00375 → **≈ \\$0.011/question** (generation dominates; the query-embedding call is ~\\$0.00001, noise).\n- **Pilot:** 400 × 22 = 8,800 questions/month × \\$0.011 ≈ **\\$96/month**.\n- **Adoption:** 2,500 × 22 = 55,000 questions/month × \\$0.011 ≈ **\\$600/month**.\nThe run cost scales linearly with adoption — it's the utility bill, and it's the line that grows after launch. Note the asymmetry worth saying out loud: the *whole corpus* cost \\$4.80 to embed, while answering questions costs ~\\$600/month at adoption — the recurring line, not the index, is the budget conversation.\n\n**Step 3 — freshness.** 4% of 120,000 chunks = 4,800 chunks/month × 400 tokens = 1.92M tokens × \\$0.10/1M ≈ **\\$0.19/month** of embedding spend — effectively free. What the token arithmetic misses is the real freshness cost: **the re-indexing pipeline and its owner**. Detecting changed documents, re-ingesting, re-chunking, re-embedding, and swapping index entries is an engineered, scheduled (or event-triggered) process — without it the index is a snapshot that goes quietly wrong within weeks. Also pin the embedding model: a model change forces re-embedding all 48M tokens (trivial here at ~\\$4.80, a real bill on a multi-million-document corpus — and always a full pipeline run).\n\n**Step 4 — proposal language.** *\"Run cost scales linearly with usage at ≈ \\$0.011 per question under current pricing — ≈ \\$100/month in the pilot and ≈ \\$600/month at forecast adoption — and we will re-validate against live pricing and alert at 150% of forecast volume. The build budget is dominated by ingestion and evaluation engineering, not model costs. We include a nightly re-indexing pipeline as a named deliverable with a named owner, because answer freshness is an ongoing obligation, not a launch-day property.\"*",
+      "rubric": {
+        "keyPoints": [
+          "Indexing computed (≈ \\$4.80) *and* correctly downgraded: ingestion engineering, not embedding spend, dominates the build",
+          "Per-question cost ≈ \\$0.011 with generation identified as the dominant term; monthly ≈ \\$96 pilot / ≈ \\$600 adoption (±10% rounding fine)",
+          "Churn re-embedding computed (≈ \\$0.19/month) with the insight that the real freshness cost is the pipeline and its owner, plus the pinned-embedding-model caveat",
+          "Proposal sentences quote both cost lines, name assumptions, include a volume alert, and make re-indexing a named deliverable"
+        ],
+        "pitfalls": [
+          "Quoting pilot run cost as if it were the adoption number — query cost is the line that scales with usage and surprises clients",
+          "Treating embedding spend as the build cost and under-quoting the ingestion/eval engineering that actually dominates",
+          "Forgetting that changing the embedding model forces a full re-index — pin the model in the architecture decision",
+          "Presenting a system with no re-indexing owner — \\$0.19/month of tokens but an unstaffed obligation means quiet staleness"
+        ],
+        "takeaways": [
+          "RAG cost is two lines: indexing (one-off renovation, dominated by engineering) and per-query (recurring utility bill, dominated by generation tokens and scaling with adoption)",
+          "Freshness is cheap in tokens and expensive in ownership — the re-indexing pipeline must be quoted, built, and owned"
+        ],
+        "transfer": "This two-line cost decomposition — one-off build versus usage-scaled run cost, plus an ongoing keep-it-true obligation — applies to nearly every data product: a data warehouse (modelling effort vs query compute vs pipeline maintenance), a BI dashboard estate, a search index, even a cache layer. The general skill is separating the costs that scale with *content*, with *usage*, and with *change* — and noticing that clients reliably budget the first, underestimate the second, and forget the third."
+      }
+    },
+    {
+      "id": "ex2",
+      "title": "Diagnose the stalled RAG PoC",
+      "estimatedMinutes": 30,
+      "scenario": "An engineering lead calls you in: their internal RAG demo \"worked great in the demo, but nobody trusts it now.\" You build a **gold set of 50 real questions** with human-verified answers and run the four-metric scorecard. Results: **faithfulness 0.58, answer relevance 0.85, context precision 0.45, context recall 0.62**. Inspecting the build you find: documents were chunked as **whole pages**; retrieval is **semantic-only** over an off-the-shelf embedding; the corpus **mixes general engineering docs with HR-restricted documents** in one index; and there has been **no re-ingestion since the PoC was built five months ago**.",
+      "givens": [
+        "Scorecard on the 50-question gold set: faithfulness 0.58 · answer relevance 0.85 · context precision 0.45 · context recall 0.62",
+        "Build facts: whole-page chunks; semantic-only retrieval, top-10 stuffed into the prompt; one mixed-permission index; no re-indexing for 5 months",
+        "Many user complaints are of the form \"it answered about the right topic but with the wrong detail\" — plus one report of a non-HR user seeing salary-band content",
+        "Client wants a prioritised fix list and a way to prove the lift"
+      ],
+      "tasks": [
+        "Read the scorecard: which half of the pipeline is failing, and in what order do the numbers tell you to work?",
+        "Map each build fact to the named failure mode it causes, including the one that is a security incident rather than a quality bug.",
+        "Produce the prioritised fix list with a one-line justification each.",
+        "Describe the re-test protocol that proves the lift to the client."
+      ],
+      "solution": "**Step 1 — read the metrics.** Context precision 0.45 and recall 0.62 say the **retriever is failing both ways**: nearly half of what's retrieved is noise, and over a third of the needed passages are never fetched. Low recall means many answers were *impossible* regardless of the generator — retrieval is the ceiling. Faithfulness 0.58 says the generator is also producing unsupported claims, but with this much retrieval noise you fix retrieval *first*, then re-measure faithfulness: a generator drowning in irrelevant pages and missing key passages is being set up to invent. Answer relevance 0.85 just means it answers the question asked — fluently, on-topic, and unreliably: the classic confidently-wrong profile that demos hide.\n\n**Step 2 — map facts to failure modes.** (a) **Whole-page chunks → poor chunking**: multi-topic pages dilute the meaning vectors — that drives both the precision *and* recall damage, and matches \"right topic, wrong detail.\" (b) **Semantic-only retrieval → bad retrieval** on exact terms (error codes, policy numbers); no hybrid, no reranking. (c) **Top-10 stuffed in → lost in the middle**: even when the right chunk is fetched, the model attends poorly to mid-context passages — retrieve wide, rerank, pass fewer, best first. (d) **Mixed-permission index → missing access controls**: the salary-band leak is a **security incident**, not a quality bug — the bot is currently an exfiltration tool that cites its sources. (e) **No re-ingestion → stale index**: five months of document changes are invisible, so some \"wrong\" answers are faithfully grounded in outdated text.\n\n**Step 3 — prioritised fixes.** 1) **Access control now** — filter retrieval by user entitlements before generation (or split the index); a leak outranks every quality concern and may have disclosure obligations. 2) **Re-chunk**: recursive/structural splitting to ~300-500 tokens with 10-20% overlap, swept against the retrieval metrics on the gold set — the biggest quality lever given the scorecard. 3) **Hybrid retrieval + reranker**: keyword + vector merged, retrieve ~50 candidates, rerank to the best ~5 — lifts precision and recall together and directly fights \"right topic, wrong passage.\" 4) **Pass fewer, better chunks** (post-rerank) to counter lost-in-the-middle. 5) **Stricter grounding prompt** (\"answer only from context; quote figures; say you cannot confirm if absent\") — then re-measure faithfulness once retrieval is fixed. 6) **Stand up the re-indexing pipeline** with an owner and a freshness SLA.\n\n**Step 4 — prove the lift.** Freeze the 50-question gold set as the regression baseline (extend toward ~100 with newly-failing cases as they appear). Re-run the full scorecard after each fix lands — not just at the end — so each improvement is attributable: expect the chunking + hybrid + rerank work to move precision/recall first, then the prompt work to move faithfulness. Report before/after per metric to the client, and hand over the harness itself: the eval set, not the demo, is what separates this from a weekend prototype.",
+      "rubric": {
+        "keyPoints": [
+          "Scorecard read correctly: low precision *and* recall → retrieval is the primary failure and the ceiling; faithfulness re-measured after retrieval is fixed; high answer-relevance recognised as the confidently-wrong mask",
+          "All five build facts mapped to named failure modes: poor chunking, bad retrieval (no hybrid/rerank), lost in the middle, missing access controls, stale index",
+          "Access control prioritised first as a security incident, not queued behind quality work",
+          "Re-test protocol: frozen gold set as regression baseline, per-fix re-measurement, before/after metrics as the deliverable"
+        ],
+        "pitfalls": [
+          "Reaching for a stronger/cleverer LLM first — a perfect generator cannot rescue irrelevant retrieved passages",
+          "Fixing faithfulness with prompt work while recall is 0.62 — many answers were impossible no matter what the generator does",
+          "Treating the permission leak as a quality bug to batch with the rest instead of an immediate security fix",
+          "Improving 'by feel' without the frozen gold set, leaving no way to attribute or prove the lift"
+        ],
+        "takeaways": [
+          "Metric decomposition turns 'it's unreliable' into a work order: precision/recall point at the retriever, faithfulness at the generator — fix in that order",
+          "The eval harness is the durable deliverable: it catches the confidently-wrong system a demo can never expose"
+        ],
+        "transfer": "This is instrumented differential diagnosis: decompose an opaque end-to-end failure into stage-level metrics, fix the upstream stage first, and re-measure after every change. It's the same discipline as debugging a conversion funnel (traffic → landing → checkout), profiling a slow service (network vs query vs render), or triaging a failing data pipeline stage by stage. The universal rule: never accept an end-to-end score as a diagnosis — find the stage metrics, because the upstream stage is the ceiling on everything below it."
+      }
+    },
+    {
+      "id": "ex3",
+      "title": "RAG, fine-tuning, or long-context? Route three client asks",
+      "estimatedMinutes": 25,
+      "scenario": "In one week, three clients bring you 'AI on our documents' requests:\n\n**A — Boutique law firm:** wants an assistant for one practice area's reference material — a stable ~80-page internal playbook updated roughly once a year. \"We were told we need RAG with a vector database.\"\n\n**B — SaaS company:** 60,000 help-centre and product articles, updated daily, to power a support copilot. Agents must see **source links** on every suggested answer. They already run Postgres and Elasticsearch.\n\n**C — Insurance group:** \"Fine-tune a model on all our policy documents so it knows our products **and** always answers in our regulated response format.\" Policies change quarterly; the response format almost never changes; volume is high.",
+      "givens": [
+        "A: ~80 pages, static (annual updates), small team of users",
+        "B: 60k articles (≈ several hundred thousand chunks), daily changes, citation requirement, existing Postgres + Elasticsearch estate",
+        "C: large changing corpus (policies, quarterly) + strict stable output format, high volume; stakeholder has pre-chosen fine-tuning",
+        "Rule of thumb from the module: RAG injects knowledge; fine-tuning teaches behaviour/format; long-context = paste it all in"
+      ],
+      "tasks": [
+        "Route each client to RAG / fine-tuning / long-context (or a combination), with a two-sentence justification each.",
+        "For B, choose the storage/retrieval layer given their existing estate, and justify it.",
+        "For C, write the sentences you'd use to redirect the stakeholder from 'fine-tune on our documents' without losing the deal.",
+        "State the one promise you will not make to any of the three."
+      ],
+      "solution": "**A → long-context (no RAG, no vector DB).** Eighty static pages fit comfortably in a modern context window: paste the playbook into the prompt and you're done — no ingestion, chunking, index, or re-indexing machinery for a document that changes annually. Telling them they *don't* need the RAG build they were sold costs you a small project and buys the credibility that wins the bigger one later; the corollary in the module is explicit — if the knowledge base fits in the window and rarely changes, skip RAG entirely.\n\n**B → RAG, full pipeline.** Large (hundreds of thousands of chunks), private, changes daily, citations mandatory: this is RAG's exact profile — knowledge injected at query time, updated by re-indexing, with source links as the trust mechanism. Daily change means the re-indexing pipeline (event-triggered or at least nightly) is a named deliverable with an owner from day one.\n\n**B's storage layer → add vectors to the existing Elasticsearch/OpenSearch estate.** They already operate it, so they reuse operational muscle (backups, security, scaling) — and it gives **hybrid search for free**, which a support corpus full of error codes and product names needs anyway; add a reranker on the candidate set. A dedicated vector DB at this scale is premature; pgvector would also work but the search platform wins because hybrid comes built in.\n\n**C → split the request: RAG for knowledge + light fine-tuning (after prompting) for format.** The ask conflates two different problems. Product/policy *knowledge* changes quarterly → RAG, so updates are an index refresh, not a retraining cycle. The regulated response *format* is stable, narrow, high-volume *behaviour* → exactly the legitimate fine-tuning profile — but exhaust prompting + output validation first and fine-tune only if measured format compliance plateaus. The redirect sentences: *\"Fine-tuning teaches the model how to behave, not what's true — if we bake your policies into the weights, the model is stale at the first quarterly update and we're retraining four times a year, and it will still occasionally invent details without citations. Retrieval keeps it current for a fraction of the cost, and we reserve fine-tuning for the part it's actually good at: locking in your regulated response format.\"*\n\n**The promise withheld from all three: zero hallucination.** RAG reduces hallucination sharply and makes it checkable via citations; long-context and fine-tuning don't eliminate it either. Each proposal commits to *groundedness with sources and a measured faithfulness target on a gold set* — a method, not perfection — and no accuracy number is quoted before it's measured on their data.",
+      "rubric": {
+        "keyPoints": [
+          "A routed to long-context with the small-static-corpus justification — and the credibility value of de-scoping named",
+          "B routed to RAG with the large/changing/citations profile, hybrid retrieval on the existing Elastic estate, and re-indexing as an owned deliverable",
+          "C split correctly: knowledge → RAG, stable format → prompt-first-then-fine-tune; the conflation diagnosed rather than accepted",
+          "Zero-hallucination withheld everywhere; commitment framed as groundedness + citations + measured faithfulness"
+        ],
+        "pitfalls": [
+          "Building the vector-DB RAG stack for client A because that's what they asked for — the named over-build",
+          "Accepting C's 'fine-tune on our documents' framing — the field's most expensive misconception (stale, costly, still hallucinates, no citations)",
+          "Choosing a dedicated vector DB for B without counting chunks or noticing the existing search platform that gives hybrid for free",
+          "Promising any client a hallucination-free or pre-measured-accuracy system"
+        ],
+        "takeaways": [
+          "The three approaches answer different questions — what the model knows (RAG), how it behaves (fine-tuning), what you paste in (long-context) — and most real requests need them correctly split, not picked by buzzword",
+          "Recommending the cheaper sufficient option is a competitive weapon: it converts a small honest 'no' into the trust that wins the flagship mission"
+        ],
+        "transfer": "Decomposing a pre-packaged solution request back into its underlying problems — then routing each to its own cheapest adequate mechanism — is the consultant's core move everywhere: 'we need Kubernetes' often splits into deploy-frequency and scaling problems with simpler answers; 'we need a data lake' into three reporting needs; 'we need a mobile app' into one notification flow. The pattern: never argue with the requested artefact — name the distinct jobs it's supposed to do, route each job honestly, and the right architecture (and the client's trust) follows."
+      }
+    }
+  ]
+}

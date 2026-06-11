@@ -1,0 +1,504 @@
+{
+ "id": "06",
+ "title": "Deep Learning Essentials",
+ "weeks": [
+  12,
+  13
+ ],
+ "part": "III — Deep Learning & Modern AI",
+ "partIndex": 3,
+ "addon": false,
+ "pitchHtml": "<p>Deep learning is the engine behind the AI that makes headlines — image recognition, speech, translation, and ultimately the large language models in later modules. But for a tech lead, the headline is also the trap: deep learning is <em>more expensive, more data-hungry, and harder to staff</em> than the classical ML of <a class=\"wikilink\" data-module=\"04\" href=\"#/module/04\">Classical ML &#x26; Forecasting in Practice</a>, and it only earns that cost on a specific kind of problem. This module gives you the intuition — what a neural network actually is, how it learns, why it needs GPUs — without a single derivation. The one idea to walk away with, the one that reshapes every cost estimate, is <strong>transfer learning</strong>: you almost never train a deep model from scratch; you start from a pretrained one and adapt it. That single move collapses the data, compute, and talent bill from \"research lab\" to \"a small team in a few weeks\" — and it's the difference between a deep-learning mission you can sell and one you can't.</p>",
+ "prev": "05",
+ "next": "07",
+ "sectionCount": 8,
+ "quizCount": 8,
+ "exerciseCount": 2,
+ "sections": [
+  {
+   "id": "learning-objectives",
+   "kind": "objectives",
+   "title": "Learning Objectives",
+   "blocks": [
+    {
+     "type": "checklist",
+     "checklistId": "06/learning-objectives/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Decide when <strong>deep learning beats classical ML</strong> — and, just as often, when it doesn't — from the data type and scale"
+      },
+      {
+       "id": "1",
+       "html": "Explain a neural network to a stakeholder as <strong>stacked transformations that learn representations</strong>, with no equations"
+      },
+      {
+       "id": "2",
+       "html": "Describe training intuitively (loss, gradient descent, backprop as \"blame assignment\") and name the knobs — epochs, batch size, learning rate"
+      },
+      {
+       "id": "3",
+       "html": "Estimate the <strong>compute/GPU cost</strong> of a deep-learning effort and factor it into a quote"
+      },
+      {
+       "id": "4",
+       "html": "Explain <strong>transfer learning &#x26; fine-tuning</strong> and why they collapse the cost and data needed for a deep-learning mission"
+      },
+      {
+       "id": "5",
+       "html": "Recognise <strong>embeddings</strong> as the reusable by-product of deep models (forward-link to <a class=\"wikilink\" data-module=\"08\" href=\"#/module/08\">NLP &#x26; Embeddings in Practice</a>)"
+      },
+      {
+       "id": "6",
+       "html": "Scope a transfer-learning classifier, a feasibility study, or a \"add a pretrained capability\" mission with a named deliverable and buyer"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "key-concepts",
+   "kind": "concepts",
+   "title": "Key Concepts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "when-deep-learning-beats-classical-ml--and-when-it-doesnt",
+     "number": 1,
+     "title": "When Deep Learning Beats Classical ML — and When It Doesn't",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>This is the decision that matters most, and it is mostly settled by <strong>the shape of your data</strong>, not by ambition. Deep learning's superpower is learning useful features <em>automatically</em> from raw, <strong>unstructured</strong> inputs — the pixels of an image, the waveform of audio, the raw characters of text — where hand-engineering features is hopeless. On <strong>structured / tabular</strong> data, that superpower is wasted: the features are already columns, and gradient-boosted trees beat deep nets on cost, speed, and usually accuracy too (the core lesson of <a class=\"wikilink\" data-module=\"04\" href=\"#/module/04\">Classical ML &#x26; Forecasting in Practice</a>).</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Your data is…</th><th align=\"left\">Default to</th><th align=\"left\">Why</th></tr></thead><tbody><tr><td align=\"left\"><strong>Tabular</strong> (rows &#x26; columns, mixed types)</td><td align=\"left\"><strong>Gradient-boosted trees</strong> (XGBoost/LightGBM/CatBoost)</td><td align=\"left\">Cheaper, faster, explainable, usually <em>more</em> accurate — no GPU</td></tr><tr><td align=\"left\"><strong>Images / video</strong></td><td align=\"left\"><strong>Deep learning</strong> (CNNs / vision transformers)</td><td align=\"left\">Raw pixels need learned features; classical ML can't see</td></tr><tr><td align=\"left\"><strong>Audio / speech</strong></td><td align=\"left\"><strong>Deep learning</strong></td><td align=\"left\">Waveforms/spectrograms are unstructured; covered in <a class=\"wikilink\" data-module=\"07\" href=\"#/module/07\">Computer Vision &#x26; Multimodal in Practice</a></td></tr><tr><td align=\"left\"><strong>Raw text / language</strong></td><td align=\"left\"><strong>Deep learning</strong> (transformers, embeddings)</td><td align=\"left\">Meaning lives in sequence &#x26; context — see <a class=\"wikilink\" data-module=\"08\" href=\"#/module/08\">NLP &#x26; Embeddings in Practice</a></td></tr><tr><td align=\"left\"><strong>Small data</strong> (hundreds–low thousands of rows)</td><td align=\"left\"><strong>Classical ML</strong> (or transfer learning, never from-scratch DL)</td><td align=\"left\">Deep nets overfit badly without lots of data</td></tr><tr><td align=\"left\"><strong>Massive data + complex patterns</strong></td><td align=\"left\"><strong>Deep learning</strong></td><td align=\"left\">DL keeps improving with scale where classical ML plateaus</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Two forces decide it: <strong>data type</strong> and <strong>data scale</strong>. Unstructured data (you can't write the features by hand) pushes toward deep learning; large scale with rich patterns lets deep learning keep climbing while classical methods flatten out. If your data is tabular <em>and</em> modest in size — which describes the majority of business problems — classical ML is not the cautious choice, it's usually the <em>better</em> one. Reach for deep learning when the input is something a human perceives rather than tabulates.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The senior framing for a stakeholder who asks \"shouldn't we use deep learning, it's more powerful?\": <strong>power you don't need is just cost.</strong> Deep learning is essential for perception and language and overkill for a spreadsheet. Most roadmaps have some of each — route each problem by its data, not by what sounds advanced.</p>"
+      }
+     ]
+    },
+    {
+     "id": "what-a-neural-network-actually-is",
+     "number": 2,
+     "title": "What a Neural Network Actually Is",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Strip away the mystique and a neural network is a <strong>stack of simple transformations</strong>, each one reshaping the data a little, learned end-to-end so the final output is useful.</p>\n<ul>\n<li><strong>Layers as stacked transformations.</strong> The input (pixels, numbers, a text encoding) passes through a sequence of layers. Each layer takes the previous layer's output, multiplies it by a set of <strong>weights</strong>, adds a bias, and passes it through a simple <strong>activation function</strong>. Stack enough of these and the network can represent very intricate input→output relationships.</li>\n<li><strong>Weights are what's learned.</strong> A weight is a dial. A network has millions or billions of them. \"Training\" means turning all those dials until the output is right. The weights <em>are</em> the model — everything the network \"knows\" is encoded in their values.</li>\n<li><strong>Activation functions add the bends.</strong> Without them, stacking layers would just be one big linear transformation — a straight line, no matter how many layers (this is why <a class=\"wikilink\" data-module=\"04\" href=\"#/module/04\">Classical ML &#x26; Forecasting in Practice</a> noted a straight line can't fit a wiggly boundary). The activation (today usually <strong>ReLU</strong> — \"keep positives, zero out negatives\") lets each layer bend the space, so the stack can fit curves, corners, and interactions.</li>\n<li><strong>\"Learning representations\" — the key phrase.</strong> This is the real magic and the reason deep learning wins on unstructured data. Early layers learn crude features (edges in an image, character patterns in text); deeper layers combine them into richer concepts (shapes → objects → \"a cat\"). The network <em>invents its own features</em> instead of you hand-crafting them — which is exactly the labour classical ML asks of you in feature engineering (<a class=\"wikilink\" data-module=\"03\" href=\"#/module/03\">Working with Data: Sources, Quality &#x26; Feature Engineering</a>).</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Picture an assembly line. Raw material (pixels) enters; each station (layer) applies one simple operation and passes the result on; by the end, a recognisable product (a label, a translation) comes out. Nobody programmed \"what a cat looks like\" — the line <em>learned</em> the right operations from millions of examples. \"Deep\" just means the line has many stations; depth is what lets it build complex concepts from simple parts. That's the whole idea — no equations required.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The only formula worth seeing, just to anchor \"weights and a bend,\" is what one layer does:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\text{output} = \\text{activation}(W \\cdot \\text{input} + b)",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mtext>output</mtext><mo>=</mo><mtext>activation</mtext><mo stretchy=\"false\">(</mo><mi>W</mi><mo>⋅</mo><mtext>input</mtext><mo>+</mo><mi>b</mi><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">\\text{output} = \\text{activation}(W \\cdot \\text{input} + b)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8095em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\">output</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\"><span class=\"mord\">activation</span></span><span class=\"mopen\">(</span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">W</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">⋅</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.8623em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\">input</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\">b</span><span class=\"mclose\">)</span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>That's it. A network is this, repeated, with the <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>W</mi></mrow><annotation encoding=\"application/x-tex\">W</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.1389em;\">W</span></span></span></span>'s and <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>b</mi></mrow><annotation encoding=\"application/x-tex\">b</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord mathnormal\">b</span></span></span></span>'s learned. Everything else is engineering on top of this one move.</p>\n<p><strong>The activation functions you'll hear named.</strong> The activation is the \"bend\" — and a handful are standard. You won't choose them, but you should recognise each, what it's for, and its catch:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Activation</th><th align=\"left\">Formula</th><th align=\"left\">Use case</th><th align=\"left\">Why / catch</th></tr></thead><tbody><tr><td align=\"left\"><strong>Sigmoid</strong></td><td align=\"left\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>σ</mi><mo stretchy=\"false\">(</mo><mi>x</mi><mo stretchy=\"false\">)</mo><mo>=</mo><mstyle scriptlevel=\"0\" displaystyle=\"true\"><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>x</mi></mrow></msup></mrow></mfrac></mstyle></mrow><annotation encoding=\"application/x-tex\">\\sigma(x)=\\dfrac{1}{1+e^{-x}}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">σ</span><span class=\"mopen\">(</span><span class=\"mord mathnormal\">x</span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.0908em;vertical-align:-0.7693em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3214em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\">1</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">e</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6973em;\"><span style=\"top:-2.989em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">−</span><span class=\"mord mathnormal mtight\">x</span></span></span></span></span></span></span></span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\">1</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.7693em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></td><td align=\"left\"><strong>Binary</strong> output layer — squashes any number to a probability in <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mo stretchy=\"false\">(</mo><mn>0</mn><mo separator=\"true\">,</mo><mn>1</mn><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">(0,1)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mopen\">(</span><span class=\"mord\">0</span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\">1</span><span class=\"mclose\">)</span></span></span></span></td><td align=\"left\">Saturates at the ends (slope → 0), so gradients vanish in deep stacks — avoid in hidden layers</td></tr><tr><td align=\"left\"><strong>Tanh</strong></td><td align=\"left\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mstyle scriptlevel=\"0\" displaystyle=\"true\"><mfrac><mrow><msup><mi>e</mi><mi>x</mi></msup><mo>−</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>x</mi></mrow></msup></mrow><mrow><msup><mi>e</mi><mi>x</mi></msup><mo>+</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>x</mi></mrow></msup></mrow></mfrac></mstyle></mrow><annotation encoding=\"application/x-tex\">\\dfrac{e^{x}-e^{-x}}{e^{x}+e^{-x}}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:2.2177em;vertical-align:-0.7693em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.4483em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathnormal\">e</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.5904em;\"><span style=\"top:-2.989em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">x</span></span></span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">e</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6973em;\"><span style=\"top:-2.989em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">−</span><span class=\"mord mathnormal mtight\">x</span></span></span></span></span></span></span></span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathnormal\">e</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6644em;\"><span style=\"top:-3.063em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">x</span></span></span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">e</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.7713em;\"><span style=\"top:-3.063em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">−</span><span class=\"mord mathnormal mtight\">x</span></span></span></span></span></span></span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.7693em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></td><td align=\"left\">Zero-centred alternative to sigmoid, range <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mo stretchy=\"false\">(</mo><mo>−</mo><mn>1</mn><mo separator=\"true\">,</mo><mn>1</mn><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">(-1,1)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mopen\">(</span><span class=\"mord\">−</span><span class=\"mord\">1</span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\">1</span><span class=\"mclose\">)</span></span></span></span></td><td align=\"left\">Outputs centred on 0 ease optimisation; still saturates at the extremes</td></tr><tr><td align=\"left\"><strong>ReLU</strong></td><td align=\"left\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>max</mi><mo>⁡</mo><mo stretchy=\"false\">(</mo><mn>0</mn><mo separator=\"true\">,</mo><mi>x</mi><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">\\max(0,x)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mop\">max</span><span class=\"mopen\">(</span><span class=\"mord\">0</span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\">x</span><span class=\"mclose\">)</span></span></span></span></td><td align=\"left\"><strong>Default for hidden layers</strong></td><td align=\"left\">Cheap (a threshold), doesn't saturate for positives → mitigates vanishing gradients. Catch: a neuron stuck at negative inputs outputs 0 forever — the <strong>\"dying ReLU\"</strong></td></tr><tr><td align=\"left\"><strong>Leaky ReLU</strong></td><td align=\"left\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>max</mi><mo>⁡</mo><mo stretchy=\"false\">(</mo><mi>α</mi><mi>x</mi><mo separator=\"true\">,</mo><mi>x</mi><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">\\max(\\alpha x, x)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mop\">max</span><span class=\"mopen\">(</span><span class=\"mord mathnormal\" style=\"margin-right:0.0037em;\">α</span><span class=\"mord mathnormal\">x</span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\">x</span><span class=\"mclose\">)</span></span></span></span>, small <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>α</mi></mrow><annotation encoding=\"application/x-tex\">\\alpha</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0037em;\">α</span></span></span></span> (e.g. 0.01)</td><td align=\"left\">Drop-in for ReLU when neurons die</td><td align=\"left\">The small negative slope keeps a trickle of gradient alive, so neurons can recover — fixes dying ReLU</td></tr><tr><td align=\"left\"><strong>Softmax</strong></td><td align=\"left\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mstyle scriptlevel=\"0\" displaystyle=\"true\"><mfrac><msup><mi>e</mi><msub><mi>z</mi><mi>i</mi></msub></msup><mrow><munder><mo>∑</mo><mi>j</mi></munder><msup><mi>e</mi><msub><mi>z</mi><mi>j</mi></msub></msup></mrow></mfrac></mstyle></mrow><annotation encoding=\"application/x-tex\">\\dfrac{e^{z_i}}{\\sum_j e^{z_j}}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:2.4632em;vertical-align:-1.1218em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3414em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mop\"><span class=\"mop op-symbol small-op\" style=\"position:relative;top:0em;\">∑</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.162em;\"><span style=\"top:-2.4003em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\" style=\"margin-right:0.0572em;\">j</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.4358em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">e</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6065em;\"><span style=\"top:-3.0051em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\" style=\"margin-right:0.044em;\">z</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3281em;\"><span style=\"top:-2.357em;margin-left:-0.044em;margin-right:0.0714em;\"><span class=\"pstrut\" style=\"height:2.5em;\"></span><span class=\"sizing reset-size3 size1 mtight\"><span class=\"mord mathnormal mtight\" style=\"margin-right:0.0572em;\">j</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2819em;\"><span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathnormal\">e</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6644em;\"><span style=\"top:-3.063em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\" style=\"margin-right:0.044em;\">z</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3281em;\"><span style=\"top:-2.357em;margin-left:-0.044em;margin-right:0.0714em;\"><span class=\"pstrut\" style=\"height:2.5em;\"></span><span class=\"sizing reset-size3 size1 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.143em;\"><span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.1218em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></td><td align=\"left\"><strong>Multi-class</strong> output layer</td><td align=\"left\">Turns a vector of scores into a probability distribution — all outputs positive and summing to 1</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Sigmoid and tanh \"squash\" — gentle in the middle, flat at the ends; that flatness is exactly what kills gradients deep in a network, which is why <strong>ReLU</strong> (\"keep positives, zero the rest\") became the hidden-layer default — it stays responsive and costs almost nothing. The output layer is chosen by the <em>task</em>: <strong>sigmoid</strong> for one yes/no probability, <strong>softmax</strong> for \"pick one of many\" — it exponentiates each score (making them positive) then normalises so they sum to 1, giving a clean probability distribution over the classes.</p>"
+      }
+     ]
+    },
+    {
+     "id": "how-it-learns-intuition-no-derivation",
+     "number": 3,
+     "title": "How It Learns (Intuition, No Derivation)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Training a neural network is the same loop you met for any model in <a class=\"wikilink\" data-module=\"02\" href=\"#/module/02\">Math &#x26; Stats Intuition for Leaders</a>, scaled up:</p>\n<ol>\n<li><strong>Loss</strong> — a single number measuring how wrong the network's predictions are on the training data. Lower is better. Training = making the loss small. The choice of loss follows the task. For <strong>classification</strong> it's <strong>cross-entropy</strong>:</li>\n</ol>"
+      },
+      {
+       "type": "formula",
+       "tex": "L = -\\sum_k y_k \\log(\\hat{y}_k)",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mi>L</mi><mo>=</mo><mo>−</mo><munder><mo>∑</mo><mi>k</mi></munder><msub><mi>y</mi><mi>k</mi></msub><mi>log</mi><mo>⁡</mo><mo stretchy=\"false\">(</mo><msub><mover accent=\"true\"><mi>y</mi><mo>^</mo></mover><mi>k</mi></msub><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">L = -\\sum_k y_k \\log(\\hat{y}_k)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\">L</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.3521em;vertical-align:-1.3021em;\"></span><span class=\"mord\">−</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mop op-limits\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.05em;\"><span style=\"top:-1.8479em;margin-left:0em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\" style=\"margin-right:0.0315em;\">k</span></span></span><span style=\"top:-3.05em;\"><span class=\"pstrut\" style=\"height:3.05em;\"></span><span><span class=\"mop op-symbol large-op\">∑</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3021em;\"><span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3361em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\" style=\"margin-right:0.0315em;\">k</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mop\">lo<span style=\"margin-right:0.0139em;\">g</span></span><span class=\"mopen\">(</span><span class=\"mord\"><span class=\"mord accent\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6944em;\"><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span></span><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"accent-body\" style=\"left:-0.1944em;\"><span class=\"mord\">^</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1944em;\"><span></span></span></span></span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3361em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\" style=\"margin-right:0.0315em;\">k</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mclose\">)</span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>where <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>y</mi><mi>k</mi></msub></mrow><annotation encoding=\"application/x-tex\">y_k</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3361em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\" style=\"margin-right:0.0315em;\">k</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> is the true label (1 for the correct class, 0 otherwise) and <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mover accent=\"true\"><mi>y</mi><mo>^</mo></mover><mi>k</mi></msub></mrow><annotation encoding=\"application/x-tex\">\\hat{y}_k</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord accent\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6944em;\"><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span></span><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"accent-body\" style=\"left:-0.1944em;\"><span class=\"mord\">^</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1944em;\"><span></span></span></span></span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3361em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\" style=\"margin-right:0.0315em;\">k</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> is the model's predicted probability for class <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>k</mi></mrow><annotation encoding=\"application/x-tex\">k</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0315em;\">k</span></span></span></span> — so the loss is simply <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mo>−</mo><mi>log</mi><mo>⁡</mo><mo stretchy=\"false\">(</mo><mtext>probability the model gave the right answer</mtext><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">-\\log(\\text{probability the model gave the right answer})</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">−</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mop\">lo<span style=\"margin-right:0.0139em;\">g</span></span><span class=\"mopen\">(</span><span class=\"mord text\"><span class=\"mord\">probability the model gave the right answer</span></span><span class=\"mclose\">)</span></span></span></span>, which blows up when the model is confidently wrong. For <strong>regression</strong> (predicting a number) it's <strong>mean squared error</strong>, the average of <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mo stretchy=\"false\">(</mo><msub><mover accent=\"true\"><mi>y</mi><mo>^</mo></mover><mi>i</mi></msub><mo>−</mo><msub><mi>y</mi><mi>i</mi></msub><msup><mo stretchy=\"false\">)</mo><mn>2</mn></msup></mrow><annotation encoding=\"application/x-tex\">(\\hat{y}_i - y_i)^2</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mopen\">(</span><span class=\"mord\"><span class=\"mord accent\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6944em;\"><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span></span><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"accent-body\" style=\"left:-0.1944em;\"><span class=\"mord\">^</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1944em;\"><span></span></span></span></span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.0641em;vertical-align:-0.25em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">y</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3117em;\"><span style=\"top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">i</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mclose\"><span class=\"mclose\">)</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.8141em;\"><span style=\"top:-3.063em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\">2</span></span></span></span></span></span></span></span></span></span></span> over the examples — the same MSE you met in <a class=\"wikilink\" data-module=\"04\" href=\"#/module/04\">Classical ML &#x26; Forecasting in Practice</a>.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Cross-entropy pairs naturally with <strong>softmax / sigmoid</strong> outputs (above): those produce probabilities, and cross-entropy is the right yardstick for \"how good is a predicted probability.\" Together they punish confident mistakes hard and produce a clean, well-behaved gradient — which is exactly why this pairing is the default for every classifier. MSE is the analogue for continuous targets: penalise the squared distance from the truth.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<ol start=\"2\">\n<li><strong>Gradient descent</strong> — the optimisation recap from <a class=\"wikilink\" data-module=\"02\" href=\"#/module/02\">Math &#x26; Stats Intuition for Leaders</a>: from where you are, find the downhill direction in \"loss space\" and take a small step. Repeat. The loss slides toward a minimum, the weights toward good values. The update rule every practitioner recognises is:</li>\n</ol>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\theta \\leftarrow \\theta - \\eta\\,\\nabla L(\\theta)",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mi>θ</mi><mo>←</mo><mi>θ</mi><mo>−</mo><mi>η</mi><mtext> </mtext><mi mathvariant=\"normal\">∇</mi><mi>L</mi><mo stretchy=\"false\">(</mo><mi>θ</mi><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">\\theta \\leftarrow \\theta - \\eta\\,\\nabla L(\\theta)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0278em;\">θ</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">←</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.7778em;vertical-align:-0.0833em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0278em;\">θ</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">η</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\">∇</span><span class=\"mord mathnormal\">L</span><span class=\"mopen\">(</span><span class=\"mord mathnormal\" style=\"margin-right:0.0278em;\">θ</span><span class=\"mclose\">)</span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>where <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>θ</mi></mrow><annotation encoding=\"application/x-tex\">\\theta</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0278em;\">θ</span></span></span></span> is the full set of weights, <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi mathvariant=\"normal\">∇</mi><mi>L</mi><mo stretchy=\"false\">(</mo><mi>θ</mi><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">\\nabla L(\\theta)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">∇</span><span class=\"mord mathnormal\">L</span><span class=\"mopen\">(</span><span class=\"mord mathnormal\" style=\"margin-right:0.0278em;\">θ</span><span class=\"mclose\">)</span></span></span></span> is the <strong>gradient</strong> (the uphill direction of the loss — so we step the opposite way), and <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>η</mi></mrow><annotation encoding=\"application/x-tex\">\\eta</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">η</span></span></span></span> (eta) is the <strong>learning rate</strong>, the size of the step. In practice you don't compute the gradient on all the data at once: <strong>SGD / mini-batch</strong> estimates it from one small batch of examples at a time — far cheaper and, helpfully, the noise helps escape bad spots. The learning rate is the knob that bites: <strong>too large</strong> and the steps overshoot the minimum and the loss diverges or oscillates; <strong>too small</strong> and training crawls and may stall. <em>(Deeper math → <span class=\"vault-ref\" title=\"In the Obsidian vault: 09 - Neural Network Foundations\">Neural Network Foundations</span> in the AI Scientist path.)</em></p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>The gradient is the slope under your feet; the minus sign says \"walk downhill\"; <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>η</mi></mrow><annotation encoding=\"application/x-tex\">\\eta</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">η</span></span></span></span> is your stride. Long strides cross the valley faster but can leap clean over the bottom and bounce up the far wall; tiny strides never miss but take forever. Tuning <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>η</mi></mrow><annotation encoding=\"application/x-tex\">\\eta</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">η</span></span></span></span> is finding the stride that descends fastest without overshooting — which is why it's the single most fiddly knob below.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<ol start=\"3\">\n<li><strong>Backpropagation</strong> — the part everyone names and few explain. With millions of weights, you need to know <em>how much each one contributed to the error</em> so you know which dials to turn. Backprop is an efficient algorithm that does exactly this <strong>blame assignment</strong>: it pushes the error backward through the layers and computes each weight's share of the blame, so gradient descent can adjust every dial in one pass. It is the <strong>chain rule</strong> applied layer by layer — for a single weight the gradient has the shape</li>\n</ol>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\frac{\\partial L}{\\partial w} = \\frac{\\partial L}{\\partial a}\\cdot\\frac{\\partial a}{\\partial z}\\cdot\\frac{\\partial z}{\\partial w}",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mfrac><mrow><mi mathvariant=\"normal\">∂</mi><mi>L</mi></mrow><mrow><mi mathvariant=\"normal\">∂</mi><mi>w</mi></mrow></mfrac><mo>=</mo><mfrac><mrow><mi mathvariant=\"normal\">∂</mi><mi>L</mi></mrow><mrow><mi mathvariant=\"normal\">∂</mi><mi>a</mi></mrow></mfrac><mo>⋅</mo><mfrac><mrow><mi mathvariant=\"normal\">∂</mi><mi>a</mi></mrow><mrow><mi mathvariant=\"normal\">∂</mi><mi>z</mi></mrow></mfrac><mo>⋅</mo><mfrac><mrow><mi mathvariant=\"normal\">∂</mi><mi>z</mi></mrow><mrow><mi mathvariant=\"normal\">∂</mi><mi>w</mi></mrow></mfrac></mrow><annotation encoding=\"application/x-tex\">\\frac{\\partial L}{\\partial w} = \\frac{\\partial L}{\\partial a}\\cdot\\frac{\\partial a}{\\partial z}\\cdot\\frac{\\partial z}{\\partial w}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:2.0574em;vertical-align:-0.686em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3714em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\" style=\"margin-right:0.0556em;\">∂</span><span class=\"mord mathnormal\" style=\"margin-right:0.0269em;\">w</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\" style=\"margin-right:0.0556em;\">∂</span><span class=\"mord mathnormal\">L</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.0574em;vertical-align:-0.686em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3714em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\" style=\"margin-right:0.0556em;\">∂</span><span class=\"mord mathnormal\">a</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\" style=\"margin-right:0.0556em;\">∂</span><span class=\"mord mathnormal\">L</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">⋅</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.0574em;vertical-align:-0.686em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3714em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\" style=\"margin-right:0.0556em;\">∂</span><span class=\"mord mathnormal\" style=\"margin-right:0.044em;\">z</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\" style=\"margin-right:0.0556em;\">∂</span><span class=\"mord mathnormal\">a</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">⋅</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.0574em;vertical-align:-0.686em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3714em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\" style=\"margin-right:0.0556em;\">∂</span><span class=\"mord mathnormal\" style=\"margin-right:0.0269em;\">w</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\" style=\"margin-right:0.0556em;\">∂</span><span class=\"mord mathnormal\" style=\"margin-right:0.044em;\">z</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>read right-to-left: how the weight <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>w</mi></mrow><annotation encoding=\"application/x-tex\">w</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0269em;\">w</span></span></span></span> moves the layer's pre-activation <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>z</mi></mrow><annotation encoding=\"application/x-tex\">z</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.044em;\">z</span></span></span></span>, how <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>z</mi></mrow><annotation encoding=\"application/x-tex\">z</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.044em;\">z</span></span></span></span> moves the activation <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>a</mi></mrow><annotation encoding=\"application/x-tex\">a</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mord mathnormal\">a</span></span></span></span>, how <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>a</mi></mrow><annotation encoding=\"application/x-tex\">a</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mord mathnormal\">a</span></span></span></span> moves the loss <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>L</mi></mrow><annotation encoding=\"application/x-tex\">L</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6833em;\"></span><span class=\"mord mathnormal\">L</span></span></span></span> — multiplied together to give the weight's total influence on the error. <strong>You do not need the full derivation</strong> — it's this chain rule applied carefully across every layer, and it's automatic in every framework. The leader's takeaway: backprop is \"who's responsible for this mistake, and by how much,\" computed cheaply for every weight at once.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Blame flows backward like a chain of responsibility: the loss blames the output, the output blames the activation, the activation blames the weight — each link a simple \"how much does this nudge that?\" multiplied down the chain. Because the links are <em>multiplied</em>, if several are tiny the product vanishes — that's the \"vanishing gradients\" you'll hear about, and the reason ReLU (§2) replaced the saturating sigmoid in hidden layers. <em>(Full derivation → <span class=\"vault-ref\" title=\"In the Obsidian vault: 09 - Neural Network Foundations\">Neural Network Foundations</span> in the AI Scientist path.)</em></p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Imagine a relay race where the team finishes badly. Backprop walks back down the line asking each runner \"how much of the lost time was yours?\" — then each adjusts for next time. Gradient descent is running the race again and again, everyone improving their share, until the team is fast. You will hear engineers say \"the gradients vanished\" or \"the loss won't go down\" — that's this loop failing, and it's their problem to fix, not yours to derive.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>The knobs a leader actually hears about.</strong> You don't tune these, but you'll sit in reviews where they're discussed, and you should know what they trade off:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Knob</th><th align=\"left\">Plain meaning</th><th align=\"left\">What it trades off</th></tr></thead><tbody><tr><td align=\"left\"><strong>Epoch</strong></td><td align=\"left\">One full pass over all the training data</td><td align=\"left\">More epochs = more learning, but eventually <strong>overfitting</strong> (§4) and more compute cost</td></tr><tr><td align=\"left\"><strong>Batch size</strong></td><td align=\"left\">How many examples the network looks at before updating weights</td><td align=\"left\">Bigger = faster on a GPU but needs more memory; affects stability</td></tr><tr><td align=\"left\"><strong>Learning rate</strong></td><td align=\"left\">How big a step gradient descent takes</td><td align=\"left\">Too high → training diverges/explodes; too low → trains forever. The single most fiddly knob</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>If a team says \"we just need more epochs\" to fix a quality problem, be sceptical — past a point that's how you <em>memorise</em> the training data, not how you improve.</p>\n<p><strong>Why it needs GPUs, and what that costs.</strong> All of the above is enormous amounts of matrix multiplication, repeated millions of times. <strong>GPUs</strong> (and TPUs) do matrix maths massively in parallel — they are to deep learning what an espresso machine is to a café: you <em>can</em> do it by hand (CPU), but not at any useful scale. The cost consequence is real and is the reason deep learning is in a different budget tier from classical ML:</p>\n<ul>\n<li>A boosted-tree model trains in minutes on a laptop CPU for ~€0. A deep model often needs <strong>GPU time billed by the hour</strong> (cloud GPUs run from a couple of euros to tens of euros per hour in 2026, depending on the chip).</li>\n<li><strong>The cost lives in training, not in using the model.</strong> Once trained, running (\"inference\") is comparatively cheap — but training a large model from scratch can mean <em>thousands of GPU-hours</em> (a five-to-seven-figure bill for frontier models). This is precisely the cost that <strong>transfer learning (§5) is designed to avoid</strong> — and why almost nobody trains from scratch.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "overfitting-in-deep-learning-and-the-practical-fixes",
+     "number": 4,
+     "title": "Overfitting in Deep Learning (and the Practical Fixes)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Overfitting — the model memorising the training data instead of learning the general pattern — was a risk in classical ML; in deep learning it's <em>acute</em>, because networks have so many weights they can memorise noise outright. The eval discipline from <a class=\"wikilink\" data-module=\"05\" href=\"#/module/05\">Model Evaluation, Validation &#x26; Experimentation</a> (a held-out test set, judged once) is how you <em>detect</em> it: training loss keeps dropping while validation loss starts rising — the model is getting better at the exam it's seen and worse at the real world.</p>\n<p>The practical fixes are intuition-level, and you should recognise them in a plan:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Fix</th><th align=\"left\">What it does</th><th align=\"left\">Plain intuition</th></tr></thead><tbody><tr><td align=\"left\"><strong>More data</strong></td><td align=\"left\">The single best cure</td><td align=\"left\">Harder to memorise a million examples than a thousand; more signal, less noise-fitting</td></tr><tr><td align=\"left\"><strong>Data augmentation</strong></td><td align=\"left\">Cheaply manufacture \"new\" data</td><td align=\"left\">Flip/rotate/crop images, paraphrase text — same label, more variety, so the model can't memorise exact inputs</td></tr><tr><td align=\"left\"><strong>Dropout</strong></td><td align=\"left\">Randomly switch off neurons during training</td><td align=\"left\">Forces the network not to over-rely on any one path — like cross-training a team so no single person is a point of failure</td></tr><tr><td align=\"left\"><strong>Early stopping</strong></td><td align=\"left\">Stop when validation loss stops improving</td><td align=\"left\">Don't keep training into the memorisation zone — quit while you're ahead</td></tr><tr><td align=\"left\"><strong>Transfer learning</strong></td><td align=\"left\">Start from a model that already generalises (§5)</td><td align=\"left\">The biggest practical fix of all — fewer weights to learn from your data means far less to overfit</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Overfitting is a student who memorised last year's exam answers and is lost when the questions change. Every fix above is a way of forcing genuine understanding instead of memorisation — more questions to study (data, augmentation), studying without crutches (dropout), stopping before rote learning sets in (early stopping), or starting from someone who already understands the subject (transfer learning).</p>"
+      }
+     ]
+    },
+    {
+     "id": "transfer-learning--fine-tuning--the-most-important-lesson",
+     "number": 5,
+     "title": "Transfer Learning & Fine-Tuning — the Most Important Lesson",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>If you remember one thing from this module, remember this: <strong>you do not train deep models from scratch. You start from a pretrained model and adapt it.</strong> This is transfer learning, and it is the single move that turns deep learning from a research-budget endeavour into something a small team can deliver in weeks. It deserves — and gets here — the most space.</p>\n<p><strong>The idea.</strong> Someone (a big lab, an open-source community) has already spent enormous compute training a model on a giant general dataset — millions of images, or a huge text corpus. That model has <em>already learned the hard, general part</em>: what edges, textures, shapes, words, and grammar look like. Those learned <strong>representations</strong> (§2) are not specific to their task — they transfer. You take that pretrained model and adapt it to <em>your</em> narrow task with <em>your</em> (much smaller) data.</p>\n<p><strong>Two flavours, by how much you adapt:</strong></p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Approach</th><th align=\"left\">What you do</th><th align=\"left\">When</th><th align=\"left\">Data &#x26; compute needed</th></tr></thead><tbody><tr><td align=\"left\"><strong>Feature extraction</strong> (freeze)</td><td align=\"left\">Keep the pretrained model fixed; train only a small new \"head\" on top for your task</td><td align=\"left\">Your task is close to the original; you have little data</td><td align=\"left\">Smallest — often hundreds of examples, minutes on a modest GPU</td></tr><tr><td align=\"left\"><strong>Fine-tuning</strong></td><td align=\"left\">Continue training some or all of the pretrained model's weights on your data, gently</td><td align=\"left\">Your task differs more; you have moderate data and want max accuracy</td><td align=\"left\">Larger but still a fraction of from-scratch — thousands of examples, a GPU for hours not weeks</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Why this collapses cost and data needs — the part that reshapes your estimates:</strong></p>\n<ul>\n<li><strong>Data:</strong> from-scratch deep learning needs <em>hundreds of thousands to millions</em> of labelled examples. Transfer learning can get a strong result from <em>hundreds to a few thousand</em> — because the model already learned the general features and only needs to learn your specifics. For most clients, this is the difference between \"impossible, we don't have the data\" and \"feasible.\"</li>\n<li><strong>Compute:</strong> you skip the expensive part. The thousands of GPU-hours went into the <em>pretraining</em>, which someone else paid for. Your adaptation is hours, not weeks — turning a five-figure compute bill into a small one.</li>\n<li><strong>Time &#x26; talent:</strong> weeks instead of months, and you need someone who can <em>adapt and evaluate</em> a model rather than a researcher who can design one from nothing.</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Hiring a model is like hiring a person. Training from scratch is raising a child from birth to do one job — absurdly expensive and slow. Transfer learning is hiring an experienced graduate and giving them a week of onboarding for <em>your</em> specific role. They already know how to read, reason, and see; you only teach them your particulars. Almost every successful deep-learning mission in 2026 is \"onboarding\", not \"raising from birth\" — and your cost estimate should assume the former unless someone proves a genuine need for the latter.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "worked-example",
+       "title": "a defect classifier from 800 photos",
+       "html": "<p>A manufacturer wants to flag scratched parts on the line from camera images. They have ~800 labelled photos (400 good, 400 scratched) — <em>nowhere near</em> enough to train a vision model from scratch.</p>\n<ol>\n<li><strong>From-scratch?</strong> A vision network trained from zero on 800 images would overfit instantly and fail. Off the table.</li>\n<li><strong>Transfer learning instead.</strong> Start from a vision model pretrained on millions of general images (it already \"knows\" edges, textures, surfaces). Replace its final classification layer with a fresh good/scratched head.</li>\n<li><strong>Feature extraction first.</strong> Freeze the pretrained body, train only the new head on the 800 photos — minutes on one GPU. This alone often reaches strong accuracy because \"scratch vs smooth surface\" leans on exactly the texture features the model already learned.</li>\n<li><strong>Fine-tune if needed.</strong> If accuracy isn't enough, gently unfreeze the top layers and continue training at a low learning rate to specialise to this factory's lighting and parts — a few GPU-hours.</li>\n<li><strong>Augment to fight overfitting.</strong> Rotate, flip, and adjust brightness on the 800 photos to manufacture variety (§4), so the model generalises beyond the exact shots taken.</li>\n<li><strong>Evaluate honestly.</strong> Hold out a test set judged once; pick the threshold from the <em>business</em> cost of a missed defect vs a false alarm — straight from <a class=\"wikilink\" data-module=\"05\" href=\"#/module/05\">Model Evaluation, Validation &#x26; Experimentation</a>. <strong>Deliverable:</strong> a defect-scoring service wired into the line's existing camera feed, not \"a neural network.\"</li>\n</ol>\n<p>What carried it: a pretrained model, 800 photos, augmentation, and a sensible threshold — <em>days of GPU time, not a research project.</em> That is the shape of a sellable deep-learning mission.</p>"
+      }
+     ]
+    },
+    {
+     "id": "embeddings--the-reusable-by-product",
+     "number": 6,
+     "title": "Embeddings — the Reusable By-Product",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>A concept you'll meet constantly from here on. As a deep model processes an input, an intermediate layer holds a <strong>vector of numbers that captures the input's meaning</strong> — its learned representation. That vector is an <strong>embedding</strong>. Similar inputs land at nearby points; dissimilar ones land far apart. An embedding turns \"fuzzy\" things (a sentence, an image, a product, a user) into coordinates you can compute with — measure similarity, cluster, search, feed into a simple classifier.</p>\n<p>This is the quiet workhorse behind semantic search, recommendations, deduplication, and retrieval for LLMs (RAG, in <a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a>). You often don't need to train <em>anything</em> — you call a pretrained model to turn your data into embeddings and build on top. The full treatment, including how embeddings power search and NLP, is in <strong><a class=\"wikilink\" data-module=\"08\" href=\"#/module/08\">NLP &#x26; Embeddings in Practice</a></strong>; for now, just hold the picture: <em>deep models hand you a numeric fingerprint of meaning, and that fingerprint is reusable infrastructure.</em></p>"
+      }
+     ]
+    },
+    {
+     "id": "the-talent-data--compute-reality",
+     "number": 7,
+     "title": "The Talent, Data & Compute Reality",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Deep learning sits in a heavier weight class than classical ML on every input, and that <em>must</em> feed your build-vs-buy stance and your estimates:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Dimension</th><th align=\"left\">Classical ML (<a class=\"wikilink\" data-module=\"04\" href=\"#/module/04\">Classical ML &#x26; Forecasting in Practice</a>)</th><th align=\"left\">Deep learning</th></tr></thead><tbody><tr><td align=\"left\"><strong>Data</strong></td><td align=\"left\">Thousands of rows can suffice</td><td align=\"left\">Lots — unless you use transfer learning (then far less)</td></tr><tr><td align=\"left\"><strong>Compute</strong></td><td align=\"left\">CPU, minutes, ~€0</td><td align=\"left\">GPUs, billed by the hour; training is the cost centre</td></tr><tr><td align=\"left\"><strong>Talent</strong></td><td align=\"left\">Common, hireable data scientists</td><td align=\"left\">Scarcer, pricier DL specialists who know the frameworks &#x26; pitfalls</td></tr><tr><td align=\"left\"><strong>Iteration speed</strong></td><td align=\"left\">Fast — retrain in minutes</td><td align=\"left\">Slower — experiments take hours/days</td></tr><tr><td align=\"left\"><strong>Explainability</strong></td><td align=\"left\">Decent (SHAP, coefficients)</td><td align=\"left\">Hard — mostly a black box (see <a class=\"wikilink\" data-module=\"15\" href=\"#/module/15\">Responsible AI: Interpretability, Fairness, Safety &#x26; the EU AI Act</a>)</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The build-vs-buy consequence: for perception and language tasks, <strong>buy the pretrained model (it's a commodity) and build only the adaptation and integration</strong> — the differentiator. From-scratch deep learning is justified only by a genuinely novel problem with no suitable pretrained model <em>and</em> the data and budget to match — rare, and almost never the right <em>first</em> move (the same escalation discipline as everywhere in this path).</p>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "client-mission-patterns--commercial-angle",
+   "kind": "missions",
+   "title": "Client Mission Patterns / Commercial Angle",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Deep-learning missions sell on <strong>perception and language capability the client can't get from classical ML</strong> — but the credible, fixed-scope versions all rest on transfer learning, not from-scratch training. Sell the adaptation and integration; rent the pretrained model.</p>\n<ul>\n<li>\n<p><strong>Transfer-Learning Classifier (Images or Text), PoC → Production</strong> — <em>Problem:</em> \"we need to automatically classify these images/documents and we don't have a research team or a million labels.\" <em>Deliverable:</em> a trained-by-fine-tuning classifier (e.g. defect detection, document/email triage, product categorisation) delivered as a <strong>scored API or batch job wired into the client's workflow</strong>, with an honest evaluation and a chosen decision threshold. <em>Scope:</em> a 2-4 week PoC on a few hundred–few thousand labels to prove feasibility, then 6-12 weeks to production-harden. <em>Who buys:</em> a Head of Operations/Quality (vision on a line), a COO or shared-services lead (document triage), an e-commerce/catalogue owner (categorisation).</p>\n</li>\n<li>\n<p><strong>Deep-Learning Feasibility Study / Go–No-Go</strong> — <em>Problem:</em> a stakeholder wants a deep-learning capability and needs an honest, low-cost read on whether it's viable <em>before</em> committing real budget. <em>Deliverable:</em> a feasibility report — data sufficiency assessment, a transfer-learning baseline built on the client's actual data, a measured accuracy-vs-target verdict, a compute/cost projection, and a go / scope-down / no-go recommendation. <em>Scope:</em> 2-3 weeks, fixed price. <em>Who buys:</em> a CTO/CDO de-risking a bet, an innovation lead, a product owner. <em>(High-trust, high-margin — you sell judgement and a real baseline, not a finished build; mirrors the audit/eval-plan missions in <a class=\"wikilink\" data-module=\"05\" href=\"#/module/05\">Model Evaluation, Validation &#x26; Experimentation</a>.)</em></p>\n</li>\n<li>\n<p><strong>Augment an Existing Product with a Pretrained Capability</strong> — <em>Problem:</em> a working product needs one perception/language feature (visual search, auto-tagging, image moderation, smart OCR, voice transcription) that classical ML can't deliver. <em>Deliverable:</em> the <strong>feature, integrated</strong> — built on a pretrained or hosted model, exposed where the product already lives, with latency and cost within agreed bounds. <em>Scope:</em> 4-10 weeks depending on how much fine-tuning vs a straight API call it needs. <em>Who buys:</em> a Head of Product, a platform engineering lead.</p>\n</li>\n</ul>\n<p><strong>Buy-vs-build:</strong> the <strong>pretrained model is the commodity — rent or download it; your billable value is the data work, the fine-tuning, the honest evaluation, and the integration.</strong> Never sell \"a neural network.\" <strong>What to charge for:</strong> the feasibility study as fixed-price repeatable IP; the PoC and the production build as scoped phases; and — because models drift and data shifts — a <strong>monitoring/retraining retainer</strong> (real recurring revenue, see <a class=\"wikilink\" data-module=\"13\" href=\"#/module/13\">MLOps &#x26; Productionization</a>). <strong>What NOT to promise:</strong> a specific accuracy number before you've tested transfer learning on the client's real data; from-scratch training \"because it's more bespoke\" (it's usually just more expensive); human-level reliability with no human-in-the-loop; or that a black-box model will be fully explainable to a regulator (flag that constraint early — <a class=\"wikilink\" data-module=\"15\" href=\"#/module/15\">Responsible AI: Interpretability, Fairness, Safety &#x26; the EU AI Act</a>).</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "tools--vendor-landscape",
+   "kind": "tools",
+   "title": "Tools & Vendor Landscape",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p><em>As of 2026 — treat names/prices as perishable; re-check before quoting.</em></p>"
+    },
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Tool / Category</th><th align=\"left\">Use here</th><th align=\"left\">OSS / Paid</th><th align=\"left\">Note</th></tr></thead><tbody><tr><td align=\"left\"><strong>PyTorch</strong></td><td align=\"left\">The default deep-learning framework</td><td align=\"left\">OSS</td><td align=\"left\">What most teams and tutorials use; deeper code → <span class=\"vault-ref\" title=\"In the Obsidian vault: 05 - Deep Learning Foundations\">Deep Learning Foundations</span> (MLE Path)</td></tr><tr><td align=\"left\"><strong>TensorFlow / Keras</strong></td><td align=\"left\">Alternative framework, friendly high-level API</td><td align=\"left\">OSS</td><td align=\"left\">Still common in enterprise; Keras is the gentle on-ramp</td></tr><tr><td align=\"left\"><strong>Hugging Face</strong> (Hub + Transformers)</td><td align=\"left\">Pretrained models for transfer learning &#x26; embeddings</td><td align=\"left\">OSS + paid tiers</td><td align=\"left\">The single most useful place for \"don't train from scratch\" — vast model zoo</td></tr><tr><td align=\"left\"><strong>fast.ai</strong></td><td align=\"left\">High-level transfer-learning library &#x26; course</td><td align=\"left\">OSS</td><td align=\"left\">Fastest path to a working fine-tuned model for a small team</td></tr><tr><td align=\"left\"><strong>Cloud GPUs</strong> (AWS, GCP, Azure, plus GPU specialists)</td><td align=\"left\">Training &#x26; inference compute</td><td align=\"left\">Paid (hourly)</td><td align=\"left\">The cost centre; compare per-hour rates &#x26; spot pricing; watch egress &#x26; lock-in</td></tr><tr><td align=\"left\"><strong>Managed ML platforms</strong> (SageMaker, Vertex AI, Azure ML)</td><td align=\"left\">One-stop train/tune/serve/monitor</td><td align=\"left\">Paid</td><td align=\"left\">Convenient; price and lock-in caveats — see <a class=\"wikilink\" data-module=\"13\" href=\"#/module/13\">MLOps &#x26; Productionization</a></td></tr><tr><td align=\"left\"><strong>Pretrained embedding models / APIs</strong></td><td align=\"left\">Turn text/images into vectors without training</td><td align=\"left\">OSS + paid</td><td align=\"left\">Foundation for search, similarity, RAG — detail in <a class=\"wikilink\" data-module=\"08\" href=\"#/module/08\">NLP &#x26; Embeddings in Practice</a></td></tr><tr><td align=\"left\"><strong>Experiment tracking</strong> (MLflow, Weights &#x26; Biases)</td><td align=\"left\">Track runs, compare fine-tuning experiments</td><td align=\"left\">OSS / Freemium</td><td align=\"left\">Deep-learning iteration is slow — tracking pays off</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The leader's read: the <em>model</em> is increasingly free or rented; the recurring bill is <strong>GPU time and the specialists who run it</strong>. Budget those, not the algorithm.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "when-is-this-overkill",
+   "kind": "overkill",
+   "title": "When Is This Overkill?",
+   "blocks": [
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Situation</th><th align=\"left\">Deep learning is overkill — do this instead</th></tr></thead><tbody><tr><td align=\"left\">The data is <strong>tabular</strong></td><td align=\"left\">Gradient-boosted trees — cheaper, faster, usually better, no GPU (<a class=\"wikilink\" data-module=\"04\" href=\"#/module/04\">Classical ML &#x26; Forecasting in Practice</a>)</td></tr><tr><td align=\"left\">A few hundred examples and no pretrained model fits</td><td align=\"left\">Classical ML or a rule; from-scratch DL will overfit and fail</td></tr><tr><td align=\"left\">A €X/month <strong>API already does it</strong> (OCR, transcription, generic vision/chat)</td><td align=\"left\">Buy and integrate; don't build or fine-tune anything</td></tr><tr><td align=\"left\">The logic is <strong>known and explainable</strong></td><td align=\"left\">Write the rules; deep learning would only obscure a clear decision</td></tr><tr><td align=\"left\">You need a <strong>fully explainable</strong> output (regulated credit, clinical)</td><td align=\"left\">Favour a transparent model; a black box is a liability (<a class=\"wikilink\" data-module=\"15\" href=\"#/module/15\">Responsible AI: Interpretability, Fairness, Safety &#x26; the EU AI Act</a>)</td></tr><tr><td align=\"left\">Stakeholder wants it \"because it's cutting-edge\"</td><td align=\"left\">Route by the data, not the buzzword; name the cheaper thing that clears the bar</td></tr><tr><td align=\"left\">You'd spend more on GPUs than the problem is worth</td><td align=\"left\">Re-read the value/complexity budget; the espresso machine isn't free</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The senior move, unchanged across this path: <strong>prove the cheaper thing fails before reaching for the GPU.</strong> And when deep learning <em>is</em> right, prove transfer learning is insufficient before training from scratch.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "resources",
+   "kind": "resources",
+   "title": "Resources",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "books",
+     "number": null,
+     "title": "Books",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Aurélien Géron — <em>Hands-On Machine Learning</em> (the deep-learning half) — intuition-first, the practical reference for everything here including transfer learning. <em>(Paid)</em></li>\n<li>François Chollet — <em>Deep Learning with Python</em> — exceptionally clear conceptual intuition, light on maths; the transfer-learning chapters are gold. <em>(Paid)</em></li>\n<li>Andrew Ng — <em>Machine Learning Yearning</em> (<strong>free</strong>) — not about algorithms but about <em>strategy</em>: data, error analysis, what to do when a model underperforms. Leader-relevant.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "courses--articles-free",
+     "number": null,
+     "title": "Courses & Articles (Free)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li><strong>fast.ai — <em>Practical Deep Learning for Coders</em></strong> — the canonical \"transfer learning first\" course; the fastest way to internalise §5.</li>\n<li>Hugging Face course &#x26; model hub docs — how pretrained models and fine-tuning work in practice.</li>\n<li>3Blue1Brown — <em>Neural Networks</em> video series — the best visual intuition for §2–§3 without the maths.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "go-deeper",
+     "number": null,
+     "title": "Go Deeper",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li><strong>Deeper math</strong> (the derivations deliberately skipped here — backprop, optimisation, initialisation, the universal approximation theorem) → <span class=\"vault-ref\" title=\"In the Obsidian vault: 09 - Neural Network Foundations\">Neural Network Foundations</span> (AI Scientist Path).</li>\n<li><strong>Deeper code</strong> (building, fine-tuning, and serving deep models in PyTorch, production-grade) → <span class=\"vault-ref\" title=\"In the Obsidian vault: 05 - Deep Learning Foundations\">Deep Learning Foundations</span> (ML Engineer Path).</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "practical-artifacts",
+   "kind": "artifacts",
+   "title": "Practical Artifacts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "decision-checklist--should-this-be-a-deep-learning-mission",
+     "number": null,
+     "title": "Decision Checklist — \"Should this be a deep-learning mission?\"",
+     "blocks": [
+      {
+       "type": "checklist",
+       "checklistId": "06/practical-artifacts/1",
+       "items": [
+        {
+         "id": "0",
+         "html": "Is the input <strong>unstructured</strong> (images, audio, raw text)? If it's tabular, default to boosted trees instead."
+        },
+        {
+         "id": "1",
+         "html": "Is there a <strong>pretrained model</strong> we can adapt, so we're doing transfer learning, not training from scratch?"
+        },
+        {
+         "id": "2",
+         "html": "Do we have enough <strong>labelled data</strong> for fine-tuning (hundreds–thousands), even if not the millions from-scratch would need?"
+        },
+        {
+         "id": "3",
+         "html": "Have we <strong>budgeted GPU/compute cost</strong> — and confirmed it's proportionate to the problem's value?"
+        },
+        {
+         "id": "4",
+         "html": "Can we <strong>staff</strong> the DL skills (in-house or partner), and tolerate slower iteration than classical ML?"
+        },
+        {
+         "id": "5",
+         "html": "Is the <strong>black-box</strong> nature acceptable, or is explainability a hard requirement here?"
+        },
+        {
+         "id": "6",
+         "html": "Is the deliverable <strong>wired into the client's workflow</strong>, with an honest eval and a business-set threshold?"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "red-flags",
+     "number": null,
+     "title": "Red Flags",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"Let's use deep learning\" for <strong>tabular</strong> data. (Boosted trees, almost always — cheaper and usually better.)</li>\n<li>A plan to <strong>train from scratch</strong> when a pretrained model exists. (Burning budget on the part someone already paid for.)</li>\n<li>Promising a deep model on <strong>a few hundred examples</strong> with no transfer learning. (It will overfit and fail.)</li>\n<li><strong>No GPU/compute line</strong> in the budget. (The cost is real and it's the differentiator from classical ML.)</li>\n<li>\"We'll just add <strong>more epochs</strong>\" to fix a quality problem. (That's how you overfit, not improve.)</li>\n<li>A specific <strong>accuracy promised</strong> before transfer learning was tested on the client's real data.</li>\n<li>Selling deep learning where a <strong>€X/month API</strong> already does the job.</li>\n<li>Ignoring that the output is a <strong>black box</strong> when the use case (credit, clinical, hiring) demands an explanation.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "scoping-prompts-ask-the-client--the-team",
+     "number": null,
+     "title": "Scoping Prompts (ask the client / the team)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"Is the input something a human <em>perceives</em> (an image, a recording, free text) or something they <em>tabulate</em>?\"</li>\n<li>\"How many labelled examples do we have <em>today</em>, and is there a pretrained model we can start from?\"</li>\n<li>\"Who pays the GPU bill, and is that cost proportionate to what the prediction is worth?\"</li>\n<li>\"Could a hosted API or an off-the-shelf model deliver this without us training anything?\"</li>\n<li>\"Does anyone need to <em>understand why</em> the model decided what it did — a regulator, a customer, an auditor?\"</li>\n<li>\"Where will the prediction appear so someone actually acts on it — and what happens when it's wrong?\"</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "self-assessment",
+   "kind": "self-assessment",
+   "title": "Self-Assessment",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Before moving on, you should be able to:</p>"
+    },
+    {
+     "type": "checklist",
+     "checklistId": "06/self-assessment/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Route a problem to deep learning vs classical ML from its data type and scale, and justify it in one sentence"
+      },
+      {
+       "id": "1",
+       "html": "Explain a neural network as stacked transformations learning representations, with no equations"
+      },
+      {
+       "id": "2",
+       "html": "Describe loss, gradient descent, and backprop-as-blame-assignment intuitively, and name what epochs / batch size / learning rate trade off"
+      },
+      {
+       "id": "3",
+       "html": "Explain <em>why</em> transfer learning collapses the data, compute, and talent cost of a deep-learning mission — and default to it"
+      },
+      {
+       "id": "4",
+       "html": "Estimate, at a rough order of magnitude, the GPU/compute cost of a deep-learning effort and put it in a quote"
+      },
+      {
+       "id": "5",
+       "html": "Explain what an embedding is and why it's reusable infrastructure (forward to <a class=\"wikilink\" data-module=\"08\" href=\"#/module/08\">NLP &#x26; Embeddings in Practice</a>)"
+      },
+      {
+       "id": "6",
+       "html": "Scope a transfer-learning classifier, a feasibility study, or a \"add a pretrained capability\" mission with a named deliverable, realistic phases, and the buyer"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  }
+ ]
+}

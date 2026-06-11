@@ -1,0 +1,511 @@
+{
+ "id": "03",
+ "title": "Working with Data: Sources, Quality & Feature Engineering",
+ "weeks": [
+  5,
+  6
+ ],
+ "part": "II — Core ML in Practice",
+ "partIndex": 2,
+ "addon": false,
+ "pitchHtml": "<p>\"Garbage in, garbage out\" is the oldest law in this field and the one most often ignored in a sales meeting. A model is a function of its data; no architecture rescues a dataset that is incomplete, mislabelled, or quietly leaking the answer. For a tech lead this module is mostly about <em>protecting the mission</em>: knowing what kind of data you're dealing with, how to judge whether it's good enough, how to price the cleaning that nobody wants to pay for, and how to spot the silent killers — above all <strong>data leakage</strong> — before they make you promise a number you can't hit in production. The hands-on pandas/code lives in the ML Engineer Path's <span class=\"vault-ref\" title=\"In the Obsidian vault: 03 - Data Processing &#x26; Feature Engineering\">Data Processing &#x26; Feature Engineering</span>; here we stay at the leader's altitude — <em>what / when / scope / sell</em>.</p>",
+ "prev": "02",
+ "next": "04",
+ "sectionCount": 8,
+ "quizCount": 8,
+ "exerciseCount": 2,
+ "sections": [
+  {
+   "id": "learning-objectives",
+   "kind": "objectives",
+   "title": "Learning Objectives",
+   "blocks": [
+    {
+     "type": "checklist",
+     "checklistId": "03/learning-objectives/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Classify any incoming dataset by type and provenance, and name what each implies for cost, risk, and access"
+      },
+      {
+       "id": "1",
+       "html": "Assess a dataset against the six data-quality dimensions and decide what \"good enough\" means <em>for this use case</em>"
+      },
+      {
+       "id": "2",
+       "html": "Run a leader-level profiling conversation: the questions to ask of a new dataset before promising anything"
+      },
+      {
+       "id": "3",
+       "html": "Estimate and price data work using the <strong>80% rule</strong>, and defend that line in a proposal"
+      },
+      {
+       "id": "4",
+       "html": "Explain what feature engineering is and why it often beats a fancier model — and when a <strong>feature store</strong> earns its keep"
+      },
+      {
+       "id": "5",
+       "html": "Scope how labels get created and judge label quality (annotation cost, inter-annotator agreement)"
+      },
+      {
+       "id": "6",
+       "html": "Detect the four forms of <strong>data leakage</strong> and kill them before they reach a client demo"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "key-concepts",
+   "kind": "concepts",
+   "title": "Key Concepts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "data-sources--types",
+     "number": 1,
+     "title": "Data Sources & Types",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Before anything else, locate the data on two axes: <strong>structure</strong> (how machine-ready it is) and <strong>provenance</strong> (whose it is, and what you may do with it). Both drive cost and risk far more than volume does.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Type</th><th align=\"left\">What it is</th><th align=\"left\">Examples</th><th align=\"left\">Implication for a mission</th></tr></thead><tbody><tr><td align=\"left\"><strong>Structured</strong></td><td align=\"left\">Rows &#x26; columns, fixed schema</td><td align=\"left\">SQL tables, CSV, warehouse exports</td><td align=\"left\">Cheapest to model; classical ML thrives here</td></tr><tr><td align=\"left\"><strong>Semi-structured</strong></td><td align=\"left\">Tagged but irregular</td><td align=\"left\">JSON, XML, logs, nested API payloads</td><td align=\"left\">Needs parsing/flattening; schema drifts silently</td></tr><tr><td align=\"left\"><strong>Unstructured</strong></td><td align=\"left\">No schema</td><td align=\"left\">Free text, images, audio, video, PDFs</td><td align=\"left\">Needs deep learning + labelling; the expensive lane</td></tr><tr><td align=\"left\"><strong>Streaming / events</strong></td><td align=\"left\">Continuous, time-ordered</td><td align=\"left\">Clickstream, IoT, transactions, Kafka topics</td><td align=\"left\">Adds latency, ordering, and replay concerns (see <a class=\"wikilink\" data-module=\"12\" href=\"#/module/12\">Data Engineering &#x26; Platforms</a>)</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The second axis is who owns it:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Provenance</th><th align=\"left\">What it is</th><th align=\"left\">Upside</th><th align=\"left\">The catch a lead must flag</th></tr></thead><tbody><tr><td align=\"left\"><strong>First-party</strong></td><td align=\"left\">Data the client collects itself</td><td align=\"left\">Proprietary; your differentiator</td><td align=\"left\">Often messy, siloed, under-instrumented</td></tr><tr><td align=\"left\"><strong>Second-party</strong></td><td align=\"left\">A partner's first-party data, shared</td><td align=\"left\">Trusted, relevant</td><td align=\"left\">Contract &#x26; consent scope; can disappear</td></tr><tr><td align=\"left\"><strong>Third-party</strong></td><td align=\"left\">Bought or scraped from a vendor/market</td><td align=\"left\">Fast to acquire, fills gaps</td><td align=\"left\">Licence terms, freshness, <em>everyone else has it too</em></td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Defensible client value lives in <strong>first-party</strong> data and <strong>unstructured</strong> data you've made usable — that's the \"build the differentiator\" half of the path's motto. Structured third-party data is a commodity: rent it, don't build a moat on it. The mission that turns a client's messy first-party logs into a clean, labelled asset is worth more than one that wraps a public dataset.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>A practical consequence: when a stakeholder says \"we have tons of data,\" the volume is rarely the issue. <strong>Type and provenance determine the bill.</strong> Ten million clean structured rows are a gift; ten thousand scanned PDFs of mixed quality are a project.</p>"
+      }
+     ]
+    },
+    {
+     "id": "the-six-data-quality-dimensions",
+     "number": 2,
+     "title": "The Six Data-Quality Dimensions",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Quality is not one number. Assess these six, each with a cheap first check, and judge each <em>relative to the use case</em> — not against perfection.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Dimension</th><th align=\"left\">The question</th><th align=\"left\">Quick check</th><th align=\"left\">\"Good enough\" depends on</th></tr></thead><tbody><tr><td align=\"left\"><strong>Completeness</strong></td><td align=\"left\">Are values present?</td><td align=\"left\">% nulls per column; missing rows vs source counts</td><td align=\"left\">Whether the gaps are random or systematic</td></tr><tr><td align=\"left\"><strong>Accuracy</strong></td><td align=\"left\">Are values correct?</td><td align=\"left\">Spot-check against ground truth / source system</td><td align=\"left\">Tolerance of the decision downstream</td></tr><tr><td align=\"left\"><strong>Consistency</strong></td><td align=\"left\">Do values agree across sources/fields?</td><td align=\"left\">Cross-table joins, contradictory records</td><td align=\"left\">How many systems feed the pipeline</td></tr><tr><td align=\"left\"><strong>Timeliness</strong></td><td align=\"left\">Is it fresh enough?</td><td align=\"left\">Lag between event and availability</td><td align=\"left\">The decision's clock (real-time vs monthly)</td></tr><tr><td align=\"left\"><strong>Validity</strong></td><td align=\"left\">Does it conform to rules/format?</td><td align=\"left\">Range checks, type checks, regex on formats</td><td align=\"left\">How strict the schema must be</td></tr><tr><td align=\"left\"><strong>Uniqueness</strong></td><td align=\"left\">Are there duplicates?</td><td align=\"left\">Count distinct vs total on keys</td><td align=\"left\">Whether dupes bias the model or the metric</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>\"Good enough\" is defined by the <em>cost of being wrong</em>, not by an abstract score. A churn model that nudges a marketing email tolerates messy data; a model that triggers an automated refund or a medical flag does not. Set the quality bar from the failure mode (the \"what happens when it's wrong?\" question from <a class=\"wikilink\" data-module=\"01\" href=\"#/module/01\">AI &#x26; Data Landscape &#x26; Tech-Lead Mindset</a>) — then stop cleaning once you clear it. Over-cleaning is its own form of waste.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The dangerous dimension is <strong>completeness when missingness is not random.</strong> If a sensor only logs when it's working, \"missing\" silently means \"broken\" — and a naive fill teaches the model the opposite of reality. Always ask <em>why</em> a value is missing before deciding how to handle it.</p>"
+      }
+     ]
+    },
+    {
+     "id": "data-profiling--eda-at-the-leader-level",
+     "number": 3,
+     "title": "Data Profiling / EDA at the Leader Level",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>You don't need to write the exploratory analysis — your data scientist does that (deeper code → <span class=\"vault-ref\" title=\"In the Obsidian vault: 03 - Data Processing &#x26; Feature Engineering\">Data Processing &#x26; Feature Engineering</span>). But you must know <em>which questions to demand answers to</em> before any promise leaves your mouth. Profiling is the cheapest insurance a mission buys.</p>\n<p>The leader's pre-promise checklist for a new dataset:</p>\n<ul>\n<li><strong>Shape:</strong> How many rows, how many columns, what grain (one row = one <em>what</em>)?</li>\n<li><strong>Coverage:</strong> What time range? Any gaps, regime changes, or a \"before/after a system migration\" cliff?</li>\n<li><strong>Target balance:</strong> For prediction — how rare is the event? (1% fraud is a different mission from 40% churn.)</li>\n<li><strong>Missingness:</strong> Which columns are mostly empty, and <em>is the emptiness meaningful</em>?</li>\n<li><strong>Distributions &#x26; outliers:</strong> Are there impossible values (age = 200, negative price), placeholder codes (<code>-999</code>, <code>9999-12-31</code>), or a few rows that dominate?</li>\n<li><strong>Cardinality:</strong> How many distinct values in categorical fields? (A 50,000-category column is a modelling problem, not a column.)</li>\n<li><strong>Drift:</strong> Does last month look like last year? Has the meaning of a field changed over time?</li>\n<li><strong>Linkage:</strong> Can the tables actually be joined cleanly, on stable keys?</li>\n</ul>\n<p>Two of these checks reduce to a single number worth quoting in the audit. The <strong>missingness rate</strong> of a column is just the share of empty values, <span class=\"katex-error\" title=\"ParseError: KaTeX parse error: Expected &#x27;EOF&#x27;, got &#x27;#&#x27; at position 34: … = \\frac{\\text{#̲ nulls}}{\\text{…\" style=\"color:#cc0000\">\\text{missingness} = \\frac{\\text{# nulls}}{\\text{# rows}}</span> — the headline number that flags which columns are barely populated. The <strong>class-imbalance ratio</strong> for a binary target is the size of the majority class over the minority, <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mfrac><msub><mi>n</mi><mtext>majority</mtext></msub><msub><mi>n</mi><mtext>minority</mtext></msub></mfrac></mrow><annotation encoding=\"application/x-tex\">\\frac{n_{\\text{majority}}}{n_{\\text{minority}}}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1.351em;vertical-align:-0.5423em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.8087em;\"><span style=\"top:-2.655em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">n</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.334em;\"><span style=\"top:-2.357em;margin-left:0em;margin-right:0.0714em;\"><span class=\"pstrut\" style=\"height:2.5em;\"></span><span class=\"sizing reset-size3 size1 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">minority</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2819em;\"><span></span></span></span></span></span></span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.5073em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\"><span class=\"mord mathnormal mtight\">n</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.334em;\"><span style=\"top:-2.357em;margin-left:0em;margin-right:0.0714em;\"><span class=\"pstrut\" style=\"height:2.5em;\"></span><span class=\"sizing reset-size3 size1 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">majority</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2819em;\"><span></span></span></span></span></span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.5423em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span> (so 1% fraud is roughly 99:1). Neither is deep maths, but both turn a vague \"the data's a bit sparse / a bit skewed\" into a figure that sets the mission: a 99:1 ratio tells you accuracy is a useless metric (a \"predict everyone is fine\" model scores 99%) and pushes you toward the imbalance-aware evaluation of <a class=\"wikilink\" data-module=\"05\" href=\"#/module/05\">Model Evaluation, Validation &#x26; Experimentation</a>.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "worked-example",
+       "title": "the churn dataset that wasn't",
+       "html": "<p>A telco asks for a churn model, citing \"five years of clean customer data, 2% monthly churn.\" A two-day profiling pass finds: (1) the <code>churn</code> flag was only added 14 months ago — the prior years can't be labelled; (2) 30% of <code>last_login</code> values are null, and the nulls are <em>exactly</em> the churned customers (the field stops updating on cancellation — a leak, see §7); (3) a 2024 billing-system migration renamed plan tiers, so <code>plan_type</code> means different things before and after. The honest scope is now: ~14 months of usable data, a leakage column to drop, and a normalisation step on plan tiers — <em>before</em> a single model is trained. Profiling turned an over-promise into a deliverable.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The output of leader-level EDA is not a chart deck; it's a <strong>revised scope and a revised price.</strong></p>"
+      }
+     ]
+    },
+    {
+     "id": "the-cost-of-bad-data--the-80-rule",
+     "number": 4,
+     "title": "The Cost of Bad Data & the 80% Rule",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The single most useful number to internalise — and to put in front of a client — is this: on a first ML mission, <strong>the large majority of the effort is data work</strong>, not modelling. Acquisition, access, cleaning, joining, labelling, and validation routinely consume around 80% of the timeline; the model itself is often a few well-understood days.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Price the mission as data work <em>plus</em> a modelling step, not the reverse. A useful planning split for a first engagement:\n<span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mtext>Effort</mtext><mo>≈</mo><munder><munder><mn>0.8</mn><mo stretchy=\"true\">⏟</mo></munder><mtext>data: acquire, clean, label, validate</mtext></munder><mo>+</mo><munder><munder><mn>0.2</mn><mo stretchy=\"true\">⏟</mo></munder><mtext>model, evaluate, package</mtext></munder></mrow><annotation encoding=\"application/x-tex\">\\text{Effort} \\approx \\underbrace{0.8}_{\\text{data: acquire, clean, label, validate}} + \\underbrace{0.2}_{\\text{model, evaluate, package}}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord text\"><span class=\"mord\">Effort</span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">≈</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.1147em;vertical-align:-1.4702em;\"></span><span class=\"minner munder\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6444em;\"><span style=\"top:-1.6659em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">data: acquire, clean, label, validate</span></span></span></span></span><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"minner munder\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6444em;\"><span class=\"svg-align\" style=\"top:-2.352em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"stretchy\" style=\"height:0.548em;min-width:1.6em;\"><span class=\"brace-left\" style=\"height:0.548em;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"400em\" height=\"0.548em\" viewBox=\"0 0 400000 548\" preserveAspectRatio=\"xMinYMin slice\"><path d=\"M0 6l6-6h17c12.688 0 19.313.3 20 1 4 4 7.313 8.3 10 13\n 35.313 51.3 80.813 93.8 136.5 127.5 55.688 33.7 117.188 55.8 184.5 66.5.688\n 0 2 .3 4 1 18.688 2.7 76 4.3 172 5h399450v120H429l-6-1c-124.688-8-235-61.7\n-331-161C60.687 138.7 32.312 99.3 7 54L0 41V6z\"></path></svg></span><span class=\"brace-center\" style=\"height:0.548em;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"400em\" height=\"0.548em\" viewBox=\"0 0 400000 548\" preserveAspectRatio=\"xMidYMin slice\"><path d=\"M199572 214\nc100.7 8.3 195.3 44 280 108 55.3 42 101.7 93 139 153l9 14c2.7-4 5.7-8.7 9-14\n 53.3-86.7 123.7-153 211-199 66.7-36 137.3-56.3 212-62h199568v120H200432c-178.3\n 11.7-311.7 78.3-403 201-6 8-9.7 12-11 12-.7.7-6.7 1-18 1s-17.3-.3-18-1c-1.3 0\n-5-4-11-12-44.7-59.3-101.3-106.3-170-141s-145.3-54.3-229-60H0V214z\"></path></svg></span><span class=\"brace-right\" style=\"height:0.548em;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"400em\" height=\"0.548em\" viewBox=\"0 0 400000 548\" preserveAspectRatio=\"xMaxYMin slice\"><path d=\"M399994 0l6 6v35l-6 11c-56 104-135.3 181.3-238 232-57.3\n 28.7-117 45-179 50H-300V214h399897c43.3-7 81-15 113-26 100.7-33 179.7-91 237\n-174 2.7-5 6-9 10-13 .7-1 7.3-1 20-1h17z\"></path></svg></span></span></span><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\">0.8</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.648em;\"><span></span></span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.4702em;\"><span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.1147em;vertical-align:-1.4702em;\"></span><span class=\"minner munder\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6444em;\"><span style=\"top:-1.6659em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">model, evaluate, package</span></span></span></span></span><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"minner munder\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6444em;\"><span class=\"svg-align\" style=\"top:-2.352em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"stretchy\" style=\"height:0.548em;min-width:1.6em;\"><span class=\"brace-left\" style=\"height:0.548em;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"400em\" height=\"0.548em\" viewBox=\"0 0 400000 548\" preserveAspectRatio=\"xMinYMin slice\"><path d=\"M0 6l6-6h17c12.688 0 19.313.3 20 1 4 4 7.313 8.3 10 13\n 35.313 51.3 80.813 93.8 136.5 127.5 55.688 33.7 117.188 55.8 184.5 66.5.688\n 0 2 .3 4 1 18.688 2.7 76 4.3 172 5h399450v120H429l-6-1c-124.688-8-235-61.7\n-331-161C60.687 138.7 32.312 99.3 7 54L0 41V6z\"></path></svg></span><span class=\"brace-center\" style=\"height:0.548em;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"400em\" height=\"0.548em\" viewBox=\"0 0 400000 548\" preserveAspectRatio=\"xMidYMin slice\"><path d=\"M199572 214\nc100.7 8.3 195.3 44 280 108 55.3 42 101.7 93 139 153l9 14c2.7-4 5.7-8.7 9-14\n 53.3-86.7 123.7-153 211-199 66.7-36 137.3-56.3 212-62h199568v120H200432c-178.3\n 11.7-311.7 78.3-403 201-6 8-9.7 12-11 12-.7.7-6.7 1-18 1s-17.3-.3-18-1c-1.3 0\n-5-4-11-12-44.7-59.3-101.3-106.3-170-141s-145.3-54.3-229-60H0V214z\"></path></svg></span><span class=\"brace-right\" style=\"height:0.548em;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"400em\" height=\"0.548em\" viewBox=\"0 0 400000 548\" preserveAspectRatio=\"xMaxYMin slice\"><path d=\"M399994 0l6 6v35l-6 11c-56 104-135.3 181.3-238 232-57.3\n 28.7-117 45-179 50H-300V214h399897c43.3-7 81-15 113-26 100.7-33 179.7-91 237\n-174 2.7-5 6-9 10-13 .7-1 7.3-1 20-1h17z\"></path></svg></span></span></span><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\">0.2</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.648em;\"><span></span></span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.4702em;\"><span></span></span></span></span></span></span></span></span>\nThe 80/20 is a heuristic, not a law — but quoting <em>only</em> the 20% (the part that demos well) is the most common way to lose money and trust on an AI mission. Make the 80% a visible, billable line.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>How to estimate the data line without a crystal ball:</p>\n<ol>\n<li><strong>Sample, then extrapolate.</strong> Profile a representative slice; the issues in 5% of the data scale to 100%.</li>\n<li><strong>Count the sources and the joins.</strong> Each additional source and each fuzzy join is a multiplier on cleaning effort, not an addition.</li>\n<li><strong>Size the labelling separately</strong> (see §6) — it has its own cost curve.</li>\n<li><strong>Add a contingency band</strong>, not a point estimate. Data effort has a long right tail; quote a range and a checkpoint.</li>\n</ol>\n<p>The commercial move: sell a short, fixed-price <strong>data assessment first</strong> (see Mission Patterns), so the big estimate rests on evidence rather than optimism. This also gives the client an honest off-ramp if the data isn't there — which is itself a respectable outcome (the \"no data → no AI\" stop condition from module 01).</p>"
+      }
+     ]
+    },
+    {
+     "id": "feature-engineering--why-it-often-beats-a-fancier-model",
+     "number": 5,
+     "title": "Feature Engineering — Why It Often Beats a Fancier Model",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>A feature is an input column the model actually sees. <strong>Feature engineering</strong> is the craft of turning raw data into features that expose the signal. On structured problems this is frequently where the wins are: a good feature set with a simple model usually beats a raw feature set with a sophisticated one — and it's cheaper, faster, and more explainable to a client.</p>\n<p>The leader needs to recognise the common moves (not implement them — that's <span class=\"vault-ref\" title=\"In the Obsidian vault: 03 - Data Processing &#x26; Feature Engineering\">Data Processing &#x26; Feature Engineering</span>):</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Technique</th><th align=\"left\">What it does</th><th align=\"left\">When it matters</th></tr></thead><tbody><tr><td align=\"left\"><strong>Categorical encoding</strong></td><td align=\"left\">Turns labels into numbers (one-hot, target, ordinal)</td><td align=\"left\">Almost always; high-cardinality fields need care</td></tr><tr><td align=\"left\"><strong>Scaling / normalisation</strong></td><td align=\"left\">Puts numeric features on comparable ranges</td><td align=\"left\">For distance- and gradient-based models</td></tr><tr><td align=\"left\"><strong>Aggregations</strong></td><td align=\"left\">Summaries over a group/window (count, mean, max in last 30d)</td><td align=\"left\">The backbone of behavioural &#x26; time-series features</td></tr><tr><td align=\"left\"><strong>Ratios &#x26; differences</strong></td><td align=\"left\">Combines columns (price/income, days-since-X)</td><td align=\"left\">Often the single most predictive features</td></tr><tr><td align=\"left\"><strong>Date/time features</strong></td><td align=\"left\">Day-of-week, month, is-holiday, recency</td><td align=\"left\">Anything seasonal or recency-driven</td></tr><tr><td align=\"left\"><strong>Text / embedding features</strong></td><td align=\"left\">Turns text into vectors capturing meaning</td><td align=\"left\">NLP tasks — brief here; see <a class=\"wikilink\" data-module=\"08\" href=\"#/module/08\">NLP &#x26; Embeddings in Practice</a></td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Why does feature work beat model work so often? Because it injects <em>domain knowledge the model can't discover on its own from limited data</em>. \"Days since last purchase\" or \"ratio of weekend to weekday spend\" encodes a human insight directly; a model would need vastly more data to infer it. This is the cheap, high-leverage half of most classical-ML missions — and it's where your client's domain experts add value the algorithm can't.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>A formula worth recognising — feature scaling.</strong> The \"scaling / normalisation\" row above hides the two canonical transforms a practitioner should know on sight. <strong>Standardisation (z-score)</strong> recentres a feature to mean 0 and spread 1:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "z = \\frac{x - \\mu}{\\sigma}",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mi>z</mi><mo>=</mo><mfrac><mrow><mi>x</mi><mo>−</mo><mi>μ</mi></mrow><mi>σ</mi></mfrac></mrow><annotation encoding=\"application/x-tex\">z = \\frac{x - \\mu}{\\sigma}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.044em;\">z</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.9463em;vertical-align:-0.686em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.2603em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">σ</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">x</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord mathnormal\">μ</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>where <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>x</mi></mrow><annotation encoding=\"application/x-tex\">x</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mord mathnormal\">x</span></span></span></span> is the raw value, <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>μ</mi></mrow><annotation encoding=\"application/x-tex\">\\mu</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord mathnormal\">μ</span></span></span></span> the feature's mean, and <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>σ</mi></mrow><annotation encoding=\"application/x-tex\">\\sigma</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">σ</span></span></span></span> its standard deviation. <strong>Min-max normalisation</strong> instead squashes the feature into a fixed range (usually <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mo stretchy=\"false\">[</mo><mn>0</mn><mo separator=\"true\">,</mo><mn>1</mn><mo stretchy=\"false\">]</mo></mrow><annotation encoding=\"application/x-tex\">[0, 1]</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mopen\">[</span><span class=\"mord\">0</span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\">1</span><span class=\"mclose\">]</span></span></span></span>):</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "x' = \\frac{x - \\min}{\\max - \\min}",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><msup><mi>x</mi><mo mathvariant=\"normal\" lspace=\"0em\" rspace=\"0em\">′</mo></msup><mo>=</mo><mfrac><mrow><mi>x</mi><mo>−</mo><mi>min</mi><mo>⁡</mo></mrow><mrow><mi>max</mi><mo>⁡</mo><mo>−</mo><mi>min</mi><mo>⁡</mo></mrow></mfrac></mrow><annotation encoding=\"application/x-tex\">x&#x27; = \\frac{x - \\min}{\\max - \\min}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8019em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">x</span><span class=\"msupsub\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.8019em;\"><span style=\"top:-3.113em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord mtight\">′</span></span></span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.1142em;vertical-align:-0.7693em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3449em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mop\">max</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\">−</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mop\">min</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">x</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mop\">min</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.7693em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>where <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>min</mi><mo>⁡</mo></mrow><annotation encoding=\"application/x-tex\">\\min</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6679em;\"></span><span class=\"mop\">min</span></span></span></span> and <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>max</mi><mo>⁡</mo></mrow><annotation encoding=\"application/x-tex\">\\max</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mop\">max</span></span></span></span> are the feature's smallest and largest observed values. Use <strong>z-score</strong> as the default — it tolerates outliers better and suits roughly bell-shaped features; use <strong>min-max</strong> when you need a bounded range (e.g. for inputs to a neural net) or when the feature has no meaningful \"spread\", but know it is sensitive to extreme values. (Whichever you pick, fit <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>μ</mi><mo separator=\"true\">,</mo><mi>σ</mi></mrow><annotation encoding=\"application/x-tex\">\\mu, \\sigma</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord mathnormal\">μ</span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">σ</span></span></span></span> or <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>min</mi><mo>⁡</mo><mo separator=\"true\">,</mo><mi>max</mi><mo>⁡</mo></mrow><annotation encoding=\"application/x-tex\">\\min, \\max</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8623em;vertical-align:-0.1944em;\"></span><span class=\"mop\">min</span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mop\">max</span></span></span></span> on the <em>training split only</em> — fitting on all the data is contamination, see §7.)</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Why scale at all? Distance- and gradient-based models (k-NN, SVMs, k-means, linear/logistic regression, neural nets) implicitly assume features are on comparable scales. Leave income (0-100,000) next to age (0-100) unscaled and the model \"hears\" income a thousand times louder purely because of its units — and gradient descent zig-zags slowly down a lopsided surface. Scaling levels the playing field so the model weighs features on signal, not magnitude. Tree-based models (random forests, gradient boosting) split one feature at a time and are indifferent to scale — don't bother scaling for them.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>The feature store.</strong> As an offer matures, the same features get rebuilt for every project, and — worse — computed one way in training and another way in production (a classic skew, see §7). A <em>feature store</em> is shared infrastructure that defines a feature once and serves it consistently to both training and serving. It's powerful but not free: it's platform-tier tooling (deeper treatment in <a class=\"wikilink\" data-module=\"12\" href=\"#/module/12\">Data Engineering &#x26; Platforms</a>).</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Skip the feature store when</th><th align=\"left\">Invest in one when</th></tr></thead><tbody><tr><td align=\"left\">First mission; one model</td><td align=\"left\">Several models reuse the same features</td></tr><tr><td align=\"left\">Features are simple, recomputed cheaply</td><td align=\"left\">Real-time serving needs the <em>same</em> features as training</td></tr><tr><td align=\"left\">Small team, no platform yet</td><td align=\"left\">Train-serve skew has already bitten you</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>For a first mission, a feature store is almost always <strong>overkill</strong> — a documented, version-controlled transformation script is enough.</p>"
+      }
+     ]
+    },
+    {
+     "id": "labels--the-often-forgotten-half-of-supervised-learning",
+     "number": 6,
+     "title": "Labels — The Often-Forgotten Half of Supervised Learning",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Most valuable classical-ML and many DL missions are <strong>supervised</strong>: they learn from examples <em>with the answer attached</em> — the <strong>label</strong>. No labels, no supervised model. Yet stakeholders routinely cost the data and forget the labels, which are frequently the most expensive and most fragile part.</p>\n<p>Where labels come from, cheapest to dearest:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Source</th><th align=\"left\">What it is</th><th align=\"left\">Cost</th><th align=\"left\">Quality risk</th></tr></thead><tbody><tr><td align=\"left\"><strong>Existing signals</strong></td><td align=\"left\">A business event already recorded <em>is</em> the label (a refund, a click, a cancellation)</td><td align=\"left\">Lowest</td><td align=\"left\">Often leaky or a proxy for the real target</td></tr><tr><td align=\"left\"><strong>Weak / auto-labelling</strong></td><td align=\"left\">Rules, heuristics, or another model label at scale</td><td align=\"left\">Low</td><td align=\"left\">Systematic, correlated errors</td></tr><tr><td align=\"left\"><strong>Manual annotation</strong></td><td align=\"left\">Humans label examples by hand</td><td align=\"left\">High (people-time)</td><td align=\"left\">Inconsistency between annotators</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The two questions a lead must ask about any label:</p>\n<ul>\n<li><strong>Is it actually the thing we want to predict, or a proxy?</strong> \"Customer clicked support article\" is not \"customer's problem was solved.\" Optimising the proxy can quietly hurt the real goal.</li>\n<li><strong>How consistent are the labellers?</strong> If two trained annotators disagree on, say, 30% of \"is this review toxic?\" calls, no model will reliably exceed that ceiling — the <em>label itself</em> is fuzzy. This consistency is measured by <strong>inter-annotator agreement</strong>.</li>\n</ul>\n<p>The standard metric a practitioner should recognise is <strong>Cohen's kappa</strong>, which scores agreement between two annotators while correcting for the agreement they'd hit by luck alone:</p>"
+      },
+      {
+       "type": "formula",
+       "tex": "\\kappa = \\frac{p_o - p_e}{1 - p_e}",
+       "html": "<span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mi>κ</mi><mo>=</mo><mfrac><mrow><msub><mi>p</mi><mi>o</mi></msub><mo>−</mo><msub><mi>p</mi><mi>e</mi></msub></mrow><mrow><mn>1</mn><mo>−</mo><msub><mi>p</mi><mi>e</mi></msub></mrow></mfrac></mrow><annotation encoding=\"application/x-tex\">\\kappa = \\frac{p_o - p_e}{1 - p_e}</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mord mathnormal\">κ</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:2.1408em;vertical-align:-0.8804em;\"></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.2603em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\">1</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">p</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1514em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">e</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathnormal\">p</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1514em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">o</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">p</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1514em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">e</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.8804em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span>"
+      },
+      {
+       "type": "html",
+       "html": "<p>where <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>p</mi><mi>o</mi></msub></mrow><annotation encoding=\"application/x-tex\">p_o</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">p</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1514em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">o</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> is the <strong>observed agreement</strong> (the fraction of items the two annotators actually labelled the same) and <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>p</mi><mi>e</mi></msub></mrow><annotation encoding=\"application/x-tex\">p_e</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">p</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1514em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">e</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> is the <strong>expected agreement by chance</strong> (the fraction they'd match on if each just guessed according to their own label frequencies). <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>κ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding=\"application/x-tex\">\\kappa = 1</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mord mathnormal\">κ</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">1</span></span></span></span> is perfect agreement; <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>κ</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding=\"application/x-tex\">\\kappa = 0</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mord mathnormal\">κ</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">=</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0</span></span></span></span> is no better than chance; below 0 is worse than random. As a rough field reading, <strong>above ~0.8 is strong, 0.6-0.8 is usable, and below ~0.4 means your guideline — not your model — is the problem.</strong></p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Why subtract chance? Raw \"they agreed 90% of the time\" flatters you when one class dominates: if 95% of reviews are non-toxic, two annotators stabbing in the dark agree ~90% of the time on the majority class alone, telling you nothing about whether they can spot the rare toxic case. Cohen's kappa divides out that freebie — the <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mn>1</mn><mo>−</mo><msub><mi>p</mi><mi>e</mi></msub></mrow><annotation encoding=\"application/x-tex\">1 - p_e</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.7278em;vertical-align:-0.0833em;\"></span><span class=\"mord\">1</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:0.625em;vertical-align:-0.1944em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">p</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.1514em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">e</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> denominator rescales the <em>score above chance</em> to fill the <em>room above chance</em> — so a high <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>κ</mi></mrow><annotation encoding=\"application/x-tex\">\\kappa</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.4306em;\"></span><span class=\"mord mathnormal\">κ</span></span></span></span> means real, signal-bearing agreement, not a quirk of class balance.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Inter-annotator agreement is the practical <em>ceiling on achievable accuracy</em>: a model can't be more reliable than the labels it learns from. If humans agree only 70% of the time, a model scoring \"70%\" may already be at the ceiling — chasing 90% is chasing noise. The fix is rarely a better model; it's a clearer <strong>annotation guideline</strong> and a second pass on the ambiguous cases. Always pilot-label a small batch with two people and measure disagreement <em>before</em> committing to a full annotation budget.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>Commercially, labelling has a distinct cost curve: a per-example human price (in-house experts, or a labelling vendor — see Tools) times the number of examples needed for the target accuracy, plus the overhead of writing and revising the guideline. Size it as its own line item; it does not hide inside \"data cleaning.\"</p>"
+      }
+     ]
+    },
+    {
+     "id": "data-leakage--the-1-silent-killer",
+     "number": 7,
+     "title": "Data Leakage — The #1 Silent Killer",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Of everything in this module, leakage deserves the most space, because it is the failure that <strong>looks like success</strong>. A leaking model posts a spectacular validation score, sails through the demo, and then collapses in production — and by then your name is on the number. Leakage is information reaching the model at training time that it will <em>not</em> legitimately have at prediction time.</p>\n<p>There are four forms a lead must be able to name and probe for:</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th align=\"left\">Form</th><th align=\"left\">What happens</th><th align=\"left\">Tell-tale sign</th></tr></thead><tbody><tr><td align=\"left\"><strong>Target leakage</strong></td><td align=\"left\">A feature encodes the answer (or a consequence of it)</td><td align=\"left\">A single feature is \"too good\"; near-perfect accuracy</td></tr><tr><td align=\"left\"><strong>Train/test contamination</strong></td><td align=\"left\">Test rows influence training (e.g. scaling fit on all data, duplicates across splits)</td><td align=\"left\">Validation score far exceeds production</td></tr><tr><td align=\"left\"><strong>Train-serve skew</strong></td><td align=\"left\">Features built differently in training vs production</td><td align=\"left\">Offline great, online disappointing</td></tr><tr><td align=\"left\"><strong>Temporal leakage</strong></td><td align=\"left\">Using future information to predict the past</td><td align=\"left\">Backtest beautiful, live forecast poor</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "worked-example",
+       "title": "the hospital readmission model that \"achieved 98%.\"",
+       "html": "<p>A team builds a model to predict whether a patient will be readmitted within 30 days. Validation accuracy is 98% — everyone celebrates. Then someone profiles the top feature: <code>discharge_disposition</code>, which includes a code meaning \"transferred to long-term care because the patient was readmitted.\" The feature is <em>a record of the outcome</em>, only available <em>after</em> the event you're trying to predict. That's <strong>target leakage</strong>. Removing it, accuracy drops to a realistic ~70% — which is the honest, shippable number. The 98% never existed; it was the model reading the answer off the back of the card.</p>\n<p>The same project hid two more leaks: lab-result tables were normalised using statistics computed over the <em>entire</em> dataset including the test rows (<strong>contamination</strong>), and the production pipeline computed a patient's \"average prior stay length\" over a <em>different</em> time window than training did (<strong>train-serve skew</strong>). Each one inflates the offline score and evaporates in the real world.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>The defences a lead should insist on — and can ask about without writing code:</p>\n<ul>\n<li><strong>\"Would we know this feature at the moment of prediction?\"</strong> Ask it of every feature. If the value only exists <em>after</em> the event, it leaks. This one question catches most target leakage.</li>\n<li><strong>Split before you touch.</strong> All cleaning, scaling, and encoding statistics must be learned on the <em>training</em> split only, then applied to test — never fit on the full dataset.</li>\n<li><strong>Split by time for anything temporal.</strong> Train on the past, test on the future. A random shuffle of time-ordered data is temporal leakage by construction.</li>\n<li><strong>De-duplicate across splits.</strong> The same customer/document appearing in both train and test inflates the score.</li>\n<li><strong>Mirror training in serving.</strong> The transformation that builds a feature offline must be the <em>same one</em> that builds it live — the core argument for a feature store (§5) once you have several models.</li>\n</ul>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "Intuition",
+       "html": "<p>Treat a suspiciously high score as a <em>bug report</em>, not a victory. On real problems, \"too good to be true\" almost always is — and it's almost always leakage. The senior move is to be <em>more</em> sceptical of a 98% than of a 72%. The number that survives an honest temporal split and a leakage review is the only one safe to put in a proposal.</p>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "client-mission-patterns--commercial-angle",
+   "kind": "missions",
+   "title": "Client Mission Patterns / Commercial Angle",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Data work is not the unglamorous prelude to the \"real\" AI mission — it <em>is</em> a sellable portfolio of missions, and often the most defensible one (it builds on the client's proprietary asset).</p>\n<ul>\n<li><strong>Data Quality Audit &#x26; Remediation Plan</strong> — <em>Problem:</em> \"we want to do ML but we're not sure our data is usable.\" <em>Deliverable:</em> a scored report across the six quality dimensions, a profiled inventory of key tables, a leakage/risk register, and a prioritised remediation backlog with effort estimates. <em>Scope:</em> 2-4 weeks, fixed price. <em>Who buys:</em> CDO, data platform owner, or the sponsor of a stalled AI project. <em>This is the ideal entry mission</em> — it de-risks everything downstream and produces the evidence for the next quote.</li>\n<li><strong>Dataset Construction / Feature Pipeline for a Target Use Case</strong> — <em>Problem:</em> a specific use case is agreed, but no clean, model-ready dataset exists. <em>Deliverable:</em> a documented, versioned pipeline producing a training-ready feature table, with a data dictionary, quality checks, and a leakage-reviewed train/test protocol — handed off ready for <a class=\"wikilink\" data-module=\"04\" href=\"#/module/04\">Classical ML &#x26; Forecasting in Practice</a>. <em>Scope:</em> 4-8 weeks depending on sources and labelling. <em>Who buys:</em> a product or business owner with a funded use case.</li>\n<li><strong>Labelling Strategy &#x26; Annotation Pipeline Setup</strong> — <em>Problem:</em> a supervised use case with no labels. <em>Deliverable:</em> an annotation guideline, a labelling-tool setup, a measured inter-annotator agreement pilot, and a costed plan to label at the target volume/quality (in-house vs vendor recommendation). <em>Scope:</em> 2-4 weeks for the setup + pilot; labelling itself is a separate, metered line. <em>Who buys:</em> the use-case owner; sometimes an ops team that will do the labelling.</li>\n</ul>\n<p><strong>Buy-vs-build for the client:</strong> <em>build</em> the cleaning and feature logic on their proprietary first-party data — that's the differentiator. <em>Buy</em> the commodities: a labelling tool, a managed annotation workforce, off-the-shelf data-quality monitoring. <strong>What to charge for:</strong> the audit and the pipeline as packaged deliverables; meter labelling by volume. <strong>What NOT to promise:</strong> a model accuracy <em>before</em> the data assessment is done, a fixed labelling cost before the agreement pilot, or \"we'll clean it as we go\" — name the 80% line explicitly or it becomes unbillable scope creep.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "tools--vendor-landscape",
+   "kind": "tools",
+   "title": "Tools & Vendor Landscape",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p><em>As of 2026 — treat names/prices as perishable; re-check before quoting.</em></p>"
+    },
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Tool / Category</th><th align=\"left\">Use here</th><th align=\"left\">OSS / Paid</th><th align=\"left\">Note</th></tr></thead><tbody><tr><td align=\"left\">pandas / Polars</td><td align=\"left\">Cleaning &#x26; feature work in code</td><td align=\"left\">OSS</td><td align=\"left\">The default; Polars for larger-than-memory speed</td></tr><tr><td align=\"left\"><code>ydata-profiling</code> / <code>pandas-profiling</code></td><td align=\"left\">One-command dataset profiling report</td><td align=\"left\">OSS</td><td align=\"left\">Great for the leader-level EDA pass</td></tr><tr><td align=\"left\">Great Expectations / Soda / dbt tests</td><td align=\"left\">Codified data-quality checks in the pipeline</td><td align=\"left\">OSS / freemium</td><td align=\"left\">Turn the six dimensions into automated gates</td></tr><tr><td align=\"left\">Label Studio</td><td align=\"left\">Open-source annotation tool (text, image, audio)</td><td align=\"left\">OSS</td><td align=\"left\">Self-host for control over sensitive data</td></tr><tr><td align=\"left\">Scale AI / Labelbox / Snorkel (weak labelling)</td><td align=\"left\">Managed annotation &#x26; programmatic labelling</td><td align=\"left\">Paid</td><td align=\"left\">Cost scales with volume; mind data residency</td></tr><tr><td align=\"left\">Feast / Tecton / cloud feature stores</td><td align=\"left\">Consistent feature serving train↔serve</td><td align=\"left\">OSS / Paid</td><td align=\"left\">Platform-tier; overkill for a first mission (see <a class=\"wikilink\" data-module=\"12\" href=\"#/module/12\">Data Engineering &#x26; Platforms</a>)</td></tr><tr><td align=\"left\">Cloud warehouses (BigQuery, Snowflake, Databricks)</td><td align=\"left\">Where structured data lives &#x26; is transformed</td><td align=\"left\">Paid (consumption)</td><td align=\"left\">Watch egress &#x26; lock-in</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The genuinely portable skill of this module is the <em>judgment</em> — profiling questions, the quality bar, the leakage checklist — not any one tool.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "when-is-this-overkill",
+   "kind": "overkill",
+   "title": "When Is This Overkill?",
+   "blocks": [
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th align=\"left\">Situation</th><th align=\"left\">The heavy data machinery is overkill — do this instead</th></tr></thead><tbody><tr><td align=\"left\">One-off analysis, not a production model</td><td align=\"left\">Clean by hand in a notebook; don't build a pipeline</td></tr><tr><td align=\"left\">A few hundred clean rows</td><td align=\"left\">Skip profiling automation; just look at the data</td></tr><tr><td align=\"left\">First mission, one model</td><td align=\"left\">A documented transformation script, not a feature store</td></tr><tr><td align=\"left\">Labels already exist as a reliable business event</td><td align=\"left\">Use them; don't stand up an annotation pipeline</td></tr><tr><td align=\"left\">Tiny, slow-changing reference data</td><td align=\"left\">Validate once; you don't need continuous quality monitoring</td></tr><tr><td align=\"left\">The data plainly doesn't exist</td><td align=\"left\">Stop — sell a collection/instrumentation mission (<a class=\"wikilink\" data-module=\"01\" href=\"#/module/01\">AI &#x26; Data Landscape &#x26; Tech-Lead Mindset</a>)</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The discipline is the same as everywhere on this path: match the effort to the cost of being wrong, and reach for the lightest thing that clears the bar.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "resources",
+   "kind": "resources",
+   "title": "Resources",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "books",
+     "number": null,
+     "title": "Books",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Chip Huyen — <em>Designing Machine Learning Systems</em> — excellent chapters on data, features, and the failure modes (incl. leakage &#x26; skew). <em>(Paid)</em></li>\n<li>Max Kuhn &#x26; Kjell Johnson — <em>Feature Engineering and Selection</em> — the canonical, pragmatic treatment.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "courses--articles-free",
+     "number": null,
+     "title": "Courses / Articles (Free)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>The classic \"data is 80% of the work\" surveys and write-ups — for the framing and the numbers (<em>date them</em>).</li>\n<li>DVC / Great Expectations / Feast docs — practical, vendor-neutral intros to versioning, quality gates, and feature stores.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "go-deeper",
+     "number": null,
+     "title": "Go Deeper",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li><strong>Deeper code</strong> (pandas, encodings, pipelines, hands-on feature work) → <span class=\"vault-ref\" title=\"In the Obsidian vault: 03 - Data Processing &#x26; Feature Engineering\">Data Processing &#x26; Feature Engineering</span> (ML Engineer Path).</li>\n<li><strong>Lawful use of the data</strong> (personal data, pseudonymisation, consent scope) → <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a> — a prerequisite gate, not a footnote.</li>\n<li><strong>Platform-scale pipelines &#x26; feature stores</strong> → <a class=\"wikilink\" data-module=\"12\" href=\"#/module/12\">Data Engineering &#x26; Platforms</a>.</li>\n<li><strong>Text → vectors</strong> (embeddings as features) → <a class=\"wikilink\" data-module=\"08\" href=\"#/module/08\">NLP &#x26; Embeddings in Practice</a>.</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "practical-artifacts",
+   "kind": "artifacts",
+   "title": "Practical Artifacts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "decision-checklist--is-this-data-mission-ready",
+     "number": null,
+     "title": "Decision Checklist — \"Is this data mission-ready?\"",
+     "blocks": [
+      {
+       "type": "checklist",
+       "checklistId": "03/practical-artifacts/1",
+       "items": [
+        {
+         "id": "0",
+         "html": "Do I know the type and provenance of every source (and the licence/consent on each)?"
+        },
+        {
+         "id": "1",
+         "html": "Have I profiled a representative sample (shape, grain, coverage, missingness, target balance)?"
+        },
+        {
+         "id": "2",
+         "html": "Is \"good enough\" defined from the cost of being wrong, not an abstract score?"
+        },
+        {
+         "id": "3",
+         "html": "For supervised work: do labels exist, are they the real target (not a proxy), and is annotator agreement acceptable?"
+        },
+        {
+         "id": "4",
+         "html": "Have I run a leakage review — <em>every feature passes \"would we know it at prediction time?\"</em>"
+        },
+        {
+         "id": "5",
+         "html": "Is the train/test split done by time where time matters, and de-duplicated across splits?"
+        },
+        {
+         "id": "6",
+         "html": "Is the 80% data-work line explicit and billable in the estimate?"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "red-flags",
+     "number": null,
+     "title": "Red Flags",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"We have tons of data.\" (Volume isn't the question — type, provenance, and quality are.)</li>\n<li>A validation score that looks too good. (Treat it as a leakage bug, not a win.)</li>\n<li>\"We'll clean it as we go.\" (That's the project; name and price it.)</li>\n<li>Missing values that aren't random (e.g. a field that stops updating after the event).</li>\n<li>A label that's actually a proxy (\"clicked the article\" ≠ \"problem solved\").</li>\n<li>Features computed one way in the notebook and another way in production.</li>\n<li>A \"before/after system migration\" cliff that nobody mentioned.</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "scoping-prompts-ask-the-client",
+     "number": null,
+     "title": "Scoping Prompts (ask the client)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>\"Where does each data source live, who owns it, and what may we lawfully do with it?\"</li>\n<li>\"For the thing we want to predict — how is it recorded today, and since when?\"</li>\n<li>\"Show me the answer for ten real rows: would we know each input <em>at the moment of prediction</em>?\"</li>\n<li>\"If we have to label data, who are the experts, and how often do two of them disagree?\"</li>\n<li>\"What's the cost of a wrong prediction here — a nudge, or a refund/medical/financial action?\"</li>\n<li>\"Has the meaning of any key field changed over the period we'd train on?\"</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "self-assessment",
+   "kind": "self-assessment",
+   "title": "Self-Assessment",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Before moving on, you should be able to:</p>"
+    },
+    {
+     "type": "checklist",
+     "checklistId": "03/self-assessment/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Classify a dataset by type and provenance and state what each implies for cost and risk"
+      },
+      {
+       "id": "1",
+       "html": "Run a profiling conversation that converts an over-promise into an honest scope and price"
+      },
+      {
+       "id": "2",
+       "html": "Set a use-case-appropriate quality bar across the six dimensions and know when to stop cleaning"
+      },
+      {
+       "id": "3",
+       "html": "Defend the 80% data-work line in a proposal and estimate the data effort from a sample"
+      },
+      {
+       "id": "4",
+       "html": "Explain why feature engineering often beats a fancier model, and when a feature store is justified"
+      },
+      {
+       "id": "5",
+       "html": "Scope a labelling effort and reason about its accuracy ceiling via annotator agreement"
+      },
+      {
+       "id": "6",
+       "html": "Detect all four forms of data leakage and insist on the defences before any number ships"
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  }
+ ]
+}
