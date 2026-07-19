@@ -48,6 +48,7 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
+  if (new URL(e.request.url).pathname.startsWith('/api/')) return; // sync API: always hit the network, never cache
   if (e.request.mode === 'navigate') {
     // network-first so a deploy shows up next visit; cached shell when offline
     e.respondWith(fetch(e.request).catch(() => caches.match('./index.html')));

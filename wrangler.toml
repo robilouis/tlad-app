@@ -1,0 +1,25 @@
+# Cloudflare Worker: serves the static SPA build (dist/) and the /api sync endpoint.
+# See docs/cloudflare-setup.md for the one-time provisioning steps that fill in the
+# placeholder ids/vars below.
+name = "tlad-app"
+main = "worker/index.ts"
+compatibility_date = "2024-11-01"
+
+# Static assets: the Vite build output. Requests that match a file are served
+# directly; everything else invokes the Worker (which handles /api/* and falls
+# back to env.ASSETS for the SPA shell).
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+
+# Progress store — one row per user (keyed by the Access email).
+[[d1_databases]]
+binding = "DB"
+database_name = "tlad-progress"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+migrations_dir = "migrations"
+
+# Cloudflare Access identity check (not secrets — safe to commit once filled in).
+[vars]
+ACCESS_TEAM_DOMAIN = "REPLACE_WITH_TEAM.cloudflareaccess.com"
+ACCESS_AUD = "REPLACE_WITH_ACCESS_APPLICATION_AUD"

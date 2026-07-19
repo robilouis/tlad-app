@@ -1,24 +1,28 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { ModuleMeta } from '../../shared/schema';
+import { EMPTY, mergeProgress, parseProgress, type ProgressState } from '../../shared/merge';
+
+export type { ProgressState } from '../../shared/merge';
 
 const STORAGE_KEY = 'tlad-progress-v1';
-
-export interface ProgressState {
-  sectionsRead: Record<string, number>; // "09/key-concepts" -> timestamp
-  checklists: Record<string, boolean>; // "09/practical-artifacts/1/3" -> checked
-  quiz: Record<string, { best: number; total: number; attempts: number }>; // "09"
-  exercises: Record<string, number>; // "09/ex1" -> timestamp
-}
-
-const EMPTY: ProgressState = { sectionsRead: {}, checklists: {}, quiz: {}, exercises: {} };
+const API = '/api/progress';
+const PUSH_DEBOUNCE_MS = 1500;
 
 function load(): ProgressState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return EMPTY;
-    return { ...EMPTY, ...(JSON.parse(raw) as ProgressState) };
+    return parseProgress(JSON.parse(raw)) ?? EMPTY;
   } catch {
     return EMPTY;
+  }
+}
+
+function persist(state: ProgressState) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // storage full/unavailable: keep in-memory progress
   }
 }
 
@@ -40,17 +44,98 @@ const ProgressContext = createContext<ProgressApi | null>(null);
 export function ProgressProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ProgressState>(load);
 
-  const update = useCallback((fn: (s: ProgressState) => ProgressState) => {
-    setState((prev) => {
-      const next = fn(prev);
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      } catch {
-        // storage full/unavailable: keep in-memory progress
+  // Sync bookkeeping. `stateRef` lets the debounced pusher read the latest state
+  // without re-creating callbacks; `syncOff` short-circuits when no API is mounted
+  // (e.g. static hosting), so the app stays a pure localStorage app in that case.
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const dirty = useRef(false);
+  const syncOff = useRef(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Push local state up; the Worker merges server-side and returns the converged
+  // state, which we adopt (without re-scheduling another push).
+  const push = useCallback(async () => {
+    if (syncOff.current) return;
+    dirty.current = false;
+    try {
+      const res = await fetch(API, {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(stateRef.current),
+        credentials: 'include',
+      });
+      if (res.status === 404) {
+        syncOff.current = true; // no sync backend here — go localStorage-only
+        return;
       }
-      return next;
-    });
+      if (!res.ok) throw new Error(String(res.status));
+      const merged = parseProgress(await res.json());
+      if (merged) {
+        const next = mergeProgress(stateRef.current, merged);
+        stateRef.current = next;
+        persist(next);
+        setState(next);
+      }
+    } catch {
+      dirty.current = true; // transient (offline/5xx): retry on next mutation or reconnect
+    }
   }, []);
+
+  const schedulePush = useCallback(() => {
+    if (syncOff.current) return;
+    dirty.current = true;
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(push, PUSH_DEBOUNCE_MS);
+  }, [push]);
+
+  const update = useCallback(
+    (fn: (s: ProgressState) => ProgressState) => {
+      setState((prev) => {
+        const next = fn(prev);
+        stateRef.current = next;
+        persist(next);
+        return next;
+      });
+      schedulePush();
+    },
+    [schedulePush],
+  );
+
+  // On mount: pull server state, merge it into local, then push the union back so
+  // the server converges (this also uploads any pre-sync localStorage progress).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(API, { credentials: 'include' });
+        if (res.status === 404) {
+          syncOff.current = true;
+          return;
+        }
+        if (!res.ok) return; // transient this load — stay local, try again next time
+        const remote = parseProgress(await res.json());
+        if (cancelled || !remote) return;
+        const next = mergeProgress(stateRef.current, remote);
+        stateRef.current = next;
+        persist(next);
+        setState(next);
+        schedulePush();
+      } catch {
+        // offline: keep localStorage; a later mutation/reconnect will sync
+      }
+    })();
+
+    const onOnline = () => {
+      if (dirty.current) void push();
+    };
+    window.addEventListener('online', onOnline);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('online', onOnline);
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, [push, schedulePush]);
 
   const api = useMemo<ProgressApi>(
     () => ({
@@ -81,9 +166,9 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       exportJson: () => JSON.stringify(state, null, 2),
       importJson: (json) => {
         try {
-          const parsed = JSON.parse(json) as ProgressState;
-          if (typeof parsed !== 'object' || parsed === null) return false;
-          update(() => ({ ...EMPTY, ...parsed }));
+          const parsed = parseProgress(JSON.parse(json));
+          if (!parsed) return false;
+          update((s) => mergeProgress(s, parsed));
           return true;
         } catch {
           return false;
