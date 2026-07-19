@@ -12,6 +12,10 @@ with per-module quizzes and self-check exercises.
 | `npm run dev` | Dev server |
 | `npm run build` | Typecheck + production build (`dist/`, fully static, works from any host) |
 | `npm run preview` | Serve the production build |
+| `npm test` | Unit tests for the progress-merge logic (`shared/merge.test.ts`) |
+| `npm run worker:dev` | Run the Cloudflare Worker locally (`dist/` + `/api` against a local D1) |
+| `npm run deploy` | Build + `wrangler deploy` (Worker + assets) |
+| `npm run db:migrate` | Apply D1 migrations to the remote database |
 | `npm run icons` | Regenerate the PNG app icons in `public/` (design lives in `scripts/make-icons.ts`) |
 | `npx tsx scripts/check-eval.ts NN` | Validate one authored eval file |
 
@@ -39,5 +43,21 @@ content/evals/NN.json  ──(same script)──────► src/data/evals/N
 
 ## Progress
 
-Stored in `localStorage` (`tlad-progress-v1`): sections read, checklist ticks, best quiz
-scores, exercises done. Export/import buttons are at the bottom of the home page.
+Local-first in `localStorage` (`tlad-progress-v1`): sections read, checklist ticks, best
+quiz scores, exercises done. Export/import buttons are at the bottom of the home page
+(import now **merges** rather than overwrites, so it can never wipe newer progress).
+
+**Cross-device sync (optional).** When served by the Cloudflare Worker, progress also
+syncs through `/api/progress` (D1, gated by Cloudflare Access), so multiple devices
+converge. The sync is a commutative/idempotent **merge** — devices never clobber each
+other. If no backend is present (plain static hosting, offline), the app silently stays
+localStorage-only. Merge logic lives in `shared/merge.ts` (shared by the client and the
+Worker); the Worker is `worker/`. See [`docs/cloudflare-setup.md`](docs/cloudflare-setup.md)
+for the one-time provisioning steps.
+
+## Hosting
+
+Deployed as a Cloudflare Worker (`wrangler.toml`) that serves the static build and the
+sync API. `.github/workflows/deploy.yml` builds, tests, and deploys on push to `main`.
+The build is still fully static, so it also runs from any plain static host — just
+without sync.
