@@ -16,10 +16,10 @@ binding = "ASSETS"
 [[d1_databases]]
 binding = "DB"
 database_name = "tlad-progress"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "d3023478-6a4f-4ba9-896f-4a6b8f5a46a5"
 migrations_dir = "migrations"
 
 # Cloudflare Access identity check (not secrets — safe to commit once filled in).
 [vars]
-ACCESS_TEAM_DOMAIN = "REPLACE_WITH_TEAM.cloudflareaccess.com"
-ACCESS_AUD = "REPLACE_WITH_ACCESS_APPLICATION_AUD"
+ACCESS_TEAM_DOMAIN = "strassetpaillettes.cloudflareaccess.com"
+ACCESS_AUD = "3f4f4af0942eed57c3d5325d19b9edfd3ffc9cac3352aa01a3b7e1785a6be74f"
