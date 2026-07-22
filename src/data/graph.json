@@ -193,6 +193,26 @@
     38,
     39
    ]
+  },
+  {
+   "id": "21",
+   "title": "Model Context Protocol (MCP)",
+   "partIndex": 3,
+   "addon": true,
+   "weeks": [
+    40,
+    41
+   ]
+  },
+  {
+   "id": "22",
+   "title": "World Models",
+   "partIndex": 3,
+   "addon": true,
+   "weeks": [
+    42,
+    43
+   ]
   }
  ],
  "edges": [
@@ -654,6 +674,66 @@
   {
    "source": "11",
    "target": "20",
+   "weight": 1
+  },
+  {
+   "source": "20",
+   "target": "21",
+   "weight": 1
+  },
+  {
+   "source": "21",
+   "target": "22",
+   "weight": 2
+  },
+  {
+   "source": "11",
+   "target": "21",
+   "weight": 2
+  },
+  {
+   "source": "14",
+   "target": "21",
+   "weight": 2
+  },
+  {
+   "source": "10",
+   "target": "21",
+   "weight": 1
+  },
+  {
+   "source": "13",
+   "target": "21",
+   "weight": 1
+  },
+  {
+   "source": "04",
+   "target": "22",
+   "weight": 1
+  },
+  {
+   "source": "10",
+   "target": "22",
+   "weight": 1
+  },
+  {
+   "source": "11",
+   "target": "22",
+   "weight": 1
+  },
+  {
+   "source": "20",
+   "target": "22",
+   "weight": 1
+  },
+  {
+   "source": "06",
+   "target": "22",
+   "weight": 1
+  },
+  {
+   "source": "09",
+   "target": "22",
    "weight": 1
   }
  ]

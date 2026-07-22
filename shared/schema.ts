@@ -78,7 +78,7 @@ export const HomeDataSchema = z.object({
 });
 
 export const IndexDataSchema = z.object({
-  modules: z.array(ModuleMetaSchema).length(20),
+  modules: z.array(ModuleMetaSchema).length(22),
   parts: z.array(z.object({ index: z.number(), label: z.string() })),
   home: HomeDataSchema,
 });

@@ -1,0 +1,443 @@
+{
+ "moduleId": "22",
+ "quiz": [
+  {
+   "id": "q1",
+   "conceptRef": "what-a-world-model-is--and-isnt",
+   "prompt": "<p>A vendor shows a stunning clip of a generated street scene and calls it a \"world model.\" What single property would most justify — or undermine — that label?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Whether it maintains an action-conditioned internal state you can steer and query for consequences — not just whether the frames look realistic.",
+     "correct": true,
+     "explanation": "Correct. A world model maintains a state it advances under <em>your</em> actions and can be queried for consequences. Pretty frames with no steerable, action-conditioned state are a video generator wearing the word 'world.' Generation can be one readout of a world model, but it isn't the defining property."
+    },
+    {
+     "id": "b",
+     "text": "The resolution and frame rate of the generated video.",
+     "correct": false,
+     "explanation": "Visual fidelity says nothing about whether the system models dynamics or responds to actions. A gorgeous clip can have no world model behind it at all."
+    },
+    {
+     "id": "c",
+     "text": "Whether it was trained on more data than a language model.",
+     "correct": false,
+     "explanation": "Training scale is orthogonal to the question. A world model is defined by action-conditioned latent state and forward prediction, not by dataset size."
+    },
+    {
+     "id": "d",
+     "text": "Whether it can also output text descriptions of the scene.",
+     "correct": false,
+     "explanation": "Multi-modal output is beside the point. The defining test is a steerable, action-conditioned state — captioning ability is irrelevant to it."
+    }
+   ],
+   "takeaway": "A world model maintains an action-conditioned internal state it can advance and query; a video generator just makes plausible frames. Ask what you can steer, not how good it looks.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q2",
+   "conceptRef": "latent-over-pixels--compression-is-the-point",
+   "prompt": "<p>Why do the strongest world models predict in a compressed latent space rather than in raw pixels?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Because pixel prediction is computationally impossible at any scale.",
+     "correct": false,
+     "explanation": "It's not impossible — diffusion world models like DIAMOND do predict pixels. The issue is that it's <em>wasteful</em>, not infeasible."
+    },
+    {
+     "id": "b",
+     "text": "Because pixel prediction spends capacity modeling detail irrelevant to decisions; a latent captures the state that actually matters for control (position, velocity, what's about to collide).",
+     "correct": true,
+     "explanation": "Correct. Predicting every pixel is like simulating each raindrop to answer 'will it rain?' Compressing to a decision-relevant latent — and predicting there — is what Dreamer, MuZero, and JEPA all share, however much they otherwise disagree."
+    },
+    {
+     "id": "c",
+     "text": "Because latent spaces are always human-interpretable, which aids debugging.",
+     "correct": false,
+     "explanation": "Learned latents are usually <em>not</em> interpretable. The benefit is capacity allocation and predictability, not interpretability."
+    },
+    {
+     "id": "d",
+     "text": "Because working in latent space removes the need for any reconstruction term.",
+     "correct": false,
+     "explanation": "Many latent models (Dreamer) still reconstruct to <em>learn</em> the latent. Latent prediction and reconstruction aren't mutually exclusive; the point is where prediction happens."
+    }
+   ],
+   "takeaway": "Predict in a compressed latent, not in pixels: model the decision-relevant state and skip the irrelevant detail. 'The pixels are not the point' unites Dreamer, MuZero, and JEPA.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q3",
+   "conceptRef": "the-variational-backbone--elbo-in-one-sitting",
+   "prompt": "<p>In the ELBO objective used to train latent world models, what does the KL (regularization) term contribute, and what happens if it's removed entirely?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "It maximizes reconstruction accuracy; removing it makes reconstructions blurry.",
+     "correct": false,
+     "explanation": "Reconstruction is the <em>other</em> term. The KL term regularizes the latent toward a prior; it isn't what sharpens reconstructions."
+    },
+    {
+     "id": "b",
+     "text": "It pulls the encoder's latent distribution toward a prior, keeping the space smooth and predictable; remove it and the latent can memorize/overfit and becomes hard to predict forward in.",
+     "correct": true,
+     "explanation": "Correct. The KL keeps the latent space well-behaved and — crucially for a world model — <em>predictable</em>, so you can roll it forward. Without it, the encoder is free to hoard idiosyncratic detail and the latent loses the smoothness that makes imagination possible."
+    },
+    {
+     "id": "c",
+     "text": "It adds the reward signal needed for control.",
+     "correct": false,
+     "explanation": "Reward is a separate term added in RSSM/Dreamer. The KL is about regularizing the latent distribution, not about reward."
+    },
+    {
+     "id": "d",
+     "text": "It has no practical effect and is included only for mathematical elegance.",
+     "correct": false,
+     "explanation": "Far from cosmetic — the reconstruction-vs-KL balance is the whole game. Drop the KL and the latent space degrades in exactly the ways that break forward prediction."
+    }
+   ],
+   "takeaway": "The ELBO balances reconstruction (keep what matters) against a KL regularizer (stay near the prior). The KL is what makes the latent smooth enough to predict forward — imagination depends on it.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q4",
+   "conceptRef": "rssm-and-the-dreamer-line--learning-inside-the-dream",
+   "prompt": "<p>In an RSSM, the state splits into a deterministic part <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>h</mi><mi>t</mi></msub></mrow><annotation encoding=\"application/x-tex\">h_t</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8444em;vertical-align:-0.15em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">h</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> and a stochastic part <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>z</mi><mi>t</mi></msub></mrow><annotation encoding=\"application/x-tex\">z_t</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.5806em;vertical-align:-0.15em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.044em;\">z</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:-0.044em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span>. What does 'imagination training' (as in Dreamer) actually buy you?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "It lets the agent learn behavior from vast amounts of imagined latent rollouts — nearly free 'experience' — instead of expensive real-environment interaction.",
+     "correct": true,
+     "explanation": "Correct. Once the prior can roll the latent forward without observations, Dreamer trains an actor-critic <em>inside</em> those dreams. Millions of imagined experiences cost almost nothing, which is why DreamerV3 is so sample-efficient and why DayDreamer can train real robots in hours."
+    },
+    {
+     "id": "b",
+     "text": "It replaces the need for a reward model.",
+     "correct": false,
+     "explanation": "Dreamer still learns a reward model; imagination uses it to evaluate imagined trajectories. Imagination doesn't remove reward — it exploits it cheaply."
+    },
+    {
+     "id": "c",
+     "text": "It makes the world model's reconstructions photorealistic.",
+     "correct": false,
+     "explanation": "Imagination training is about learning <em>behavior</em> in latent rollouts, not about visual fidelity. Reconstruction quality is a separate concern."
+    },
+    {
+     "id": "d",
+     "text": "It eliminates compounding rollout error.",
+     "correct": false,
+     "explanation": "Imagination actually <em>depends</em> on rollout quality and is limited by compounding error (concept 9). It doesn't eliminate drift; it just makes practice cheap within the horizon where the model stays coherent."
+    }
+   ],
+   "takeaway": "Imagination training learns behavior inside the model's own latent rollouts, making experience nearly free — the core reason a good world model is so valuable for control.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q5",
+   "conceptRef": "rssm-and-the-dreamer-line--learning-inside-the-dream",
+   "prompt": "<p>An RSSM trains both a prior <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>p</mi><mo stretchy=\"false\">(</mo><msub><mi>z</mi><mi>t</mi></msub><mo>∣</mo><msub><mi>h</mi><mi>t</mi></msub><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">p(z_t \\mid h_t)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\">p</span><span class=\"mopen\">(</span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.044em;\">z</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:-0.044em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">∣</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">h</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mclose\">)</span></span></span></span> and a posterior <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>q</mi><mo stretchy=\"false\">(</mo><msub><mi>z</mi><mi>t</mi></msub><mo>∣</mo><msub><mi>h</mi><mi>t</mi></msub><mo separator=\"true\">,</mo><msub><mi>o</mi><mi>t</mi></msub><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">q(z_t \\mid h_t, o_t)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">q</span><span class=\"mopen\">(</span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.044em;\">z</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:-0.044em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">∣</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">h</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">o</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mclose\">)</span></span></span></span>, with a KL that pulls them together. Why is minimizing that specific KL what makes pure imagination possible?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Because it forces the blind prior (which predicts without seeing the frame) to match the informed posterior (which saw it), so the model can roll forward accurately without any observations.",
+     "correct": true,
+     "explanation": "Correct. The posterior peeks at <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>o</mi><mi>t</mi></msub></mrow><annotation encoding=\"application/x-tex\">o_t</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.5806em;vertical-align:-0.15em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">o</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span>; the prior doesn't. Driving the prior toward the posterior means the model's observation-free predictions approximate what actually happens — which is exactly what you need to dream forward with no real frames."
+    },
+    {
+     "id": "b",
+     "text": "Because it makes the posterior ignore the observation, simplifying inference.",
+     "correct": false,
+     "explanation": "Backwards — you want the <em>prior</em> to become as good as the observation-informed posterior, not the posterior to discard information."
+    },
+    {
+     "id": "c",
+     "text": "Because it maximizes the entropy of <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>z</mi><mi>t</mi></msub></mrow><annotation encoding=\"application/x-tex\">z_t</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.5806em;vertical-align:-0.15em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.044em;\">z</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:-0.044em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span>, encouraging exploration.",
+     "correct": false,
+     "explanation": "This KL is about matching two distributions, not maximizing entropy. Exploration is handled elsewhere in the agent."
+    },
+    {
+     "id": "d",
+     "text": "Because it removes the deterministic path <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>h</mi><mi>t</mi></msub></mrow><annotation encoding=\"application/x-tex\">h_t</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8444em;vertical-align:-0.15em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">h</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> from the model.",
+     "correct": false,
+     "explanation": "The deterministic <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>h</mi><mi>t</mi></msub></mrow><annotation encoding=\"application/x-tex\">h_t</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8444em;vertical-align:-0.15em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">h</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> stays; it carries reliable history. The KL operates on the stochastic <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>z</mi><mi>t</mi></msub></mrow><annotation encoding=\"application/x-tex\">z_t</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.5806em;vertical-align:-0.15em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.044em;\">z</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:-0.044em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> and doesn't remove <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>h</mi><mi>t</mi></msub></mrow><annotation encoding=\"application/x-tex\">h_t</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8444em;vertical-align:-0.15em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">h</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span>."
+    }
+   ],
+   "takeaway": "Matching the blind prior to the observation-informed posterior is what lets an RSSM predict forward without seeing anything — the mathematical enabler of imagination.",
+   "difficulty": "stretch"
+  },
+  {
+   "id": "q6",
+   "conceptRef": "planning-with-a-learned-model--muzero-and-value-equivalence",
+   "prompt": "<p>MuZero plans with a learned latent model but deliberately never does one thing that Dreamer does. What is it, and what principle justifies the choice?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "It never reconstructs observations/pixels — it predicts only policy, value, and reward, on the principle of value-equivalence: model just what determines good decisions.",
+     "correct": true,
+     "explanation": "Correct. MuZero's model outputs the three planning-relevant quantities and runs tree search in an abstract latent, never rendering a frame. Value-equivalence says a model is good enough if it predicts what changes your decision — even if it can't reconstruct the world."
+    },
+    {
+     "id": "b",
+     "text": "It never uses a neural network, relying purely on search.",
+     "correct": false,
+     "explanation": "MuZero is deeply neural — it learns the latent dynamics, value, policy, and reward functions. Search is layered on top of learned models."
+    },
+    {
+     "id": "c",
+     "text": "It never uses rewards, learning purely from self-play outcomes.",
+     "correct": false,
+     "explanation": "MuZero explicitly predicts reward as one of its three outputs. Reward prediction is central, not absent."
+    },
+    {
+     "id": "d",
+     "text": "It never plans more than one step ahead.",
+     "correct": false,
+     "explanation": "MuZero runs multi-step Monte-Carlo Tree Search in latent space. Multi-step lookahead is the whole point; what it skips is reconstruction."
+    }
+   ],
+   "takeaway": "MuZero models only policy, value, and reward — never pixels — on the value-equivalence principle. Two philosophies: reconstruct enough to imagine (Dreamer) vs. model only what changes the decision (MuZero).",
+   "difficulty": "core"
+  },
+  {
+   "id": "q7",
+   "conceptRef": "jepa--prediction-without-generation",
+   "prompt": "<p>JEPA predicts in embedding space and never generates pixels. What failure mode does this create, and how is it prevented?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "Representation collapse — the trivial solution of mapping everything to a constant; prevented by a slowly-updated (EMA) stop-gradient target plus variance/covariance regularization.",
+     "correct": true,
+     "explanation": "Correct. If the target embedding is free to move, the predictor can 'win' by collapsing everything to one point — a perfect, useless solution. The cures are architectural: a stop-gradient EMA target encoder and regularizers that forbid the embeddings from collapsing."
+    },
+    {
+     "id": "b",
+     "text": "Mode collapse in a discriminator, prevented by adversarial training.",
+     "correct": false,
+     "explanation": "JEPA is not a GAN; there's no discriminator. The relevant failure is representation collapse, addressed by EMA targets and variance regularization, not adversarial training."
+    },
+    {
+     "id": "c",
+     "text": "Exploding gradients, prevented by gradient clipping.",
+     "correct": false,
+     "explanation": "The characteristic JEPA risk is collapse to a constant embedding, not exploding gradients. Clipping doesn't address it."
+    },
+    {
+     "id": "d",
+     "text": "Overfitting to pixels, prevented by dropout.",
+     "correct": false,
+     "explanation": "JEPA doesn't predict pixels at all, so pixel-overfitting isn't the issue. The specific danger is embedding collapse."
+    }
+   ],
+   "takeaway": "Predicting in embedding space risks representation collapse; JEPA prevents it with a stop-gradient EMA target and variance regularization. Generation is optional — prediction in the right space is the point.",
+   "difficulty": "stretch"
+  },
+  {
+   "id": "q8",
+   "conceptRef": "generative-interactive-worlds--genie-gaia-cosmos-marble",
+   "prompt": "<p>Which pairing of system to its defining characteristic (as of 2026) is correct?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "V-JEPA 2 → a non-generative, joint-embedding world model with an action-conditioned variant for robot control.",
+     "correct": true,
+     "explanation": "Correct. V-JEPA 2 (Meta) is the self-supervised, non-generative lineage; its V-JEPA 2-AC variant enables zero-shot robot control. It's the odd one out among the generative systems precisely because it doesn't generate."
+    },
+    {
+     "id": "b",
+     "text": "Genie 3 → a publicly available commercial product for enterprise deployment.",
+     "correct": false,
+     "explanation": "Genie 3 is a DeepMind <em>research preview</em> — real-time promptable worlds, but not a shipping product. Marble (World Labs) is the commercial-product example."
+    },
+    {
+     "id": "c",
+     "text": "MuZero → a generative video model for autonomous driving.",
+     "correct": false,
+     "explanation": "MuZero is a reconstructive-free, value-equivalent planning model for games/control — not a generative driving model. That description fits Wayve's GAIA."
+    },
+    {
+     "id": "d",
+     "text": "NVIDIA Cosmos → a closed model available only inside DeepMind.",
+     "correct": false,
+     "explanation": "Cosmos is NVIDIA's <em>open</em> world-foundation-model platform for physical AI, not a closed DeepMind system. The org and openness are both wrong."
+    }
+   ],
+   "takeaway": "Keep the 2026 map straight: V-JEPA 2 is non-generative (Meta), Genie 3 is a DeepMind research preview, Marble is World Labs' product, Cosmos is NVIDIA's open platform. Place a system by lineage and status.",
+   "difficulty": "core"
+  },
+  {
+   "id": "q9",
+   "conceptRef": "do-llms-have-world-models--the-live-debate",
+   "prompt": "<p>Vafa et al. (2024) evaluated whether a generative model trained on New York taxi trips had learned a coherent world model. What did they find, and why does it matter?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "The model navigated well and aced existing world-model diagnostics, yet the street map recovered from its internals was incoherent (impossible streets) and it broke on small detours — high task accuracy, low world-model coherence.",
+     "correct": true,
+     "explanation": "Correct. Using sharper diagnostics (inspired by the Myhill–Nerode theorem), they showed that passing existing tests doesn't imply a coherent internal model. It matters because a lot of 'the model clearly understands X' claims rest on exactly the diagnostics this work showed to be insufficient."
+    },
+    {
+     "id": "b",
+     "text": "The model had a perfect internal map of Manhattan, proving LLMs build coherent world models.",
+     "correct": false,
+     "explanation": "The opposite of the finding. The recovered map was fractured and full of impossible streets despite good navigation performance."
+    },
+    {
+     "id": "c",
+     "text": "The model could not navigate at all, proving LLMs have no world models.",
+     "correct": false,
+     "explanation": "It navigated <em>well</em> on the training distribution — that's what makes the result striking. The point is incoherence beneath good performance, not failure."
+    },
+    {
+     "id": "d",
+     "text": "They found that larger models always have more coherent world models.",
+     "correct": false,
+     "explanation": "The paper's message is about the gap between task accuracy and world-model coherence, not a clean scaling law for coherence."
+    }
+   ],
+   "takeaway": "Acing existing world-model tests doesn't imply a coherent internal model: Vafa et al. found high navigation accuracy hiding an incoherent map that shattered on detours. Sharper evaluation changes the verdict.",
+   "difficulty": "stretch"
+  },
+  {
+   "id": "q10",
+   "conceptRef": "the-hard-problems--drift-memory-and-evaluation",
+   "prompt": "<p>A vendor claims their world-model simulator is 'production-ready' and shows beautiful long clips. Which single follow-up most quickly separates substance from hype?</p>",
+   "choices": [
+    {
+     "id": "a",
+     "text": "\"How long does a rollout stay coherent before it drifts, and how do you measure dynamics correctness beyond visual quality?\"",
+     "correct": true,
+     "explanation": "Correct. Compounding rollout error caps useful horizon, and visual metrics (FVD-style) reward plausible looks, not correct dynamics. Asking for a drift horizon and a dynamics/physics evaluation cuts straight through a good-looking demo to whether the model got the rules right."
+    },
+    {
+     "id": "b",
+     "text": "\"What resolution and frame rate does it render at?\"",
+     "correct": false,
+     "explanation": "Visual specs are exactly what a hype demo already optimizes. They tell you nothing about dynamics correctness or drift — the properties that determine whether it's actually a simulator."
+    },
+    {
+     "id": "c",
+     "text": "\"How large was the training dataset?\"",
+     "correct": false,
+     "explanation": "Dataset size doesn't establish coherence or horizon. A model can train on enormous data and still drift quickly and get the physics wrong."
+    },
+    {
+     "id": "d",
+     "text": "\"Which cloud provider hosts it?\"",
+     "correct": false,
+     "explanation": "Infrastructure is irrelevant to whether the model has learned correct, steerable dynamics. It's a deflection, not a diagnostic."
+    }
+   ],
+   "takeaway": "Drift horizon and dynamics-not-looks evaluation are the fastest hype filters. A model that looks right and acts wrong is confidently wrong — ask how far it stays coherent and how they measure correctness.",
+   "difficulty": "core"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "title": "Read the objective like a leader",
+   "estimatedMinutes": 25,
+   "scenario": "<p>A data scientist shows you the training loss for an RSSM-style world model and wants your read at a leader's altitude — not a derivation. The loss has three parts: a <strong>reconstruction</strong> term <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mo>−</mo><mi>log</mi><mo>⁡</mo><mi>p</mi><mo stretchy=\"false\">(</mo><msub><mi>o</mi><mi>t</mi></msub><mo>∣</mo><msub><mi>h</mi><mi>t</mi></msub><mo separator=\"true\">,</mo><msub><mi>z</mi><mi>t</mi></msub><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">-\\log p(o_t \\mid h_t, z_t)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">−</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mop\">lo<span style=\"margin-right:0.0139em;\">g</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\">p</span><span class=\"mopen\">(</span><span class=\"mord\"><span class=\"mord mathnormal\">o</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">∣</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">h</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.044em;\">z</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:-0.044em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mclose\">)</span></span></span></span>, a <strong>reward</strong> term <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mo>−</mo><mi>log</mi><mo>⁡</mo><mi>p</mi><mo stretchy=\"false\">(</mo><msub><mi>r</mi><mi>t</mi></msub><mo>∣</mo><msub><mi>h</mi><mi>t</mi></msub><mo separator=\"true\">,</mo><msub><mi>z</mi><mi>t</mi></msub><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">-\\log p(r_t \\mid h_t, z_t)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">−</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mop\">lo<span style=\"margin-right:0.0139em;\">g</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\">p</span><span class=\"mopen\">(</span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.0278em;\">r</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">∣</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">h</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.044em;\">z</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:-0.044em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mclose\">)</span></span></span></span>, and a <strong>KL</strong> term <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>β</mi><mtext> </mtext><mrow><mi mathvariant=\"normal\">K</mi><mi mathvariant=\"normal\">L</mi></mrow><mo fence=\"false\" stretchy=\"true\" minsize=\"1.2em\" maxsize=\"1.2em\">(</mo><mi>q</mi><mo stretchy=\"false\">(</mo><msub><mi>z</mi><mi>t</mi></msub><mo>∣</mo><msub><mi>h</mi><mi>t</mi></msub><mo separator=\"true\">,</mo><msub><mi>o</mi><mi>t</mi></msub><mo stretchy=\"false\">)</mo><mtext> </mtext><mi mathvariant=\"normal\">∥</mi><mtext> </mtext><mi>p</mi><mo stretchy=\"false\">(</mo><msub><mi>z</mi><mi>t</mi></msub><mo>∣</mo><msub><mi>h</mi><mi>t</mi></msub><mo stretchy=\"false\">)</mo><mo fence=\"false\" stretchy=\"true\" minsize=\"1.2em\" maxsize=\"1.2em\">)</mo></mrow><annotation encoding=\"application/x-tex\">\\beta\\,\\mathrm{KL}\\big(q(z_t \\mid h_t, o_t)\\,\\|\\,p(z_t \\mid h_t)\\big)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1.2em;vertical-align:-0.35em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0528em;\">β</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">KL</span></span><span class=\"mord\"><span class=\"delimsizing size1\">(</span></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">q</span><span class=\"mopen\">(</span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.044em;\">z</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:-0.044em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">∣</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">h</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">o</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mclose\">)</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\">∥</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord mathnormal\">p</span><span class=\"mopen\">(</span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.044em;\">z</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:-0.044em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">∣</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.2em;vertical-align:-0.35em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">h</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mclose\">)</span><span class=\"mord\"><span class=\"delimsizing size1\">)</span></span></span></span></span> that pulls the prior toward the posterior. You do not need to derive anything — you need to explain what each term is <em>for</em> and what breaks without it.</p>",
+   "givens": [
+    "<span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>h</mi><mi>t</mi></msub></mrow><annotation encoding=\"application/x-tex\">h_t</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8444em;vertical-align:-0.15em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">h</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> is the deterministic recurrent state (reliable history); <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>z</mi><mi>t</mi></msub></mrow><annotation encoding=\"application/x-tex\">z_t</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.5806em;vertical-align:-0.15em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.044em;\">z</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:-0.044em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span> is the stochastic latent (uncertainty).",
+    "The posterior <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>q</mi><mo stretchy=\"false\">(</mo><msub><mi>z</mi><mi>t</mi></msub><mo>∣</mo><msub><mi>h</mi><mi>t</mi></msub><mo separator=\"true\">,</mo><msub><mi>o</mi><mi>t</mi></msub><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">q(z_t \\mid h_t, o_t)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0359em;\">q</span><span class=\"mopen\">(</span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.044em;\">z</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:-0.044em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">∣</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">h</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">o</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mclose\">)</span></span></span></span> sees the observation; the prior <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>p</mi><mo stretchy=\"false\">(</mo><msub><mi>z</mi><mi>t</mi></msub><mo>∣</mo><msub><mi>h</mi><mi>t</mi></msub><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">p(z_t \\mid h_t)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord mathnormal\">p</span><span class=\"mopen\">(</span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.044em;\">z</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:-0.044em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">∣</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">h</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mclose\">)</span></span></span></span> does not.",
+    "<span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>β</mi></mrow><annotation encoding=\"application/x-tex\">\\beta</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0528em;\">β</span></span></span></span> weights the KL term against the others."
+   ],
+   "tasks": [
+    "In one sentence each, state the job of the reconstruction, reward, and KL terms.",
+    "Explain what capability the KL term specifically enables for the world model (hint: what the model can do without observations).",
+    "Predict the failure mode if each term were removed or if <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>β</mi></mrow><annotation encoding=\"application/x-tex\">\\beta</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0528em;\">β</span></span></span></span> were set far too high or far too low."
+   ],
+   "solution": "<p><strong>Jobs.</strong> <em>Reconstruction</em> forces the latent <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mo stretchy=\"false\">(</mo><msub><mi>h</mi><mi>t</mi></msub><mo separator=\"true\">,</mo><msub><mi>z</mi><mi>t</mi></msub><mo stretchy=\"false\">)</mo></mrow><annotation encoding=\"application/x-tex\">(h_t, z_t)</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mopen\">(</span><span class=\"mord\"><span class=\"mord mathnormal\">h</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mpunct\">,</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\" style=\"margin-right:0.044em;\">z</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:-0.044em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mclose\">)</span></span></span></span> to retain enough information to explain the observation — it keeps the state informative about what matters. <em>Reward</em> makes the same latent predict reward, so the state is useful for <em>control</em>, not just perception. <em>KL</em> pulls the blind prior toward the observation-informed posterior, keeping the latent space smooth and predictable.</p>\n<p><strong>What the KL enables.</strong> Because it drives the prior (which never sees <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><msub><mi>o</mi><mi>t</mi></msub></mrow><annotation encoding=\"application/x-tex\">o_t</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.5806em;vertical-align:-0.15em;\"></span><span class=\"mord\"><span class=\"mord mathnormal\">o</span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.2806em;\"><span style=\"top:-2.55em;margin-left:0em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mathnormal mtight\">t</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span></span></span></span>) to match the posterior (which does), the model learns to roll its latent state <em>forward without observations</em> — i.e. to imagine. That observation-free rollout is what makes cheap 'imagination training' possible.</p>\n<p><strong>Failure modes.</strong> Remove <em>reconstruction</em> → the latent can stop encoding the observation and the model loses touch with reality. Remove <em>reward</em> → the state may be great for reconstruction but useless for choosing actions. Remove <em>KL</em> → the prior no longer matches the posterior, so observation-free rollouts drift immediately and imagination collapses; the latent can also overfit. <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>β</mi></mrow><annotation encoding=\"application/x-tex\">\\beta</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0528em;\">β</span></span></span></span> too high → the latent is pulled to the prior and forgets the observation (posterior collapse: predictable but uninformative). <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>β</mi></mrow><annotation encoding=\"application/x-tex\">\\beta</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0528em;\">β</span></span></span></span> too low → effectively removing the KL: informative but unpredictable latent, poor imagination.</p>",
+   "rubric": {
+    "keyPoints": [
+     "Correctly assigns the job of each term (reconstruction = keep info, reward = make it useful for control, KL = predictable/imaginable latent).",
+     "Identifies that the KL is what enables observation-free rollout / imagination.",
+     "Gives plausible, distinct failure modes for removing each term.",
+     "Handles the <span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>β</mi></mrow><annotation encoding=\"application/x-tex\">\\beta</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord mathnormal\" style=\"margin-right:0.0528em;\">β</span></span></span></span> trade-off in both directions (posterior collapse vs. unpredictable latent)."
+    ],
+    "pitfalls": [
+     "Trying to derive the ELBO instead of explaining the terms' purpose.",
+     "Confusing the reconstruction and KL roles, or calling the KL cosmetic.",
+     "Missing that the prior-vs-posterior match is the enabler of imagination."
+    ],
+    "takeaways": [
+     "You can lead a world-model conversation by reading an objective's terms, without deriving them.",
+     "The reconstruction-vs-regularization balance is the recurring tension across VAEs, PlaNet, and Dreamer."
+    ],
+    "transfer": "The same 'read the loss terms and their trade-offs' skill applies to any regularized objective you'll be shown: the bias-variance knob in classical ML, the KL in RLHF, or weight decay in a deep net. You don't derive it — you say what each term buys and what breaks at the extremes."
+   }
+  },
+  {
+   "id": "ex2",
+   "title": "Brief the board on world models",
+   "estimatedMinutes": 30,
+   "scenario": "<p>The CTO of an industrial-robotics company has seen the Genie 3 and V-JEPA 2 headlines and asks you for a one-page briefing: \"Are world models something we should be investing in, and if so how?\" The company builds warehouse robots; it is not a frontier AI lab and cannot staff a research team. Leadership is prone to buying hype.</p>",
+   "givens": [
+    "The audience is technical-executive: wants signal, not a lecture.",
+    "The company's realistic AI capacity is applied engineering, not fundamental research.",
+    "There is genuine adjacent value in robotics simulation and synthetic data."
+   ],
+   "tasks": [
+    "Define world models in two sentences appropriate for this audience.",
+    "State honestly what is real versus demo in 2026, and name the three lineages with a flagship each.",
+    "Give a concrete recommendation with 'watch triggers' — specific developments that would change your advice — and one adjacent, real project worth doing now.",
+    "Keep it free of hype: explicitly flag one thing you would NOT recommend."
+   ],
+   "solution": "<p><strong>Definition.</strong> A world model is a learned simulator: it compresses what a robot senses into an internal state, predicts how that state changes as the robot acts, and lets the robot plan by imagining consequences rather than trying them. It is not a video generator and not a policy — it's the predictive engine a policy can plan against.</p>\n<p><strong>Real vs. demo (2026).</strong> Model-based RL (DreamerV3) is real and deployed in narrow control. Generative-interactive worlds (Genie 3 — research preview; NVIDIA Cosmos — a real simulation/synthetic-data platform; Wayve GAIA — driving) are visually striking but mostly pre-production outside simulation. The JEPA/self-supervised lineage (Meta V-JEPA 2; LeCun's new venture) is the big bet on world models as the successor to LLMs — promising, unproven at product scale. Three lineages: model-based RL (Dreamer), generative-interactive (Genie/Cosmos), JEPA (V-JEPA 2).</p>\n<p><strong>Recommendation.</strong> Do not start a world-model research program — you can't staff or evaluate it. Do run one adjacent, real project now: evaluate a world-model <em>simulator</em> (Cosmos-class) against your existing classical simulation for generating rare-scenario training data, with an honest acceptance eval. Watch triggers that would upgrade the advice: a credible fix for long-horizon drift, evaluation standards for dynamics (not looks), and a first load-bearing production deployment beyond simulation by a peer. <strong>Would NOT recommend:</strong> treating any generative video demo as a production simulator, or committing headcount to training a world model in-house.</p>",
+   "rubric": {
+    "keyPoints": [
+     "Two-sentence definition correctly separates world model from video generator and policy.",
+     "Honest maturity read: names lineages and flagships and distinguishes real from demo.",
+     "Recommendation fits the company's actual capacity (applied, not research) and includes concrete watch triggers.",
+     "Explicitly names something NOT to do — hype resistance is demonstrated."
+    ],
+    "pitfalls": [
+     "Recommending an in-house world-model research program for a non-frontier company.",
+     "Presenting Genie 3 or a video demo as production-ready.",
+     "Vague 'keep an eye on it' with no concrete trigger or adjacent project."
+    ],
+    "takeaways": [
+     "The honest 2026 posture for most companies is a watchlist plus one adjacent, real project — usually simulation or synthetic data.",
+     "Credibility comes from naming what's NOT worth doing, not just what is."
+    ],
+    "transfer": "This is the generic 'brief leadership on an immature technology' skill: define it plainly, separate real from demo, match ambition to the org's actual capacity, and set explicit triggers that would change the call. It applies to quantum, AGI claims, or any frontier pitch that lands on an exec's desk."
+   }
+  },
+  {
+   "id": "ex3",
+   "title": "Design the acceptance evaluation",
+   "estimatedMinutes": 30,
+   "scenario": "<p>An autonomous-vehicle client is being sold a world-model simulator that promises to generate rare, dangerous driving scenarios (a child running out, a sudden blowout) as synthetic training data. The vendor's pitch is entirely visual — long, photorealistic clips. The client asks you to design the acceptance evaluation that must be passed before they trust this data to train a safety-critical model.</p>",
+   "givens": [
+    "The purpose of the data is to train a downstream driving policy — so the data's value is measured by its effect on that policy.",
+    "Visual realism has already been demonstrated; it is not in question.",
+    "The scenarios are safety-critical and rare, so real ground-truth data is scarce."
+   ],
+   "tasks": [
+    "List the evaluation dimensions that matter beyond visual quality, and why visual metrics are insufficient here.",
+    "Specify at least one action-consistency probe and one physics/dynamics sanity check.",
+    "Define the decisive test tied to the actual purpose (downstream policy performance), and state a pass/fail threshold philosophy."
+   ],
+   "solution": "<p><strong>Beyond visual quality.</strong> FVD-style visual metrics reward plausible-looking frames, not correct dynamics — a clip can look perfect while violating physics, which is catastrophic for safety-critical training. Evaluation must cover: action-consistency (does the scene respond correctly to control inputs?), physics/dynamics correctness (momentum, braking distance, collision behavior), long-horizon coherence (does the scene stay consistent over the scenario, or drift?), and diversity/coverage (does it actually generate the rare cases, not just easy ones).</p>\n<p><strong>Probes.</strong> <em>Action-consistency:</em> issue a known control sequence (e.g. hard brake at a fixed distance) and check the generated trajectory matches physically-expected stopping behavior across many seeds. <em>Physics sanity:</em> measure whether object velocities, accelerations, and contact events obey basic kinematics — e.g. no teleporting pedestrians, braking distances within physical bounds, conservation of momentum in collisions.</p>\n<p><strong>Decisive test.</strong> The data's whole purpose is to improve a downstream policy, so the acceptance test is a <em>policy-transfer</em> evaluation: train (or fine-tune) the driving policy on the synthetic data and measure its performance on a held-out set of <em>real</em> rare-event data (or a trusted high-fidelity simulator). Pass/fail philosophy: the synthetic data must produce a measurable, statistically-sound improvement on the real held-out safety metric versus the baseline without it — and must never <em>degrade</em> performance on nominal driving. Looks are necessary but never sufficient; the model earns trust only by improving the thing it exists to improve.</p>",
+   "rubric": {
+    "keyPoints": [
+     "Explains why visual metrics (FVD-style) are insufficient for safety-critical dynamics.",
+     "Specifies concrete action-consistency and physics/dynamics probes.",
+     "Makes downstream policy performance on real held-out data the decisive acceptance test.",
+     "Threshold philosophy requires measured improvement and no regression on nominal cases."
+    ],
+    "pitfalls": [
+     "Accepting visual realism as sufficient evidence of data quality.",
+     "Designing only intrinsic metrics with no link to the downstream task.",
+     "Ignoring long-horizon drift or scenario coverage/diversity."
+    ],
+    "takeaways": [
+     "Evaluate a world model by dynamics and downstream task impact, never by looks alone.",
+     "For safety-critical synthetic data, the acceptance test is transfer to real held-out performance."
+    ],
+    "transfer": "The principle — evaluate a generative artifact by its effect on the downstream task, not by its surface plausibility — generalizes to synthetic tabular data, augmentation pipelines, and even LLM-generated training data: measure the lift on the real objective, and guard against regressions on the cases you already handle."
+   }
+  }
+ ]
+}

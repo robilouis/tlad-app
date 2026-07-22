@@ -43,7 +43,7 @@ export default function Home() {
   return (
     <div className="fade-in">
       <section className="hero">
-        <div className="eyebrow">Interactive learning path · 39 weeks</div>
+        <div className="eyebrow">Interactive learning path · 43 weeks</div>
         <h1>Tech Lead — AI &amp; Data</h1>
         <div className="hero-pitch prose" dangerouslySetInnerHTML={{ __html: indexData.home.pitchHtml }} />
       </section>
