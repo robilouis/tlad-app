@@ -329,9 +329,43 @@
    "addon": true,
    "pitchHtml": "<p>Reinforcement learning (RL) is the part of AI that learns by <strong>trial and error</strong>: an agent takes actions, gets rewards, and adjusts to earn more reward over time. It is genuinely powerful — it is how game-playing systems beat humans, how robots learn control, and how LLMs are tuned to be helpful (RLHF). It is also, for the overwhelming majority of business problems, <strong>the wrong tool</strong> — expensive to set up, hard to evaluate, dangerous to debug, and almost always beaten by either supervised learning or its lighter cousin, the <strong>bandit</strong>. This module gives you the vocabulary to recognise the rare genuine fit, the judgment to de-escalate everything else, and a working command of bandits — the \"RL lite\" that actually earns its keep in recommendation, content, and pricing. The throughline, stated once and repeated on purpose: <strong>RL is powerful but usually overkill — reach for a bandit or supervised learning unless the problem truly needs sequential decisions.</strong></p>",
    "prev": "19",
-   "next": null,
+   "next": "21",
    "sectionCount": 8,
    "quizCount": 8,
+   "exerciseCount": 3
+  },
+  {
+   "id": "21",
+   "title": "Model Context Protocol (MCP)",
+   "weeks": [
+    40,
+    41
+   ],
+   "part": "III — Deep Learning & Modern AI",
+   "partIndex": 3,
+   "addon": true,
+   "pitchHtml": "<p>Model Context Protocol is the piece of plumbing that clients now ask for by name — usually with a security worry attached in the same breath. \"We want our assistant to actually <em>do</em> things — read the CRM, file the ticket, query the warehouse — but we heard MCP is a data-leak risk. Is it safe?\" This module answers both halves, because you cannot answer the second without the first.</p>\n<p>The honest headline, which the rest of the module earns: <strong>MCP does not create a new class of vulnerability. It industrializes an old one.</strong> Everything dangerous about connecting a language model to your tools and data was already dangerous before the protocol existed — MCP just makes it a five-minute config change instead of a bespoke engineering project, which moves the risk from \"buried in code review\" to \"one dropdown in a settings panel.\" That shift is the whole story: it is what makes MCP genuinely useful <em>and</em> what makes the paranoia partly justified and partly theater. Your job as a tech lead is to tell the client which is which — to separate the real, governable danger from the reflexive \"let's ban it\" that quietly pushes people toward something worse. By the end you will be able to draw where the data actually flows (including through a LiteLLM-style proxy, and — critically — where it flows <em>around</em> one), name the attack classes with real 2025-26 examples, and design a posture that is proportionate to the client's actual data sensitivity rather than to their anxiety.</p>",
+   "prev": "20",
+   "next": "22",
+   "sectionCount": 8,
+   "quizCount": 10,
+   "exerciseCount": 3
+  },
+  {
+   "id": "22",
+   "title": "World Models",
+   "weeks": [
+    42,
+    43
+   ],
+   "part": "III — Deep Learning & Modern AI",
+   "partIndex": 3,
+   "addon": true,
+   "pitchHtml": "<p>Everything else on this path has been about models of <em>data</em>: models of tables, of images, of language. This final module is about models of <em>the world</em> — systems that learn how an environment evolves and what an agent's actions will do to it, then use that learned simulator to imagine, plan, and act. It is the frontier bet several of the biggest labs are now making: Google DeepMind's Genie, Meta's V-JEPA, NVIDIA's Cosmos, Fei-Fei Li's World Labs, and Yann LeCun's post-Meta venture are all, in different accents, arguments that the road past today's language models runs through models of the physical world.</p>\n<p>Treat this module differently from the rest. The field is <strong>not mature</strong> — there are, honestly, few billable \"world-model missions\" in 2026, and this is deliberately a field guide rather than a delivery playbook. What you get here is a durable mental model of what a world model <em>is</em>, the three research lineages competing to build one, and just enough of the mathematics — the ELBO, the RSSM, JEPA's objective, MuZero's value-equivalence — to read the papers and smell the hype, without re-deriving anything. The pace of change means specific system names will age fast; the concepts and the maths will not. The one sentence to carry out: <strong>a world model is a learned simulator — it compresses observations into a latent state, predicts that state forward under actions, and lets an agent act by imagining consequences instead of trying them.</strong> Hold that, and every system below becomes a variation on a theme.</p>",
+   "prev": "21",
+   "next": null,
+   "sectionCount": 8,
+   "quizCount": 10,
    "exerciseCount": 3
   }
  ],
@@ -362,7 +396,7 @@
   }
  ],
  "home": {
-  "pitchHtml": "<p>A practical, breadth-first curriculum for the person who has to <strong>build an AI &#x26; Data pole and a commercial offer</strong> — not derive the algorithms, but know <em>what exists, when to use it, what it costs, and how to scope, sell, and lead it</em>. Mathematical intuition is kept; proofs are not. Every module ends with concrete client mission patterns.\nTime budget: <strong>5-7 hours/week</strong> | Duration: <strong>~39 weeks</strong> | Philosophy: <strong>Sell outcomes, not models. Buy the commodity, build the differentiator.</strong></p>",
+  "pitchHtml": "<p>A practical, breadth-first curriculum for the person who has to <strong>build an AI &#x26; Data pole and a commercial offer</strong> — not derive the algorithms, but know <em>what exists, when to use it, what it costs, and how to scope, sell, and lead it</em>. Mathematical intuition is kept; proofs are not. Every module ends with concrete client mission patterns.\nTime budget: <strong>5-7 hours/week</strong> | Duration: <strong>~43 weeks</strong> | Philosophy: <strong>Sell outcomes, not models. Buy the commodity, build the differentiator.</strong></p>",
   "fitHtml": "<p>There are three parallel paths in this vault. They answer different questions — pick by the job you're doing.</p>\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n<table><thead><tr><th align=\"left\">Path</th><th align=\"left\">Question it answers</th><th align=\"left\">Who it's for</th><th align=\"center\">Maths</th></tr></thead><tbody><tr><td align=\"left\"><span class=\"vault-ref\" title=\"In the Obsidian vault: 00 - Index AIS\">AI Scientist</span></td><td align=\"left\"><em>Why</em> does it work, derived from first principles</td><td align=\"left\">research-grade depth</td><td align=\"center\">Heavy</td></tr><tr><td align=\"left\"><span class=\"vault-ref\" title=\"In the Obsidian vault: 00 - Index MLE\">ML Engineer</span></td><td align=\"left\"><em>How</em> do I build, ship &#x26; run one model in production</td><td align=\"left\">hands-on builder</td><td align=\"center\">Light</td></tr><tr><td align=\"left\"><strong>Tech Lead AI &#x26; Data</strong> (this path)</td><td align=\"left\"><strong><em>What</em> exists, <em>when</em> to use it, <em>what</em> it costs, <em>how</em> to scope/sell/lead it</strong></td><td align=\"left\">pole lead &#x26; commercial offer</td><td align=\"center\">Intuition only</td></tr></tbody></table>\n<p>When a module needs deeper maths, it links into the <strong>AI Scientist</strong> path. When it needs deeper code, it links into the <strong>ML Engineer</strong> path. This path is the map; those two are the territory.</p>",
   "howToHtml": "<ol>\n<li><strong>Read by need, not strictly in order.</strong> Unlike the AI Scientist path, this one is a reference map. If you're scoping a RAG mission next week, jump to <a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a> and <a class=\"wikilink\" data-module=\"16\" href=\"#/module/16\">Scoping, Estimating &#x26; Delivering AI &#x26; Data Missions</a>. The Previous/Next chain gives a sensible default order, not a prerequisite lock.</li>\n<li><strong>Foundations first if you're new.</strong> Part I (<a class=\"wikilink\" data-module=\"01\" href=\"#/module/01\">AI &#x26; Data Landscape &#x26; Tech-Lead Mindset</a>, <a class=\"wikilink\" data-module=\"02\" href=\"#/module/02\">Math &#x26; Stats Intuition for Leaders</a>) gives the vocabulary and judgment the rest assumes.</li>\n<li><strong>Use the \"Client Mission Patterns\" sections to build your offer.</strong> Every module ends with concrete mission archetypes (problem → deliverable → typical scope → who buys it). Collected, they <em>are</em> your service catalogue draft — <a class=\"wikilink\" data-module=\"17\" href=\"#/module/17\">Building the AI &#x26; Data Offer &#x26; Leading the Pole</a> assembles them.</li>\n<li><strong>Use the \"Practical Artifacts\" as reusable assets.</strong> Each module ships decision checklists, red flags, and scoping prompts you can lift directly into proposals and discovery calls.</li>\n<li><strong>Read \"When Is This Overkill?\" before recommending anything.</strong> The job is judgment, not enthusiasm. Default to the simplest thing that clears the bar.</li>\n<li><strong>Go deeper only when a mission demands it.</strong> Follow the \"deeper math → AI Scientist\" / \"deeper code → ML Engineer\" pointers when a specific engagement needs them — not pre-emptively.</li>\n</ol>",
   "principlesHtml": "<h3>The Value/Complexity Budget</h3>\n<p>Adapted from the AI Scientist path's \"Complexity Budget\", reframed for a P&#x26;L. Every capability you add to the offer carries a tax — build cost, run cost (compute, licences, people), maintenance, explainability, and risk. For each opportunity:</p>\n<ol>\n<li><strong>Name the business outcome</strong> in the client's terms (€ saved, hours removed, revenue unlocked, risk reduced).</li>\n<li><strong>Start with the cheapest thing that could work</strong> — a rule, a spreadsheet, an off-the-shelf API.</li>\n<li><strong>Escalate only when the value gap justifies the tax</strong> — and be able to say why in one sentence.</li>\n</ol>\n<h3>Sell Outcomes, Not Models</h3>\n<p>Clients buy resolved problems, not architectures. Frame every mission around the outcome and the proof it worked, then choose the lightest technology that delivers it.</p>\n<h3>Buy the Commodity, Build the Differentiator</h3>\n<p>Foundation models, vector stores, and pipelines are commodities — rent them. Spend your build budget only where it creates defensible client value (proprietary data, domain workflow, integration, trust).</p>",

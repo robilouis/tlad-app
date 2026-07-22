@@ -1,0 +1,520 @@
+{
+ "id": "21",
+ "title": "Model Context Protocol (MCP)",
+ "weeks": [
+  40,
+  41
+ ],
+ "part": "III — Deep Learning & Modern AI",
+ "partIndex": 3,
+ "addon": true,
+ "pitchHtml": "<p>Model Context Protocol is the piece of plumbing that clients now ask for by name — usually with a security worry attached in the same breath. \"We want our assistant to actually <em>do</em> things — read the CRM, file the ticket, query the warehouse — but we heard MCP is a data-leak risk. Is it safe?\" This module answers both halves, because you cannot answer the second without the first.</p>\n<p>The honest headline, which the rest of the module earns: <strong>MCP does not create a new class of vulnerability. It industrializes an old one.</strong> Everything dangerous about connecting a language model to your tools and data was already dangerous before the protocol existed — MCP just makes it a five-minute config change instead of a bespoke engineering project, which moves the risk from \"buried in code review\" to \"one dropdown in a settings panel.\" That shift is the whole story: it is what makes MCP genuinely useful <em>and</em> what makes the paranoia partly justified and partly theater. Your job as a tech lead is to tell the client which is which — to separate the real, governable danger from the reflexive \"let's ban it\" that quietly pushes people toward something worse. By the end you will be able to draw where the data actually flows (including through a LiteLLM-style proxy, and — critically — where it flows <em>around</em> one), name the attack classes with real 2025-26 examples, and design a posture that is proportionate to the client's actual data sensitivity rather than to their anxiety.</p>",
+ "prev": "20",
+ "next": "22",
+ "sectionCount": 8,
+ "quizCount": 10,
+ "exerciseCount": 3,
+ "sections": [
+  {
+   "id": "learning-objectives",
+   "kind": "objectives",
+   "title": "Learning Objectives",
+   "blocks": [
+    {
+     "type": "checklist",
+     "checklistId": "21/learning-objectives/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "Explain what MCP is and — just as important — what it is <em>not</em>, in two sentences a CISO will accept."
+      },
+      {
+       "id": "1",
+       "html": "Trace a single tool call end to end and say exactly where the data travels and which systems can see it."
+      },
+      {
+       "id": "2",
+       "html": "Name the major attack classes — prompt injection, tool poisoning, rug pulls, confused-deputy/token abuse, supply chain — each with a concrete example."
+      },
+      {
+       "id": "3",
+       "html": "Use the <strong>lethal trifecta</strong> to judge whether a given integration is actually dangerous or merely sounds scary."
+      },
+      {
+       "id": "4",
+       "html": "Say precisely what a model-API proxy (LiteLLM, Portkey, a cloud AI gateway) does and does <em>not</em> see when an MCP tool fires."
+      },
+      {
+       "id": "5",
+       "html": "Design a proportionate security posture and defend which controls are necessary versus overkill for a given data-sensitivity tier."
+      },
+      {
+       "id": "6",
+       "html": "Vet a third-party MCP server against a checklist before it ever touches client data."
+      },
+      {
+       "id": "7",
+       "html": "Run the \"our data will leak\" conversation with a nervous client and land on <em>govern, don't ban</em>."
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "key-concepts",
+   "kind": "concepts",
+   "title": "Key Concepts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "the-problem-mcp-solves--and-what-it-actually-is",
+     "number": 1,
+     "title": "The Problem MCP Solves — and What It Actually Is",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Before MCP, every time you wanted an LLM application to use an external system — GitHub, a Postgres database, Google Drive, a company wiki — someone wrote a bespoke integration: custom code to describe the tool to the model, call the API, and shuttle results back. With <strong>M</strong> applications and <strong>N</strong> systems you tend toward <strong>M×N</strong> integrations, each maintained separately. MCP is an open standard, introduced by Anthropic in November 2024 and adopted across the industry through 2025, that turns this into an <strong>M+N</strong> problem: a system exposes its capabilities <em>once</em> as an MCP <strong>server</strong>, and any MCP-capable <strong>host</strong> can consume it. The specification is versioned by date (the stable revision as of this writing is <code>2025-11-25</code>, with a large <code>2026-07-28</code> revision in release-candidate stage), and it is genuinely open — not an Anthropic product, not a hosted service.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "USB-C for AI integrations",
+       "html": "<p>Before USB-C, every device shipped its own connector and you drowned in adapters. USB-C standardized the <em>port</em>, not the devices — a hostile device plugged into that port can still try to attack your laptop. MCP standardizes how models discover and call tools; it does nothing to guarantee the tool on the other end is trustworthy. Hold on to that distinction — most of this module lives in it.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p>Be equally clear about what MCP is <em>not</em>, because the misconceptions drive the fear. It is <strong>not an agent framework</strong> (it is the connection layer <em>under</em> the agents of <a class=\"wikilink\" data-module=\"11\" href=\"#/module/11\">Agentic Architectures &#x26; LLM App Patterns</a>). It is <strong>not a model capability</strong> baked into Claude or GPT. And — the one that matters most to a paranoid client — <strong>it is not a data pipe to Anthropic or any model vendor.</strong> An MCP server you run talks to <em>your</em> host; your data goes wherever your host and your tools send it. The protocol has no home-phone.</p>"
+      },
+      {
+       "type": "diagram",
+       "text": "   Before MCP  (M×N bespoke integrations)        With MCP  (M+N)\n\n   App A ─┬─ custom ─ GitHub                 App A ─┐\n   App B ─┼─ custom ─ Postgres               App B ─┼─ MCP ─┬─ GitHub server\n   App C ─┴─ custom ─ Drive                  App C ─┘       ├─ Postgres server\n     each line hand-built & maintained                     └─ Drive server\n                                              one adapter per system, reused by all"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>MCP is a standard connector, not a trust decision.</strong> It tells you how to plug things in; it never tells you whether you should.</p>"
+      }
+     ]
+    },
+    {
+     "id": "architecture-hosts-clients-servers",
+     "number": 2,
+     "title": "Architecture: Hosts, Clients, Servers",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Three roles. The <strong>host</strong> is the application the user actually interacts with — Claude Desktop, an IDE assistant, a custom chatbot. The host is where policy lives: it decides which servers are connected, surfaces consent prompts, and enforces whatever guardrails exist. Inside the host, one <strong>client</strong> is instantiated per server connection, maintaining a 1:1 session. A <strong>server</strong> is a capability adapter that exposes some system (a database, a SaaS API, the local filesystem) through the MCP interface.</p>\n<p>The single most important architectural fact for security: <strong>the host is the policy enforcement point.</strong> Servers propose capabilities; the host (and the human behind it) disposes. If the host auto-approves everything, there is no enforcement anywhere.</p>\n<p>Servers come in two deployment shapes, and the distinction is a security fault line:</p>\n<ul>\n<li><strong>Local servers</strong> run on the user's machine and speak over stdio. They typically <strong>inherit the user's own permissions</strong> — filesystem access, local credentials, network. Convenient, and quietly dangerous: a local server is code running as you.</li>\n<li><strong>Remote servers</strong> run somewhere else and speak over HTTP, authenticating with OAuth. These have a real authorization story (see concept 8) but add network-exposure and token-management concerns.</li>\n</ul>"
+      },
+      {
+       "type": "diagram",
+       "text": "        HOST  (Claude Desktop / IDE / your app)\n        │   owns: consent UI, policy, logging\n   ┌────┼────────────┬──────────────┐\n client         client          client\n   │  stdio        │ http+oauth     │ http+oauth\n   ▼               ▼                ▼\n Local server   Remote server    Remote server\n (runs as you)  (SaaS vendor)    (your infra)\n   │               │                │\n filesystem,     Jira/Asana/…     your DB/APIs\n local creds     (their data)     (your data)\n        ▲ trust boundary crossed at every arrow ▲"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Every arrow in that diagram is a trust boundary.</strong> Security review is mostly the discipline of asking, at each one, \"what can cross here, and who vouched for the thing on the other side?\"</p>\n<p>One more architectural assumption to hold on to: the protocol authors are explicit that MCP relies on a <strong>human in the loop</strong> — users are meant to review tools before granting them and approve consequential actions. That assumption is load-bearing and routinely violated in practice, because humans click \"approve\" on everything (concept 8's consent fatigue). Many so-called \"MCP vulnerabilities\" are really \"the human-in-the-loop assumption was quietly removed.\"</p>"
+      }
+     ]
+    },
+    {
+     "id": "the-six-primitives",
+     "number": 3,
+     "title": "The Six Primitives",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>MCP defines six capability types. Three are offered by servers, three by clients. You do not need to implement them, but you must know they exist, because each is a different attack surface — and the last two are the ones people forget in threat models.</p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th>Primitive</th><th>Offered by</th><th>What it does</th><th>Security edge</th></tr></thead><tbody><tr><td><strong>Tools</strong></td><td>Server</td><td>Actions the model can invoke (<code>create_issue</code>, <code>run_query</code>)</td><td>The main event: side effects, data access</td></tr><tr><td><strong>Resources</strong></td><td>Server</td><td>Readable data the host can pull in as context</td><td>Untrusted content enters the prompt here</td></tr><tr><td><strong>Prompts</strong></td><td>Server</td><td>Reusable prompt templates the server suggests</td><td>Server-authored text the user may run blindly</td></tr><tr><td><strong>Sampling</strong></td><td>Client</td><td>Lets a server ask the host's model to complete text</td><td>Server can <em>drive the model</em>; often overlooked</td></tr><tr><td><strong>Roots</strong></td><td>Client</td><td>Tells the server which files/dirs it may touch</td><td>A scoping control — if the host honors it</td></tr><tr><td><strong>Elicitation</strong></td><td>Client</td><td>Lets a server ask the user for more input mid-task</td><td>A social-engineering surface</td></tr></tbody></table>"
+      },
+      {
+       "type": "callout",
+       "kind": "note",
+       "title": "the two everyone forgets",
+       "html": "<p>Threat models fixate on tools and resources and skip <strong>sampling</strong> and <strong>elicitation</strong>. Sampling means a server can request model generations through your host — a compromised server can use your model (and your bill, and your context) as a resource. Elicitation means a server can pop questions at the user mid-flow — a natural vector for \"please paste your API key to continue.\" When you audit a server, ask which primitives it uses, not just which tools.</p>"
+      }
+     ]
+    },
+    {
+     "id": "the-wire-json-rpc-lifecycle-and-transports",
+     "number": 4,
+     "title": "The Wire: JSON-RPC, Lifecycle, and Transports",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Under the hood MCP is unglamorous, which is good — boring protocols have smaller attack surfaces. Messages are <strong>JSON-RPC 2.0</strong>. A session opens with an <code>initialize</code> handshake that negotiates protocol version and capabilities, after which the host typically calls <code>tools/list</code> to discover what the server offers and <code>tools/call</code> to invoke one. Transports are <strong>stdio</strong> (local) and <strong>Streamable HTTP</strong> (remote; an older HTTP+SSE transport is being retired).</p>"
+      },
+      {
+       "type": "diagram",
+       "text": " Host/Client                         Server\n     │   initialize (version, caps)    │\n     │ ──────────────────────────────► │\n     │   capabilities, serverInfo      │\n     │ ◄────────────────────────────── │\n     │   tools/list                    │\n     │ ──────────────────────────────► │\n     │   [ {name, description, schema} ]│   ← descriptions enter the model's context\n     │ ◄────────────────────────────── │\n     │   tools/call(name, args)        │\n     │ ──────────────────────────────► │\n     │   result                        │   ← results enter the model's context\n     │ ◄────────────────────────────── │"
+      },
+      {
+       "type": "html",
+       "html": "<p>Two details matter later. First, <strong>tool descriptions from <code>tools/list</code> are injected into the model's context</strong> so it knows what is available — which makes them a prompt-injection vector <em>before any tool is called</em> (concept 7). Second, servers can send a <code>notifications/tools/list_changed</code> message to say \"my tools changed,\" and a well-behaved host re-fetches — which is the mechanism behind rug pulls. <strong>The wire is simple; the danger is in what rides on it.</strong></p>"
+      }
+     ]
+    },
+    {
+     "id": "where-your-data-actually-flows--the-load-bearing-concept",
+     "number": 5,
+     "title": "Where Your Data Actually Flows — the Load-Bearing Concept",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>This is the concept the entire security conversation hinges on, and it is the one most people get wrong. Consider a host that fronts its model through a LiteLLM (or Portkey, or cloud AI) gateway — the setup your security-conscious clients have adopted — and also connects an MCP server that can write to Jira.</p>"
+      },
+      {
+       "type": "diagram",
+       "text": "   USER\n    │  prompt\n    ▼\n   HOST ───────────►  LiteLLM / model-API proxy ───────►  Claude / GPT\n    │   (prompt + tool defs + tool results all pass here — proxy SEES them)\n    │\n    │  model says: call jira.create_issue({...})\n    ▼\n   MCP client ───────►  Jira MCP server ───────►  JIRA (write happens here)\n        the tool call + its side effect DO NOT traverse the model proxy"
+      },
+      {
+       "type": "html",
+       "html": "<p>Trace it carefully. The <strong>prompt, the tool definitions, and the tool results</strong> travel host → model, so they pass <em>through</em> the LiteLLM proxy — it can log them, mask them, block on them. But the <strong>tool invocation itself</strong> — the actual write to Jira, the actual <code>SELECT</code> against your database, the actual file read — happens on the <strong>host↔server↔system</strong> path, which <strong>does not go through the model-API proxy at all.</strong> The proxy governs the <em>conversation with the model</em>; it has zero visibility into, and zero control over, the <em>side effects the model triggers</em>.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "worked-example",
+       "title": "the proxy that watched the wrong door",
+       "html": "<p>A client routes all Claude traffic through LiteLLM with DLP scanning \"so nothing leaks.\" Their assistant has a filesystem MCP server. The model, following an injected instruction, reads <code>~/.aws/credentials</code> and pastes it into a Jira ticket via the Jira server. The LiteLLM proxy sees a tidy little tool call and its result — it never sees the credentials file being read, because that read never went near the model API. The DLP that was supposed to be the safety net was watching the conversation while the exfiltration walked out the side door.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>A model-API proxy sees prompts and results; it never sees the tool's side effects.</strong> Internalize this sentence. Half of enterprise MCP security is realizing that the control you already bought covers a different plane than the one MCP operates on (concept 11).</p>"
+      }
+     ]
+    },
+    {
+     "id": "threats-i-prompt-injection-is-the-engine",
+     "number": 6,
+     "title": "Threats I: Prompt Injection Is the Engine",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Almost every serious MCP attack is prompt injection wearing a costume, so understand the engine first. <strong>Direct</strong> injection is the user telling the model to misbehave — mostly their own problem. <strong>Indirect</strong> injection is the dangerous one: malicious instructions arrive inside <em>content the model reads</em> — a support ticket, a web page, a GitHub issue, a resource pulled in via MCP — and the model, unable to reliably distinguish \"data to process\" from \"instructions to follow,\" obeys them. The model becomes a <strong>confused deputy</strong>: it holds legitimate authority (your tools, your tokens) and is tricked into wielding it for someone else.</p>\n<p>Simon Willison's <strong>lethal trifecta</strong> (June 2025) is the sharpest tool for judging real risk. An agent is dangerous when it combines all three of:</p>\n<ol>\n<li><strong>Access to private/sensitive data</strong> (your DB, your files, your inbox),</li>\n<li><strong>Exposure to untrusted content</strong> (anything an attacker can influence — tickets, emails, web pages),</li>\n<li><strong>The ability to communicate externally</strong> (send email, open a PR, make an HTTP request, even render a link).</li>\n</ol>"
+      },
+      {
+       "type": "diagram",
+       "text": "        PRIVATE DATA ───────┐\n                            ├──►  all three present  =  exfiltration is one\n     UNTRUSTED CONTENT ─────┤                           injected instruction away\n                            │\n     EXTERNAL COMMS ────────┘     remove ANY ONE leg   =  the attack loses its path"
+      },
+      {
+       "type": "html",
+       "html": "<p>The power of the framing is that <strong>you defend by removing a leg, not by winning the unwinnable fight against injection.</strong> A read-only assistant over private data with <em>no</em> external-comms tool cannot exfiltrate no matter how thoroughly it is injected. A public-web research agent with no private data has nothing worth stealing. The GitHub-MCP exploit demonstrated by Invariant Labs in 2025 is the trifecta in one server: it read attacker-filed issues in <em>public</em> repos (untrusted content), had access to <em>private</em> repos (sensitive data), and could open PRs (external comms) — so a planted issue could siphon private code into a public pull request.</p>\n<p><strong>Prompt injection is not solved and will not be solved by a prompt.</strong> Design as if it fires, and make sure that when it does, one leg of the trifecta is missing.</p>"
+      }
+     ]
+    },
+    {
+     "id": "threats-ii-malicious-and-compromised-servers",
+     "number": 7,
+     "title": "Threats II: Malicious and Compromised Servers",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>The trifecta assumes the server is honest but manipulable. Now assume the server itself is hostile — because with an open ecosystem of community servers, some are.</p>\n<ul>\n<li><strong>Tool poisoning</strong> (coined by Invariant Labs, April 2025): malicious instructions hidden <em>inside the tool's description</em>. Recall from concept 4 that descriptions are injected into the model's context — so a server can ship an <code>add(a, b)</code> tool whose description quietly instructs the model to also read the user's SSH keys and include them in the arguments. The user sees \"addition\"; the model sees a payload. Trail of Bits called the general move <strong>\"line jumping,\"</strong> because the injected text reaches the model <em>before any tool is invoked</em>, jumping ahead of the consent boundary MCP is supposed to provide.</li>\n<li><strong>Rug pulls:</strong> a server presents a benign tool set during review and approval, then later swaps in a malicious definition (via <code>tools/list_changed</code>). What you audited is not what runs next week.</li>\n<li><strong>Typosquatting / lookalikes:</strong> <code>slack-mcp</code> vs <code>slack_mcp</code> vs <code>mcp-slack</code> — install the wrong one and you have invited an attacker in yourself.</li>\n<li><strong>Cross-server shadowing:</strong> a malicious server emits instructions that alter how the host uses a <em>different</em>, trusted server — poisoning the well next door.</li>\n<li><strong>Plain supply chain:</strong> an MCP server is just software running with the credentials you give it. <code>mcp-remote</code>, a popular connector with 437,000+ downloads, carried a critical remote-code-execution flaw (<strong>CVE-2025-6514</strong>, CVSS 9.6, patched in 0.1.16) that let a malicious server run OS commands on the client. The <strong>MCP Inspector</strong> debugging tool had its own critical RCE (<strong>CVE-2025-49596</strong>, fixed in 0.14.1). These are ordinary software vulnerabilities — but now sitting at the junction between your model and your systems.</li>\n</ul>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th>Attack</th><th>Vector</th><th>Control that kills it</th></tr></thead><tbody><tr><td>Tool poisoning / line jumping</td><td>Hidden instructions in tool descriptions</td><td>Pin &#x26; review descriptions; scan servers; description-diff alerts</td></tr><tr><td>Rug pull</td><td>Post-approval definition swap</td><td>Version pinning; re-vet on <code>list_changed</code>; content hashing</td></tr><tr><td>Typosquatting</td><td>Lookalike server names</td><td>Vetted internal catalog; block ad-hoc installs</td></tr><tr><td>Cross-server shadowing</td><td>One server influencing another</td><td>Isolate servers; least-context; trust tiers</td></tr><tr><td>Supply-chain RCE</td><td>Vulnerable/malicious server code</td><td>Pin versions; patch fast; sandbox; SBOM/provenance</td></tr></tbody></table>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>With third-party servers, \"what does this tool do?\" is the wrong question. The right one is \"what could the person who wrote it make it do?\"</strong></p>"
+      }
+     ]
+    },
+    {
+     "id": "threats-iii-identity-tokens-and-the-confused-deputy",
+     "number": 8,
+     "title": "Threats III: Identity, Tokens, and the Confused Deputy",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Remote servers authenticate with OAuth, and the <code>2025-11-25</code> spec sharpened this considerably: MCP servers act strictly as OAuth 2.1 <strong>resource servers</strong>, validating tokens issued by a separate, dedicated authorization server, and must publish Protected Resource Metadata (RFC 9728). That is the <em>right</em> architecture — it centralizes identity where enterprises already manage it — but it puts token hygiene at the center of your threat model.</p>\n<p>The anti-patterns to hunt for:</p>\n<ul>\n<li><strong>Token passthrough:</strong> a server that accepts a token minted for a <em>different</em> audience and replays it onward. This breaks the audience-binding that stops confused-deputy attacks and is explicitly forbidden by the spec — so a server doing it is a red flag about everything else it does.</li>\n<li><strong>Token concentration:</strong> one server (or one host) holding long-lived tokens for Gmail <em>and</em> Drive <em>and</em> GitHub <em>and</em> the warehouse. Compromise it once and you have not lost one system — you have lost the union of everything it could touch. Blast radius is the product of the scopes, not the sum.</li>\n<li><strong>Consent fatigue:</strong> the human-in-the-loop assumption (concept 2b) dies here. After the fortieth approval dialog, everyone clicks \"allow.\" Attackers rely on it.</li>\n<li><strong>Session hygiene:</strong> predictable session IDs, tokens in URLs, sessions that never expire — the ordinary web-security failures, now guarding the door to your data.</li>\n</ul>\n<p><strong>Least-privilege, short-lived, narrowly-scoped tokens are roughly 80% of your real defense</strong> — unglamorous, and worth more than any amount of prompt-level cleverness.</p>"
+      }
+     ]
+    },
+    {
+     "id": "the-fair-assessment--is-mcp-actually-dangerous",
+     "number": 9,
+     "title": "The Fair Assessment — Is MCP Actually Dangerous?",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Now the question the client actually asked. A balanced answer has four parts, and you should be able to deliver all four without flinching in either direction.</p>\n<p><strong>(a) The protocol itself is thin.</strong> MCP is JSON-RPC with a capability handshake. It introduces no novel cryptographic weakness, no new memory-safety class, no exotic vulnerability. Nothing about the wire format is inherently unsafe. Points to \"the protocol is dangerous\" are almost always misattributed.</p>\n<p><strong>(b) What is genuinely new is scale and juxtaposition.</strong> MCP makes it trivial — a config entry, done by someone who is not an engineer — to assemble the exact lethal trifecta that used to require a deliberate integration project. The risk did not get <em>worse</em> per integration; it got <em>far easier to create and far more common</em>, and it moved from \"reviewed in a pull request\" to \"toggled in a settings pane.\" That is a real and material change, and dismissing it is as wrong as panicking about it.</p>\n<p><strong>(c) Weigh it against the honest counterfactual.</strong> The alternative to MCP is not safety — it is the <em>status quo</em>, which is worse in the ways that actually leak data. Bespoke integrations carried identical trifecta risk with none of the standardization; and the true baseline in most companies is <strong>shadow AI</strong>: employees pasting client data into consumer chatbots and copying answers back, entirely unlogged. Against <em>that</em>, a governed MCP deployment with an allowlist, a central audit trail, and a real consent model is a security <em>improvement</em>, not a regression. MCP at least gives you a choke point to govern.</p>"
+      },
+      {
+       "type": "callout",
+       "kind": "intuition",
+       "title": "the browser-extension moment",
+       "html": "<p>MCP is where browser extensions were a decade ago: an open, wildly useful ecosystem that also lets a plausible-looking add-on read everything you do. We did not ban browsers. We built stores with review, permissions models, enterprise allowlists, and the habit of asking \"why does a flashlight app want your contacts?\" MCP needs — and is rapidly growing — the same scaffolding. The trajectory is known; the controls are boring; the panic is optional.</p>"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>(d) The verdict, in one line: the danger is real, but it is <em>deployment</em> risk, not <em>protocol</em> risk — and deployment risk is exactly the kind you govern with boring, well-understood controls.</strong> That sentence is what you say to the CISO. The rest of this module is the controls.</p>"
+      }
+     ]
+    },
+    {
+     "id": "the-enterprise-posture-ladder--necessary-vs-overkill",
+     "number": 10,
+     "title": "The Enterprise Posture Ladder — Necessary vs Overkill",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>There is no single \"secure MCP setup.\" There is a posture proportionate to <strong>data sensitivity × server provenance × read-vs-write</strong>, and the skill a client pays for is calibration — not maximalism. Three tiers:</p>\n<p><strong>Baseline (every deployment, even low-stakes):</strong> maintain an inventory of connected servers; allowlist which servers may be used and who may add one; pin versions; source servers from a vetted registry rather than ad-hoc installs; keep secrets out of plaintext config. This is cheap and non-negotiable.</p>\n<p><strong>Standard (real business data, mixed provenance):</strong> read-only by default; human approval on any write or irreversible action; an <strong>egress allowlist</strong> so tools can only reach sanctioned destinations (this is your trifecta cut — kill the external-comms leg for sensitive flows); run servers sandboxed/containerized with least privilege; centralize logs of tool calls and results.</p>\n<p><strong>Elevated (regulated or highly sensitive data):</strong> DLP inspection on tool <em>results</em> (not just model traffic — remember concept 5); a dedicated MCP gateway that brokers and policies all server access; network segmentation between the AI plane and crown-jewel systems; treat external server vendors as data subprocessors with the contractual review that implies. This connects directly to the governance groundwork in <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a> and the Responsible-AI module that follows it.</p>\n<p>And the half of the job nobody sells but everyone needs — <strong>naming the overkill:</strong></p>"
+      },
+      {
+       "type": "table",
+       "html": "<table><thead><tr><th>Control</th><th>Necessary when…</th><th>Overkill when…</th></tr></thead><tbody><tr><td>Human approval on every call</td><td>Writes to systems of record; regulated data</td><td>Read-only over public/low-sensitivity data — you are just training people to rubber-stamp</td></tr><tr><td>Full DLP on tool results</td><td>Regulated PII/PHI/financial data can transit</td><td>Internal dev tools over non-sensitive data</td></tr><tr><td>Dedicated MCP gateway</td><td>Many servers, many teams, sensitive data</td><td>One team, one internal read-only server</td></tr><tr><td>Banning all remote servers</td><td>Truly air-gapped / classified contexts</td><td>A vendor with SOC 2, scoped OAuth, and a support line — you are just breeding shadow AI</td></tr><tr><td>Bespoke \"safe\" protocol</td><td>~Never</td><td>Always. You inherit every risk and lose the ecosystem</td></tr></tbody></table>"
+      },
+      {
+       "type": "diagram",
+       "text": "   Is the data sensitive/regulated?\n     │\n     ├─ no ──► Baseline controls. Ship it. Stop over-engineering.\n     │\n     └─ yes ─► Can the tool reach an external destination?\n                 │\n                 ├─ no  ──► Standard tier. Read-only + logging is often enough.\n                 │\n                 └─ yes ─► Cut the leg (egress allowlist / remove the tool) OR\n                           go Elevated: gateway + DLP-on-results + approval gate."
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>The most senior move in an MCP review is subtraction: fewer servers, narrower scopes, one missing trifecta leg — not another layer of inspection bolted onto a design that should have been smaller.</strong></p>"
+      }
+     ]
+    },
+    {
+     "id": "two-control-planes--the-litellm-conversation",
+     "number": 11,
+     "title": "Two Control Planes — the LiteLLM Conversation",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<p>Your clients have invested in LiteLLM-style gateways and reasonably ask, \"doesn't that cover us?\" The precise answer wins their trust, and it is this: <strong>there are two control planes, and a proxy on one is not a policy on the other.</strong></p>\n<p>The <strong>model-API plane</strong> — LiteLLM, Portkey, cloud AI gateways — is real and valuable. It gives you API-key custody, a model allowlist, budget and rate limits, centralized logging of prompts and completions, PII masking on that traffic, and region routing for data residency. Keep it; it is good engineering. But re-read concept 5: it sees the <em>conversation with the model</em>, not the <em>side effects the model triggers</em>.</p>\n<p>The <strong>tool/MCP plane</strong> is the one that governs those side effects, and it needs its own controls: the host's own server allowlist and consent policy, an MCP gateway or scanner (tools like Docker's MCP Toolkit, Invariant's <code>mcp-scan</code>, and others in this fast-moving space), server sandboxing, egress allowlisting, and logging of tool calls and results.</p>"
+      },
+      {
+       "type": "diagram",
+       "text": "   ┌─────────────── MODEL-API PLANE ───────────────┐\n   USER → HOST → LiteLLM/gateway → MODEL             │  keys, budgets, prompt logs,\n   └──────────────────────────────────────────────────┘  masking, region routing\n        │\n        │  model decides to act\n        ▼\n   ┌─────────────── TOOL / MCP PLANE ───────────────┐\n   HOST → MCP client → server → your systems         │  server allowlist, consent,\n   └──────────────────────────────────────────────────┘  sandbox, egress rules, tool logs\n        ▲ the two planes are governed separately — securing one says nothing about the other ▲"
+      },
+      {
+       "type": "html",
+       "html": "<p><strong>Govern both planes.</strong> When a client says \"we route through LiteLLM so we're safe,\" the correct, relationship-building response is: \"That secures your conversation with the model, and you should keep it. Now let's secure the plane where the model touches your data — because that traffic never passes through LiteLLM at all.\" That single reframing is worth more to them than any tool you could install.</p>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "client-mission-patterns--commercial-angle",
+   "kind": "missions",
+   "title": "Client Mission Patterns / Commercial Angle",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Sell <em>governance and enablement</em>, not fear. Clients are anxious and under-informed; the deliverable is a proportionate posture that lets them adopt safely, not a report that scares them into a ban they will violate anyway.</p>\n<ul>\n<li><strong>MCP / AI-Integration Security Assessment</strong> — <em>Problem:</em> a client is adopting (or has quietly already adopted) MCP-based tools and has no view of the risk. <em>Deliverable:</em> an inventory of connected servers and tokens, a data-flow map (including the proxy-bypass of concept 5), a trifecta analysis per integration, and a prioritized remediation list. <em>Scope:</em> 2–3 weeks. <em>Who buys:</em> the CISO or Head of Security.</li>\n<li><strong>Safe-Enablement Program</strong> — <em>Problem:</em> security wants to say no; the business wants the productivity; shadow AI is filling the gap. <em>Deliverable:</em> an MCP usage policy, a vetted internal server catalog, a gateway/allowlist architecture, and a workshop that gets both sides to yes. <em>Scope:</em> 4–6 weeks. <em>Who buys:</em> CTO jointly with security.</li>\n<li><strong>Internal MCP Server Pilot</strong> — <em>Problem:</em> a genuinely useful internal capability (query the warehouse, search the wiki) that should be exposed to the assistant safely. <em>Deliverable:</em> a read-only server with scoped tokens, an eval harness proving its hit rate, sandboxing, and full logging — a reference implementation others copy. <em>Scope:</em> 3–5 weeks. <em>Who buys:</em> the platform or data-platform owner.</li>\n<li><strong>Two-Plane Gateway Architecture</strong> — <em>Problem:</em> a client has LiteLLM and believes they are covered. <em>Deliverable:</em> a reference architecture placing the model-API gateway and the MCP/tool gateway correctly, with the policy each enforces written down. <em>Scope:</em> 2–4 weeks. <em>Who buys:</em> the platform/architecture lead.</li>\n</ul>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "tools--vendor-landscape",
+   "kind": "tools",
+   "title": "Tools & Vendor Landscape",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p><em>As of 2026 — a fast-moving space; treat names and capabilities as perishable and re-check before quoting.</em></p>"
+    },
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th>Tool / Category</th><th>Use here</th><th>OSS / Paid</th><th>Note</th></tr></thead><tbody><tr><td>Official MCP SDKs (Python, TypeScript, others)</td><td>Build servers and clients</td><td>OSS</td><td>The reference implementations; start here</td></tr><tr><td>FastMCP</td><td>Ergonomic Python server framework</td><td>OSS</td><td>Popular for standing up servers quickly</td></tr><tr><td>MCP Inspector</td><td>Local debugging UI for servers</td><td>OSS</td><td>Patch past CVE-2025-49596 (fixed 0.14.1)</td></tr><tr><td>Managed hosts with admin controls (Claude, IDE assistants, Copilot/Gemini surfaces)</td><td>Consume servers with org policy</td><td>Paid</td><td>Enterprise tiers add allowlists, audit, SSO</td></tr><tr><td>Registries (official MCP Registry, Docker MCP Catalog, Smithery, PulseMCP)</td><td>Discover vetted servers</td><td>Mixed</td><td>Prefer curated catalogs over ad-hoc installs</td></tr><tr><td>MCP gateways / scanners (Docker MCP Toolkit, Invariant <code>mcp-scan</code>, Trail of Bits <code>mcp-context-protector</code>, Lasso and peers)</td><td>Police the tool plane</td><td>Mixed</td><td>The emerging \"tool-plane firewall\" category</td></tr><tr><td>LLM/model-API gateways (LiteLLM, Portkey, cloud AI gateways)</td><td>Police the <em>model</em> plane</td><td>Mixed</td><td><strong>Model-plane only</strong> — does not see tool side effects</td></tr><tr><td>Cloud remote-server hosting (Cloudflare, AWS, GCP patterns)</td><td>Run remote servers with managed auth</td><td>Paid</td><td>OAuth resource-server model per <code>2025-11-25</code> spec</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p>The path's rule holds: <strong>buy the commodity — SDKs, gateways, catalogs, scanners — and build the differentiator, which is your allowlist, your policy, your scoped tokens, and your evals.</strong> The vendor names churn; the judgment about where each plane's boundary sits does not.</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "when-is-this-overkill",
+   "kind": "overkill",
+   "title": "When Is This Overkill?",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>MCP is a genuinely good default when you have several tools consumed by several assistants. It is over-engineering when you do not.</p>"
+    },
+    {
+     "type": "table",
+     "html": "<table><thead><tr><th>Situation</th><th>Do this instead</th></tr></thead><tbody><tr><td>One application, one fixed integration</td><td>Just call the API in code — no protocol needed</td></tr><tr><td>The real need is \"answer from our documents\"</td><td>That is retrieval — see <a class=\"wikilink\" data-module=\"10\" href=\"#/module/10\">RAG &#x26; Knowledge Systems</a>, not a tool server</td></tr><tr><td>A single internal tool for a single host</td><td>Native function calling is simpler and smaller</td></tr><tr><td>Read-only access to public, non-sensitive data</td><td>Lightweight vetting; skip the elevated controls</td></tr><tr><td>Leadership wants an org-wide MCP ban \"for security\"</td><td>Govern instead — a ban just relocates the data to unlogged shadow AI</td></tr><tr><td>Someone proposes a bespoke protocol \"to avoid MCP's risks\"</td><td>You would inherit every one of those risks and forfeit the ecosystem and tooling</td></tr></tbody></table>"
+    },
+    {
+     "type": "html",
+     "html": "<p><strong>The most senior sentence in an MCP security review is usually: \"this doesn't need to be an MCP server at all.\"</strong> The second most senior is \"and the ones that do need three fewer permissions than they're asking for.\"</p>"
+    }
+   ],
+   "subsections": []
+  },
+  {
+   "id": "resources",
+   "kind": "resources",
+   "title": "Resources",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "docs--specs",
+     "number": null,
+     "title": "Docs & Specs",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Anthropic / MCP maintainers — <em>Model Context Protocol Specification</em> (<code>modelcontextprotocol.io</code>) — the authoritative source; read the Security Best Practices and Authorization pages specifically. <em>(Free)</em></li>\n<li>Anthropic — <em>Introducing the Model Context Protocol</em> (announcement, November 2024) — the origin and design intent. <em>(Free)</em></li>\n<li>Cloud Security Alliance — <em>Agentic MCP Security Best Practices</em> — a structured enterprise control set. <em>(Free)</em></li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "security-deep-dives",
+     "number": null,
+     "title": "Security Deep Dives",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Simon Willison — <em>The Lethal Trifecta for AI Agents</em> (June 2025) — the single most useful mental model in this module; read it first. <em>(Free)</em></li>\n<li>Simon Willison — <em>Model Context Protocol has prompt injection security problems</em> — the clearest plain-English framing of the core issue. <em>(Free)</em></li>\n<li>Invariant Labs — <em>Tool Poisoning Attacks</em> and the <em>GitHub MCP exploit</em> write-ups — where \"tool poisoning\" was coined, with reproducible demos. <em>(Free)</em></li>\n<li>Trail of Bits — <em>\"Jumping the Line\"</em> MCP security blog series — line jumping, ANSI-escape tricks, and the <code>mcp-context-protector</code> defense. <em>(Free)</em></li>\n<li>Hou et al. — <em>Model Context Protocol (MCP): Landscape, Security Threats, and Future Directions</em> (arXiv, 2025) — a broad academic survey of the threat taxonomy. <em>(Free)</em></li>\n<li>OWASP — <em>GenAI / LLM Top 10</em> — the prompt-injection and excessive-agency entries map directly onto MCP risk. <em>(Free)</em></li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "go-deeper",
+     "number": null,
+     "title": "Go Deeper",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>The layer <em>above</em> this — agents that orchestrate these tools — is <a class=\"wikilink\" data-module=\"11\" href=\"#/module/11\">Agentic Architectures &#x26; LLM App Patterns</a>; the data-classification and privacy groundwork <em>beneath</em> a good posture is <a class=\"wikilink\" data-module=\"14\" href=\"#/module/14\">Data Governance, Privacy &#x26; Pseudonymisation</a>; putting any of it into production safely is <a class=\"wikilink\" data-module=\"13\" href=\"#/module/13\">MLOps &#x26; Productionization</a>.</li>\n<li>The responsible-AI framing (accountability, human oversight, risk tiering) in the Responsible AI module pairs naturally with an MCP security posture.</li>\n<li>The hands-on craft of <em>building</em> a hardened MCP server — transports, auth flows, sandboxing in code — lives in the ML Engineer Path; this module stays at the leader's altitude of <em>what / when / how-safe / how-much</em>.</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "practical-artifacts",
+   "kind": "artifacts",
+   "title": "Practical Artifacts",
+   "blocks": [],
+   "subsections": [
+    {
+     "id": "decision-checklist--before-any-mcp-server-touches-client-data",
+     "number": null,
+     "title": "Decision Checklist — \"Before any MCP server touches client data\"",
+     "blocks": [
+      {
+       "type": "checklist",
+       "checklistId": "21/practical-artifacts/1",
+       "items": [
+        {
+         "id": "0",
+         "html": "There is a <strong>named business need</strong> this server serves — not \"it seemed useful.\""
+        },
+        {
+         "id": "1",
+         "html": "Provenance is recorded: who wrote it, where it came from, from a vetted registry."
+        },
+        {
+         "id": "2",
+         "html": "The version is <strong>pinned</strong>, and there is a plan to re-vet on update."
+        },
+        {
+         "id": "3",
+         "html": "Scopes are <strong>minimal</strong> and <strong>read-only by default</strong>; writes are justified individually."
+        },
+        {
+         "id": "4",
+         "html": "Secrets come from a manager, are <strong>short-lived and narrowly scoped</strong>, never in plaintext config."
+        },
+        {
+         "id": "5",
+         "html": "Egress is known and <strong>allowlisted</strong> — you can name every destination a tool can reach."
+        },
+        {
+         "id": "6",
+         "html": "Write / irreversible actions are <strong>human-gated</strong>."
+        },
+        {
+         "id": "7",
+         "html": "Tool calls and results are <strong>logged</strong> centrally."
+        },
+        {
+         "id": "8",
+         "html": "An <strong>owner</strong> is assigned, accountable for re-vetting when the server changes."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "red-flags",
+     "number": null,
+     "title": "Red Flags",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>OAuth scopes far broader than the stated function (\"PDF tool\" wants full Drive write).</li>\n<li>Imperative or instruction-like language inside a <em>tool description</em> — the tool-poisoning tell.</li>\n<li>An unpinned, auto-updating community server running in production.</li>\n<li>Tokens or API keys sitting in plaintext config files or environment dumps.</li>\n<li>A client configured to <strong>auto-approve</strong> every tool call.</li>\n<li>A vendor who cannot answer, crisply, \"where does our data go when this tool runs?\"</li>\n</ul>"
+      }
+     ]
+    },
+    {
+     "id": "scoping-prompts-ask-the-client",
+     "number": null,
+     "title": "Scoping Prompts (ask the client)",
+     "blocks": [
+      {
+       "type": "html",
+       "html": "<ul>\n<li>Which classes of data can <em>any</em> connected tool currently reach?</li>\n<li>Who is allowed to add a new MCP server today, and is there any gate?</li>\n<li>What is the blast radius of your single most privileged token if it leaked?</li>\n<li>Can you produce a list of every connected server and its exact version right now?</li>\n<li>What happens when a tool result contains text that looks like instructions?</li>\n<li>Which actions your assistant can take are irreversible, and are those gated?</li>\n</ul>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "self-assessment",
+   "kind": "self-assessment",
+   "title": "Self-Assessment",
+   "blocks": [
+    {
+     "type": "html",
+     "html": "<p>Work through these honestly. If you cannot do one from memory, that concept has not landed yet — revisit it before you sit in front of a nervous CISO.</p>"
+    },
+    {
+     "type": "checklist",
+     "checklistId": "21/self-assessment/1",
+     "items": [
+      {
+       "id": "0",
+       "html": "I can explain what MCP is and is not in two sentences, including \"no, it does not send your data to the model vendor.\""
+      },
+      {
+       "id": "1",
+       "html": "I can draw the data-flow diagram from memory and point to exactly where a LiteLLM proxy is blind."
+      },
+      {
+       "id": "2",
+       "html": "I can name five attack classes and, for each, the one control that most reduces it."
+      },
+      {
+       "id": "3",
+       "html": "I can apply the lethal trifecta to a proposed integration and name which leg to cut."
+      },
+      {
+       "id": "4",
+       "html": "Given a set of proposed controls, I can sort them into necessary and overkill <em>for a stated data-sensitivity tier</em> and defend the split."
+      },
+      {
+       "id": "5",
+       "html": "I can vet a real third-party server against the checklist and reach a defensible verdict."
+      },
+      {
+       "id": "6",
+       "html": "I can make the \"govern, don't ban\" argument — including the shadow-AI counterfactual — to a skeptical security leader."
+      }
+     ]
+    }
+   ],
+   "subsections": []
+  }
+ ]
+}

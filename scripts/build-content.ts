@@ -11,7 +11,7 @@ import {
   type ModuleEvals,
 } from '../shared/schema';
 import { DATA_DIR, EVALS_SRC_DIR, VAULT_DIR } from './config';
-import { mdStringToHtml } from './markdown';
+import { renderEvals } from './evals';
 import { parseIndexFile, parseModuleFile, type ParsedModule } from './parse-module';
 
 const errors: string[] = [];
@@ -28,7 +28,7 @@ const files = fs
   .filter((f) => /^\d{2} - .*\.md$/.test(f))
   .sort();
 
-if (files.length !== 21) fail(`expected 21 vault files, found ${files.length}`);
+if (files.length !== 23) fail(`expected 23 vault files, found ${files.length}`);
 
 const moduleByBasename = new Map<string, string>();
 for (const f of files) moduleByBasename.set(f.replace(/\.md$/, ''), f.slice(0, 2));
@@ -46,33 +46,6 @@ for (const f of files) {
 }
 
 // ---------- 3. evals: validate authored sources, render markdown -> HTML ----------
-
-function renderEvals(evals: ModuleEvals): ModuleEvals {
-  const md = mdStringToHtml;
-  const inline = (s: string) => md(s).replace(/^<p>([\s\S]*)<\/p>$/, '$1');
-  return {
-    moduleId: evals.moduleId,
-    quiz: evals.quiz.map((q) => ({
-      ...q,
-      prompt: md(q.prompt),
-      takeaway: inline(q.takeaway),
-      choices: q.choices.map((c) => ({ ...c, text: inline(c.text), explanation: inline(c.explanation) })),
-    })),
-    exercises: evals.exercises.map((ex) => ({
-      ...ex,
-      scenario: md(ex.scenario),
-      givens: ex.givens?.map(inline),
-      tasks: ex.tasks.map(inline),
-      solution: md(ex.solution),
-      rubric: {
-        keyPoints: ex.rubric.keyPoints.map(inline),
-        pitfalls: ex.rubric.pitfalls.map(inline),
-        takeaways: ex.rubric.takeaways.map(inline),
-        transfer: inline(ex.rubric.transfer),
-      },
-    })),
-  };
-}
 
 const evalsById = new Map<string, ModuleEvals>();
 for (const mod of parsed) {
@@ -221,5 +194,5 @@ const blockCount = modules.reduce(
   (acc, m) => acc + m.sections.reduce((a, s) => a + s.blocks.length + s.subsections.reduce((b, x) => b + x.blocks.length, 0), 0),
   0,
 );
-console.log(`✓ sync ok: ${modules.length} modules, ${blockCount} blocks, ${graph.edges.length} graph edges, ${evalsById.size}/20 eval files`);
+console.log(`✓ sync ok: ${modules.length} modules, ${blockCount} blocks, ${graph.edges.length} graph edges, ${evalsById.size}/22 eval files`);
 for (const w of warnings) console.log(`  ⚠ ${w}`);

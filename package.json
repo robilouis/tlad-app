@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "sync": "tsx scripts/build-content.ts",
+    "sync:local": "tsx scripts/sync-local.ts",
     "icons": "tsx scripts/make-icons.ts",
     "validate:evals": "tsx scripts/build-content.ts --evals-only",
     "dev": "vite",

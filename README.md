@@ -41,6 +41,18 @@ content/evals/NN.json  ──(same script)──────► src/data/evals/N
 - Schemas (zod) for both live in `shared/schema.ts`; `sync` fails loudly on violations
   (missing sections, unresolved wikilinks, bad LaTeX, quiz with ≠1 correct answer, …).
 
+### Locally-staged modules (when the vault isn't present)
+
+Some modules are authored **directly in the repo** under `content/modules/` (vault-format
+markdown + a small `meta.json`) for environments where the Obsidian vault isn't available.
+`npm run sync:local` (`scripts/build-content.ts`'s eval renderer is shared via
+`scripts/evals.ts`) parses them with the same parser, runs the same zod validation, and
+**merges** them into the generated `src/data/` instead of rebuilding from the vault. See
+[`content/modules/README.md`](content/modules/README.md) for the mechanism and the steps to
+fold a staged module back into the vault. Note: the `sync` file-count guard now expects the
+staged modules to exist in the vault too, so a full `npm run sync` fails loudly until they're
+migrated — this is deliberate, so a vault-only sync can't silently drop them.
+
 ## Progress
 
 Local-first in `localStorage` (`tlad-progress-v1`): sections read, checklist ticks, best

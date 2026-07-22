@@ -10,7 +10,7 @@
  "addon": true,
  "pitchHtml": "<p>Reinforcement learning (RL) is the part of AI that learns by <strong>trial and error</strong>: an agent takes actions, gets rewards, and adjusts to earn more reward over time. It is genuinely powerful — it is how game-playing systems beat humans, how robots learn control, and how LLMs are tuned to be helpful (RLHF). It is also, for the overwhelming majority of business problems, <strong>the wrong tool</strong> — expensive to set up, hard to evaluate, dangerous to debug, and almost always beaten by either supervised learning or its lighter cousin, the <strong>bandit</strong>. This module gives you the vocabulary to recognise the rare genuine fit, the judgment to de-escalate everything else, and a working command of bandits — the \"RL lite\" that actually earns its keep in recommendation, content, and pricing. The throughline, stated once and repeated on purpose: <strong>RL is powerful but usually overkill — reach for a bandit or supervised learning unless the problem truly needs sequential decisions.</strong></p>",
  "prev": "19",
- "next": null,
+ "next": "21",
  "sectionCount": 8,
  "quizCount": 8,
  "exerciseCount": 3,
